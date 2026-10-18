@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    {
+      "source": "/_next/image",
+      "has": [{ "type": "query", "key": "url", "value": ".*bg-fallback.*" }],
+      "destination": "/bg-fallback.jpeg"
+    },
+    { "source": "/bg-fallback.webp", "destination": "/bg-fallback.jpeg" }
+  ]
+}
