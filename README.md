@@ -58,3 +58,24 @@ El clip anterior sigue en `videos/background.mp4` por si lo quieres de vuelta.
 | `4190-...js` | `useState(!1)` -> `useState(!0)`; `y(window.innerWidth>768)` -> `y(!0)`; label/icono `Video` -> `Skyline` / `mdi:car-sports` |
 | `app/(site)/page-...js` | `src` por defecto `/videos/skyline.mp4`, fallback `/bg-skyline.jpeg`, `poster` en el `<video>` |
 | `1264-...js` | `background = Color(0)`; el plano de fondo `A` ya no se agrega a la escena |
+
+## Presencia de Discord con el bot propio (sin Lanyard)
+La web ya no usa Lanyard. El estado (online / away / do not disturb / offline), el avatar y la pestaña **music**
+salen del bot de actividad (`main.py` del bot, endpoint `GET /api/activity`) a través de funciones de Vercel:
+
+| Ruta de la web | Qué hace |
+|---|---|
+| `/api/activity` | Presencia: estado, avatar, actividades, Spotify. La página la consulta cada 10 s (30 s con la pestaña oculta) |
+| `/api/lastfm?limit=20` | Lista "on repeat" con el historial de Spotify que guarda el bot |
+| `/api/lastfm/top-artist` | Artista más repetido en el historial reciente del bot (hasta 100 canciones) |
+
+Las funciones están en `api/` y llaman al bot **desde el servidor de Vercel**: el token no llega al navegador y no hay
+problemas de CORS ni de http/https. Si el bot no responde, la web muestra *offline*.
+
+**Variables de entorno en Vercel** (Settings → Environment Variables; después, Redeploy):
+- `ACTIVITY_BOT_URL`: URL completa del bot terminada en `/api/activity` (opcional; por defecto `http://fi4.bot-hosting.cloud:25319/api/activity`).
+- `ACTIVITY_BOT_TOKEN`: mismo valor que `API_TOKEN` del bot. Solo si el bot lo tiene configurado.
+
+**Pruebas:** `node --test tests/bot.test.js` (Node 18+). Las rutas `/api/*` no existen con `serve.py` en local; ahí la web
+muestra *offline* y la lista de música vacía.
+
