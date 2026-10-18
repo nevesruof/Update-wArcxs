@@ -24,3 +24,16 @@ html[data-scene="underwater"] canvas[data-engine] {
 @media (prefers-reduced-motion: reduce) {
   html[data-scene="underwater"] body::before { animation: none; transform: scale(1.03); }
 }
+
+/* ===== Logo "TAKE": la T de la fuente Spanish viene sin caja de papel (las otras letras si).
+   Se le dibuja una caja recortada, ligeramente girada, como al resto de letras. La letra va en el
+   azul-morado oscuro del fondo (en A, K y E el fondo se ve a traves de la letra).
+   (:not(.glitch-char--active) evita la caja mientras el efecto glitch cambia la letra.)      ===== */
+.hero-name-glitch span:first-child:not(.glitch-char--active) {
+  display: inline-block;
+  padding: .02em .08em 0;
+  margin-right: .05em;
+  background: var(--white, #fff);
+  color: #0b0620;
+  transform: rotate(-2.5deg);
+}
