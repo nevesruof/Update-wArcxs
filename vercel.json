@@ -5,6 +5,11 @@
       "has": [{ "type": "query", "key": "url", "value": ".*bg-fallback.*" }],
       "destination": "/bg-fallback.jpeg"
     },
+    {
+      "source": "/_next/image",
+      "has": [{ "type": "query", "key": "url", "value": ".*logo.*" }],
+      "destination": "/logo.webp"
+    },
     { "source": "/bg-fallback.webp", "destination": "/bg-fallback.jpeg" }
   ]
 }
