@@ -1,1 +1,67 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4345],{525:(e,t,a)=>{"use strict";a.d(t,{Ac:()=>w,Dn:()=>p,T4:()=>y,VY:()=>x,dv:()=>i});let i={audio:null,filter:null,ctx:null},n=new Map,r=new Set,o="/sfx/grass.mp3",s=!1,l=0,u=0;function c(){r.forEach(e=>e())}function d(e){let t=n.get(e);if(!t){let a=new Audio(e);a.loop=!0,a.preload="auto",a.volume=0,t={audio:a,filter:null,connected:!1},n.set(e,t)}return t}function f(e){if(!e.connected)try{var t;let a=window.AudioContext||window.webkitAudioContext,n=null!=(t=i.ctx)?t:new a;i.ctx=n;let r=n.createMediaElementSource(e.audio),o=n.createBiquadFilter();o.type="lowpass",o.frequency.value=2e4,o.Q.value=.7,r.connect(o),o.connect(n.destination),e.filter=o,e.connected=!0}catch(e){}}function m(e){i.audio=e.audio,i.filter=e.filter}function v(){u+=1,cancelAnimationFrame(l),l=0}function p(e){return r.add(e),()=>{r.delete(e)}}async function w(e){let t=i.audio,a=d(e);if(d("/sfx/underwater.mp3"===e?"/sfx/grass.mp3":"/sfx/underwater.mp3"),o=e,t===a.audio)return;v();let r=u;if(m(a),c(),!s)return;f(a),m(a);try{var p;await Promise.all([a.audio.play(),null==(p=i.ctx)?void 0:p.resume()])}catch(e){if(r===u){let e=Array.from(n.values()).find(e=>e.audio===t);e&&m(e),s=Array.from(n.values()).some(e=>!e.audio.paused),c()}throw e}if(r!==u){s&&(i.audio===a.audio||l)||a.audio.pause();return}let w=Array.from(n.values()).map(e=>({track:e,volume:e.audio.volume})),x=performance.now(),y=e=>{let t=Math.min(1,(e-x)/3e3);for(let e of w){let i=.05*(e.track===a);e.track.audio.volume=e.volume+(i-e.volume)*t,1===t&&e.track!==a&&e.track.audio.pause()}l=t<1?requestAnimationFrame(y):0,1===t&&c()};l=requestAnimationFrame(y),c()}async function x(){v();let e=u,t=d(o);for(let e of(f(t),m(t),n.values()))e.audio.volume=.05*(e===t),e!==t&&e.audio.pause();s=!0;try{var a;await Promise.all([t.audio.play(),null==(a=i.ctx)?void 0:a.resume()]),e===u||s&&(i.audio===t.audio||l)||t.audio.pause()}catch(t){throw e===u&&(s=!1),t}finally{c()}}function y(){for(let e of(v(),s=!1,n.values()))e.audio.pause();c()}},2131:(e,t,a)=>{"use strict";a.d(t,{NotFoundClient:()=>l});var i=a(5155),n=a(2115),r=a(3961),o=a(3995),s=a(1264);function l(){let[e,t]=(0,n.useState)(!0),{navigateTo:a}=(0,o.w)();return(0,n.useEffect)(()=>{let e=setInterval(()=>t(e=>!e),600);return()=>clearInterval(e)},[]),(0,n.useEffect)(()=>{let e=()=>a("/");return window.addEventListener("keydown",e),window.addEventListener("pointerdown",e),()=>{window.removeEventListener("keydown",e),window.removeEventListener("pointerdown",e)}},[a]),(0,i.jsxs)("div",{className:"nf-root",children:[(0,i.jsx)(s.k,{}),(0,i.jsx)("div",{className:"nf-overlay","aria-hidden":!0}),(0,i.jsx)("div",{className:"nf-scanlines","aria-hidden":!0}),(0,i.jsxs)("div",{className:"nf-content",children:[(0,i.jsx)(r.m.p,{className:"nf-code",initial:{opacity:0},animate:{opacity:1},transition:{duration:.4,delay:.1},children:"ERROR \xb7 404"}),(0,i.jsxs)(r.m.h1,{className:"nf-title",initial:{opacity:0,scale:1.04},animate:{opacity:1,scale:1},transition:{duration:.6,delay:.25,ease:[.22,1,.36,1]},children:["GAME",(0,i.jsx)("br",{}),"OVER"]}),(0,i.jsx)(r.m.p,{className:"nf-sub",initial:{opacity:0},animate:{opacity:1},transition:{duration:.4,delay:.7},children:"this page doesn't exist"}),(0,i.jsx)(r.m.p,{className:"nf-prompt",initial:{opacity:0},animate:{opacity:.5*!!e},transition:{duration:.15},style:{marginTop:48},children:"press any key to return"})]})]})}},3995:(e,t,a)=>{"use strict";a.d(t,{PageTransitionProvider:()=>p,w:()=>m});var i=a(5155),n=a(2115),r=a(63),o=a(3136),s=a(9166),l=a(9069),u=a(3961),c=a(5239),d=a(525);let f=(0,n.createContext)({navigateTo:()=>{},isTransitioning:!1});function m(){return(0,n.useContext)(f)}let v=[.4,0,.2,1];function p(e){let{children:t}=e,a=(0,r.useRouter)(),m=(0,r.usePathname)(),p=(0,n.useRef)(m),[w,x]=(0,n.useState)(!1),[y,h]=(0,n.useState)("idle");(0,n.useEffect)(()=>{p.current!==m&&(p.current=m,d.dv.audio&&("/"===m?(0,d.VY)().catch(()=>{}):(0,d.T4)()))},[m]);let j=(0,n.useCallback)(e=>{w||(x(!0),h("cover"),setTimeout(()=>{a.push(e),setTimeout(()=>{h("reveal"),setTimeout(()=>{h("idle"),x(!1)},650)},250)},600))},[a,w]);return(0,i.jsx)(o.F,{features:s.l,children:(0,i.jsxs)(f.Provider,{value:{navigateTo:j,isTransitioning:w},children:[t,(0,i.jsx)(l.N,{children:"idle"!==y&&(0,i.jsxs)(i.Fragment,{children:[(0,i.jsx)(u.m.div,{className:"fixed z-[9998] bg-[#19191e]",style:{top:"-50%",left:"-50%",width:"200%",height:"200%",skewX:"-15deg"},initial:{x:"-100%"},animate:{x:"cover"===y?"0%":"100%"},transition:{duration:.55,ease:v}}),(0,i.jsx)(u.m.div,{className:"fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none",initial:{opacity:0,scale:.85},animate:{opacity:+("cover"===y),scale:"cover"===y?1:.9},transition:{duration:.25,delay:.33*("cover"===y)},children:(0,i.jsx)(c.default,{src:"/logo.webp",alt:"akryst",width:128,height:128,className:"rounded-2xl",priority:!0})})]})})]})})}},9109:(e,t,a)=>{Promise.resolve().then(a.bind(a,2131))}},e=>{e.O(0,[1831,3838,9367,5239,3961,4252,1842,1264,8441,1255,7358],()=>e(e.s=9109)),_N_E=e.O()}]);
+(self.webpackChunk_N_E = self.webpackChunk_N_E || []).push([[4345], { 525: (e, t, a) => {
+            "use strict";
+            a.d(t, { Ac: () => w, Dn: () => p, T4: () => y, VY: () => x, dv: () => i });
+            let i = { audio: null, filter: null, ctx: null }, n = new Map, r = new Set, o = "/sfx/ambient.mp3", s = !1, l = 0, u = 0;
+            function c() { r.forEach(e => e()); }
+            function d(e) { let t = n.get(e); if (!t) {
+                let a = new Audio(e);
+                a.loop = !0, a.preload = "auto", a.volume = 0, t = { audio: a, filter: null, connected: !1 }, n.set(e, t);
+            } return t; }
+            function f(e) { if (!e.connected)
+                try {
+                    var t;
+                    let a = window.AudioContext || window.webkitAudioContext, n = null != (t = i.ctx) ? t : new a;
+                    i.ctx = n;
+                    let r = n.createMediaElementSource(e.audio), o = n.createBiquadFilter();
+                    o.type = "lowpass", o.frequency.value = 2e4, o.Q.value = .7, r.connect(o), o.connect(n.destination), e.filter = o, e.connected = !0;
+                }
+                catch (e) { } }
+            function m(e) { i.audio = e.audio, i.filter = e.filter; }
+            function v() { u += 1, cancelAnimationFrame(l), l = 0; }
+            function p(e) { return r.add(e), () => { r.delete(e); }; }
+            async function w(e) { let t = i.audio, a = d(e); if (d("/sfx/ambient.mp3" === e ? "/sfx/ambient.mp3" : "/sfx/ambient.mp3"), o = e, t === a.audio)
+                return; v(); let r = u; if (m(a), c(), !s)
+                return; f(a), m(a); try {
+                var p;
+                await Promise.all([a.audio.play(), null == (p = i.ctx) ? void 0 : p.resume()]);
+            }
+            catch (e) {
+                if (r === u) {
+                    let e = Array.from(n.values()).find(e => e.audio === t);
+                    e && m(e), s = Array.from(n.values()).some(e => !e.audio.paused), c();
+                }
+                throw e;
+            } if (r !== u) {
+                s && (i.audio === a.audio || l) || a.audio.pause();
+                return;
+            } let w = Array.from(n.values()).map(e => ({ track: e, volume: e.audio.volume })), x = performance.now(), y = e => { let t = Math.min(1, (e - x) / 3e3); for (let e of w) {
+                let i = .05 * (e.track === a);
+                e.track.audio.volume = e.volume + (i - e.volume) * t, 1 === t && e.track !== a && e.track.audio.pause();
+            } l = t < 1 ? requestAnimationFrame(y) : 0, 1 === t && c(); }; l = requestAnimationFrame(y), c(); }
+            async function x() { v(); let e = u, t = d(o); for (let e of (f(t), m(t), n.values()))
+                e.audio.volume = .05 * (e === t), e !== t && e.audio.pause(); s = !0; try {
+                var a;
+                await Promise.all([t.audio.play(), null == (a = i.ctx) ? void 0 : a.resume()]), e === u || s && (i.audio === t.audio || l) || t.audio.pause();
+            }
+            catch (t) {
+                throw e === u && (s = !1), t;
+            }
+            finally {
+                c();
+            } }
+            function y() { for (let e of (v(), s = !1, n.values()))
+                e.audio.pause(); c(); }
+        }, 2131: (e, t, a) => {
+            "use strict";
+            a.d(t, { NotFoundClient: () => l });
+            var i = a(5155), n = a(2115), r = a(3961), o = a(3995), s = a(1264);
+            function l() { let [e, t] = (0, n.useState)(!0), { navigateTo: a } = (0, o.w)(); return (0, n.useEffect)(() => { let e = setInterval(() => t(e => !e), 600); return () => clearInterval(e); }, []), (0, n.useEffect)(() => { let e = () => a("/"); return window.addEventListener("keydown", e), window.addEventListener("pointerdown", e), () => { window.removeEventListener("keydown", e), window.removeEventListener("pointerdown", e); }; }, [a]), (0, i.jsxs)("div", { className: "nf-root", children: [(0, i.jsx)(s.k, {}), (0, i.jsx)("div", { className: "nf-overlay", "aria-hidden": !0 }), (0, i.jsx)("div", { className: "nf-scanlines", "aria-hidden": !0 }), (0, i.jsxs)("div", { className: "nf-content", children: [(0, i.jsx)(r.m.p, { className: "nf-code", initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: .4, delay: .1 }, children: "ERROR \xb7 404" }), (0, i.jsxs)(r.m.h1, { className: "nf-title", initial: { opacity: 0, scale: 1.04 }, animate: { opacity: 1, scale: 1 }, transition: { duration: .6, delay: .25, ease: [.22, 1, .36, 1] }, children: ["GAME", (0, i.jsx)("br", {}), "OVER"] }), (0, i.jsx)(r.m.p, { className: "nf-sub", initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: .4, delay: .7 }, children: "this page doesn't exist" }), (0, i.jsx)(r.m.p, { className: "nf-prompt", initial: { opacity: 0 }, animate: { opacity: .5 * !!e }, transition: { duration: .15 }, style: { marginTop: 48 }, children: "press any key to return" })] })] }); }
+        }, 3995: (e, t, a) => {
+            "use strict";
+            a.d(t, { PageTransitionProvider: () => p, w: () => m });
+            var i = a(5155), n = a(2115), r = a(63), o = a(3136), s = a(9166), l = a(9069), u = a(3961), c = a(5239), d = a(525);
+            let f = (0, n.createContext)({ navigateTo: () => { }, isTransitioning: !1 });
+            function m() { return (0, n.useContext)(f); }
+            let v = [.4, 0, .2, 1];
+            function p(e) { let { children: t } = e, a = (0, r.useRouter)(), m = (0, r.usePathname)(), p = (0, n.useRef)(m), [w, x] = (0, n.useState)(!1), [y, h] = (0, n.useState)("idle"); (0, n.useEffect)(() => { p.current !== m && (p.current = m, d.dv.audio && ("/" === m ? (0, d.VY)().catch(() => { }) : (0, d.T4)())); }, [m]); let j = (0, n.useCallback)(e => { w || (x(!0), h("cover"), setTimeout(() => { a.push(e), setTimeout(() => { h("reveal"), setTimeout(() => { h("idle"), x(!1); }, 650); }, 250); }, 600)); }, [a, w]); return (0, i.jsx)(o.F, { features: s.l, children: (0, i.jsxs)(f.Provider, { value: { navigateTo: j, isTransitioning: w }, children: [t, (0, i.jsx)(l.N, { children: "idle" !== y && (0, i.jsxs)(i.Fragment, { children: [(0, i.jsx)(u.m.div, { className: "fixed z-[9998] bg-[#19191e]", style: { top: "-50%", left: "-50%", width: "200%", height: "200%", skewX: "-15deg" }, initial: { x: "-100%" }, animate: { x: "cover" === y ? "0%" : "100%" }, transition: { duration: .55, ease: v } }), (0, i.jsx)(u.m.div, { className: "fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none", initial: { opacity: 0, scale: .85 }, animate: { opacity: +("cover" === y), scale: "cover" === y ? 1 : .9 }, transition: { duration: .25, delay: .33 * ("cover" === y) }, children: (0, i.jsx)(c.default, { src: "/images/logo.webp", alt: "take", width: 128, height: 128, className: "rounded-2xl", priority: !0 }) })] }) })] }) }); }
+        }, 9109: (e, t, a) => { Promise.resolve().then(a.bind(a, 2131)); } }, e => { e.O(0, [1831, 3838, 9367, 5239, 3961, 4252, 1842, 1264, 8441, 1255, 7358], () => e(e.s = 9109)), _N_E = e.O(); }]);

@@ -1,0 +1,18 @@
+/* TKWM-40632a5f-41f0-9fe6-22f804d522ac
+   Ajustes propios de Take.
+
+   El fondo "Underwater" ahora es el canvas de cubos 3D (js/cubes-bg.js): blanco y negro, sin imagen de fondo.
+   (Antes aqui habia un fondo de ciudad futurista detras del canvas de three.js; ya no existe.) */
+
+/* Boton de fondo bloqueado (Settings > Background > Skyline): en gris y no se puede pulsar. */
+.settings-background button.is-locked,
+.settings-background button:disabled {
+  opacity: .38;
+  filter: grayscale(1);
+  cursor: not-allowed;
+  color: #b3bec5;
+  background: transparent;
+  border-color: #f3f4f51a;
+}
+.settings-background button.is-locked:hover,
+.settings-background button:disabled:hover { background: transparent; border-color: #f3f4f51a; }

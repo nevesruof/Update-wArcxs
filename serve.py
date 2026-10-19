@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
-"""Servidor local para la copia de akryst.moe.
+"""Servidor local del sitio Take.
 
-Sirve esta carpeta como raiz del sitio (http://localhost:8000) y emula lo
-minimo que antes hacia Next.js:
+Sirve esta carpeta como raiz (http://localhost:8000) y emula lo minimo que
+antes hacia Next.js:
   * /_next/image?url=/algo.webp  -> devuelve el archivo local equivalente
-  * /bg-fallback.webp            -> bg-fallback.jpeg (el fondo de flores)
+  * /bg-fallback.webp            -> images/bg-fallback.jpeg (el fondo de flores)
+  * /photos                      -> pages/photos.html
 No modifica ningun archivo del sitio.
 """
 import http.server, os, sys, urllib.parse
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
-ALIASES = {"/bg-fallback.webp": "/bg-fallback.jpeg"}
+ALIASES = {
+    "/bg-fallback.webp": "/images/bg-fallback.jpeg",
+    "/photos": "/pages/photos.html",
+}
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
@@ -26,5 +30,5 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return super().translate_path(p)
 
 if __name__ == "__main__":
-    print(f"akryst -> http://localhost:{PORT}/   (Ctrl+C para cerrar)")
+    print(f"Take -> http://localhost:{PORT}/   (Ctrl+C para cerrar)")
     http.server.ThreadingHTTPServer(("", PORT), Handler).serve_forever()

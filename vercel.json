@@ -2,14 +2,65 @@
   "rewrites": [
     {
       "source": "/_next/image",
-      "has": [{ "type": "query", "key": "url", "value": ".*bg-fallback.*" }],
-      "destination": "/bg-fallback.jpeg"
+      "has": [
+        {
+          "type": "query",
+          "key": "url",
+          "value": ".*bg-fallback.*"
+        }
+      ],
+      "destination": "/images/bg-fallback.jpeg"
     },
     {
       "source": "/_next/image",
-      "has": [{ "type": "query", "key": "url", "value": ".*logo.*" }],
-      "destination": "/logo.webp"
+      "has": [
+        {
+          "type": "query",
+          "key": "url",
+          "value": ".*logo.*"
+        }
+      ],
+      "destination": "/images/logo.webp"
     },
-    { "source": "/bg-fallback.webp", "destination": "/bg-fallback.jpeg" }
+    {
+      "source": "/bg-fallback.webp",
+      "destination": "/images/bg-fallback.jpeg"
+    },
+    {
+      "source": "/photos",
+      "destination": "/pages/photos.html"
+    },
+    {
+      "source": "/private/:path*",
+      "destination": "/api/canary?trap=bait&p=/private/:path*"
+    },
+    {
+      "source": "/backup/:path*",
+      "destination": "/api/canary?trap=bait&p=/backup/:path*"
+    },
+    {
+      "source": "/wp-login.php",
+      "destination": "/api/canary?trap=scan&p=/wp-login.php"
+    },
+    {
+      "source": "/wp-admin/:path*",
+      "destination": "/api/canary?trap=scan&p=/wp-admin/:path*"
+    },
+    {
+      "source": "/xmlrpc.php",
+      "destination": "/api/canary?trap=scan&p=/xmlrpc.php"
+    },
+    {
+      "source": "/.env",
+      "destination": "/api/canary?trap=scan&p=/.env"
+    },
+    {
+      "source": "/.git/config",
+      "destination": "/api/canary?trap=scan&p=/.git/config"
+    },
+    {
+      "source": "/phpmyadmin/:path*",
+      "destination": "/api/canary?trap=scan&p=/phpmyadmin/:path*"
+    }
   ]
 }

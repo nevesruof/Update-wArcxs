@@ -1,81 +1,96 @@
-# akryst – copia ordenada
+# Take
 
-El código de todas las páginas guardadas está **sin modificar** (verificado byte a byte contra el zip original).
-Solo se movieron/renombraron archivos y se agregaron recursos en las rutas que la app espera.
+Sitio estático (menú con fondo de cubos 3D, Settings, galería de fotos, presencia de Discord y trampas anti-copia).
 
 ## Cómo verlo
 Windows: doble clic en `iniciar.bat` y abre http://localhost:8000
 (o `python serve.py` desde esta carpeta). No abras `index.html` con doble clic: las fuentes y el fondo
 se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un servidor.
 
-Si arranca con el fondo azul "Underwater": **Settings → Background → Video** (y `← menu` para volver).
-
 ## Estructura
 | Ruta | Qué es |
 |---|---|
-| `index.html` | El menú (antes `akryst.html`) |
-| `akryst_files/` | Recursos que `index.html` referencia (intactos) |
-| `_next/static/chunks`, `css` | Los mismos JS/CSS de `akryst_files`, copiados con el nombre y ruta que pide la app |
-| `_next/static/media/`, `fonts/` | Fuentes DM Sans y Spanish (la del logo), extraídas de `pages/settings.html` |
-| `bg-fallback.jpeg`, `videos/background.mp4` | Fondo de flores. El mp4 es un clip fijo hecho con el jpeg (el video real no venía en el zip) |
-| `pages/settings.html` | Inicio con el panel Settings abierto (antes `settings.html`) |
-| `pages/photos.html` | Galería de fotos (antes `phoyos.html`) |
-| `pages/photos-background.html` | Otra captura de /photos (antes `photos-background.html`); sola solo muestra el fondo |
-| `sfx/tic.mp3`, `sfx/tac.mp3` | Sonidos del menú: `tic` al pasar por cada botón nuevo, `tac` al abrir una sección y al volver con `← menu` |
-| `serve.py` | Servidor local mínimo (emula `/_next/image` y `/bg-fallback.webp`) |
+| `index.html` | El menú principal |
+| `pages/settings.html` | Inicio con el panel Settings abierto (captura) |
+| `pages/photos.html` | Galería de fotos (captura, se sirve en `/photos`) |
+| `css/take-extras.css` | Estilo del botón Skyline bloqueado |
+| `js/cubes-bg.js` | Fondo "Underwater": cubos 3D blancos con glow + partículas conectadas (Canvas 2D, sin librerías) |
+| `js/canary.js`, `robots.txt` | Trampas anti-copia (ver más abajo) |
+| `css/turbo-boost.css`, `js/turbo-boost.js` | Cursor 3D y botón TURBO BOOST (solo en Skyline; inactivo mientras Skyline esté bloqueado) |
+| `images/` | Logo y fondos (`bg-fallback`, `bg-skyline`) |
+| `videos/skyline.mp4` | Fondo en video |
+| `fonts/spanish.ttf` | Fuente del logo |
+| `sfx/` | `tic`/`tac` del menú y `ambient.mp3` (música de fondo) |
+| `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm`, `/api/lastfm/top-artist`, `/api/canary` |
+| `tests/` | Pruebas: `node --test tests/bot.test.js tests/canary.test.js` (Node 18+) |
+| `serve.py`, `iniciar.bat` | Servidor local |
+| `vercel.json` | Rewrites de imágenes, `/photos` y los cebos de las trampas |
+| `_next/static/` | Build compilado de la app (ver nota abajo) |
 
-## Lo que no está en el zip
-Contador de visitas y mensaje (necesitan el backend `/api/*`), sonidos `grass.mp3`, `underwater.mp3` y `akurisuto.mp3` (ambiente), modelo `.vrm`,
-`logo.webp`, pestañas About me / Music / Guestbook y la página Portfolio.
+### Sobre `_next/static/`
+Es el resultado compilado de Next.js; no hay código fuente en este proyecto. Los archivos con hash
+(`4bd1b696-….js`, `1255-….js`, etc.) son librerías (React, Next, three.js, framer-motion, iconify) y
+**no se pueden renombrar**: Next guarda sus nombres dentro de `index.html` y renombrarlos rompe la carga.
+El código propio (`app/layout`, `app/not-found`, `app/(site)/page`, `4190-…`, `1264-…`) está formateado
+para poder leerse; las librerías siguen minificadas.
 
----
+## Presencia de Discord (bot propio)
+`/api/activity` y `/api/lastfm` llaman al bot desde el servidor de Vercel (el token no llega al navegador).
+Variables de entorno en Vercel (después, Redeploy):
+- `ACTIVITY_BOT_URL`: URL del bot terminada en `/api/activity` (opcional).
+- `ACTIVITY_BOT_TOKEN`: mismo valor que `API_TOKEN` del bot (solo si el bot lo tiene).
 
-## Cambios v2 (fondos + Turbo Boost)
+## Fondo "Underwater": cubos 3D
+`js/cubes-bg.js` dibuja cubos blancos con glow flotando en 3D, con caras translúcidas y un punto de luz ("resalte"),
+y partículas que se conectan con líneas (algunas como átomos con su órbita). Solo blanco y negro, en un `<canvas>` 2D.
+- El cursor o el dedo mueven la cámara un poco (parallax) y empujan apenas a los cubos, que vuelven a su sitio.
+- Los cubos lejanos o muy cercanos se ven más suaves (profundidad de campo falsa).
+- Se pausa con la pestaña oculta; con "reducir movimiento" activado queda una imagen fija; si el equipo va justo baja solo las partículas y el brillo.
+- Pantalla vertical (celular) usa otra disposición para no tapar el menú. Ajustes rápidos al inicio del archivo: `CUBES`, `CUBES_PORTRAIT`, `SIZE`, `PART_COUNT`, `LINK`, `LIGHT`, `FOCUS`.
+- Reemplaza a la escena de three.js (rayos de luz + avatar VRM) del módulo `1264`; el fondo de ciudad se quitó.
 
-**Siempre arranca en Underwater.** Antes el código hacía `setUseUnderwaterBg(window.innerWidth > 768)`, así que en ventanas de
-768px o menos arrancaba en Video. Ahora el estado inicial es siempre Underwater (no se guarda la elección: al recargar vuelve a Underwater).
+## Música de fondo
+`sfx/ambient.mp3` reemplaza al piano/ambiente anterior. Arranca al tocar la pantalla de carga (los navegadores no permiten
+audio sin un toque) y se activa/desactiva con "ambient sound" en la pestaña music. Se repite en bucle y su volumen es 40 %
+(antes 5 %): está en `_next/static/chunks/4190-*.js` (`.4 * (`). Es un archivo de 17 s; si notas el corte al repetirse, usa una versión más larga o un loop continuo.
 
-**Underwater = wallpaper cyberpunk** en vez del azul casi negro. El wallpaper (`images/cyberpunk-city.jpg`) va detrás del canvas de three.js
-(`css/akryst-extras.css`); se quitó el plano de fondo oscuro de la escena y el canvas se mezcla con `screen`, así que solo se suman las luces
-(burbujas, rayos, avatar si existe el .vrm). Para quitarlo: borra el `<link>` de `akryst-extras.css` en `index.html`.
+## Settings: Skyline bloqueado
+El botón **Skyline** de Settings → Background está desactivado (`disabled`) y en gris; solo queda **Underwater**.
+Para reactivarlo: en `_next/static/chunks/4190-*.js` busca `className: "is-locked"` y vuelve a poner `onClick: () => t(!1)` sin `disabled`.
 
-**Video -> Skyline.** El botón del panel Settings ahora se llama *Skyline* (icono de carro) y reproduce `videos/skyline.mp4`
-(tu mp4 del Nissan Skyline, sin audio). `bg-skyline.jpeg` es el póster y el fallback si hay reduced-motion o WebGL por software.
-El clip anterior sigue en `videos/background.mp4` por si lo quieres de vuelta.
+## Trampas (canaries)
+Pasivas: solo registran y avisan; no hacen nada contra el visitante.
+| Trampa | Cómo salta | Qué recibes |
+|---|---|---|
+| **Copia del sitio** (`js/canary.js`) | La página se abre desde un dominio que no es el tuyo (`wwarcxs.vercel.app`, sus previews, localhost y redes locales están permitidos) | Aviso con dominio, ruta, referrer, IP y navegador (una vez por sesión) |
+| **Cebo** (`/private/*`, `/backup/*`) | Solo aparecen en `robots.txt` y en un enlace oculto del HTML. Un navegador normal nunca entra; un bot que ignora `robots.txt` o sigue enlaces ocultos, sí | Aviso (responde un 404 normal para no delatarse) |
+| **Escaneos** (`/wp-login.php`, `/.env`, `/.git/config`, `/xmlrpc.php`, `/phpmyadmin`…) | Escáneres automáticos | Solo en los logs (si no, sería mucho ruido) |
+| **Marca de agua** `TKWM-…` | Cadena única repetida en `index.html`, CSS, JS y `robots.txt` | Búscala en Google/GitHub (`"TKWM-40632a5f-41f0-9fe6-22f804d522ac"`) para encontrar copias |
 
-**Turbo Boost + cursor 3D** (`js/turbo-boost.js`, `css/turbo-boost.css`). Solo activo en Skyline y con el menú principal visible.
-- Cursor: perspectiva/parallax sutil aplicados SOLO al video (nunca a un contenedor padre), resorte amortiguado, vuelve a neutral al quedarse quieto.
-  En pantallas táctiles hay un vaivén lento automático.
-- Botón TURBO BOOST (o barra espaciadora; no se activa si escribes en un campo ni si el foco está en un botón/enlace). ~1 s: faros y neón, rebote de
-  suspensión, partículas cyan/violeta/blancas hacia atrás, líneas de velocidad, impulso de cámara, aberración cromática y barrido de reflejo.
-- Un solo bucle `requestAnimationFrame` con delta time; se duerme en reposo y con la pestaña oculta; baja efectos si los fps caen;
-  `prefers-reduced-motion` quita sacudida, líneas y aberración.
-- Para quitar la función: borra las dos líneas `turbo-boost` del `<head>` de `index.html`.
+**Configurar el aviso en Discord (opcional):** en un canal → Editar canal → Integraciones → Webhooks → Nuevo webhook → Copiar URL.
+En Vercel → Settings → Environment Variables agrega `CANARY_WEBHOOK_URL` con esa URL y haz Redeploy. Opcional: `CANARY_ALERT_ALL=1` para avisar también los escaneos.
+Sin webhook, todo queda en Vercel → Logs (filtra por `CANARY`). El aviso limpia el texto que llega (sin pings ni markdown), no repite el mismo origen en 10 minutos y envía como máximo 20 por hora.
+**Dominio propio:** si lo conectas, agrégalo con `<script>window.TAKE_ALLOWED_HOSTS=["midominio.com"]</script>` antes de `js/canary.js` y cambia el dominio base64 de ese archivo (`printf 'https://midominio.com' | base64`).
+**Límites:** quien copie el sitio puede borrar `canary.js`; por eso hay varias capas. Como segunda capa independiente puedes crear un *Cloned Website* token gratis en canarytokens.org y pegar su snippet. Los rewrites de los cebos están en `vercel.json` y no pude probarlos en Vercel desde aquí (la lógica sí está probada).
 
-### Parches en el JS compilado (en `_next/static/chunks` y su copia en `akryst_files/*.download`)
-| Archivo | Cambio |
-|---|---|
-| `4190-...js` | `useState(!1)` -> `useState(!0)`; `y(window.innerWidth>768)` -> `y(!0)`; label/icono `Video` -> `Skyline` / `mdi:car-sports` |
-| `app/(site)/page-...js` | `src` por defecto `/videos/skyline.mp4`, fallback `/bg-skyline.jpeg`, `poster` en el `<video>` |
-| `1264-...js` | `background = Color(0)`; el plano de fondo `A` ya no se agrega a la escena |
+## Auditoría de seguridad y privacidad
+Se revisaron todos los archivos buscando trackers, balizas, ejecución dinámica y llamadas de red:
+- **Quitado:** el script `Watermark` (reportaba el dominio de quien copiara el sitio y cargaba un canarytoken)
+  y el beacon de Cloudflare Analytics. Revisado de nuevo: no quedan trackers ni canarytokens de terceros, `eval`, `new Function`
+  ni credenciales fijas. Lo único de este tipo son las **trampas propias** de abajo, que solo avisan a tu Vercel/Discord.
+- **Peticiones al mismo dominio** (`/api/counter`, `/api/guestbook`, `/api/settings`, `/api/admin/*`,
+  WebSocket `/api/cursors`): son funciones de la web original cuyo backend **no viene en este proyecto**.
+  Sin backend fallan en silencio; el WebSocket de cursores reintenta cada pocos segundos.
+  No envían nada a servidores de terceros.
+- **Panel admin:** si existe `admin_key` en `sessionStorage`, la web la manda a `/api/admin/*`.
+  No hay ninguna clave dentro del código.
+- **Único tercero en tiempo de ejecución:** los iconos usan Iconify y piden su SVG a
+  `api.iconify.design` (con respaldo en `api.simplesvg.com` y `api.unisvg.com`).
+  Spotify, Discord y GitHub solo se usan para mostrar imágenes y enlaces.
+- El bot por defecto de `api/_lib/bot.js` apunta a `fi4.bot-hosting.cloud`; cámbialo con `ACTIVITY_BOT_URL`.
 
-## Presencia de Discord con el bot propio (sin Lanyard)
-La web ya no usa Lanyard. El estado (online / away / do not disturb / offline), el avatar y la pestaña **music**
-salen del bot de actividad (`main.py` del bot, endpoint `GET /api/activity`) a través de funciones de Vercel:
-
-| Ruta de la web | Qué hace |
-|---|---|
-| `/api/activity` | Presencia: estado, avatar, actividades, Spotify. La página la consulta cada 10 s (30 s con la pestaña oculta) |
-| `/api/lastfm?limit=20` | Lista "on repeat" con el historial de Spotify que guarda el bot |
-| `/api/lastfm/top-artist` | Artista más repetido en el historial reciente del bot (hasta 100 canciones) |
-
-Las funciones están en `api/` y llaman al bot **desde el servidor de Vercel**: el token no llega al navegador y no hay
-problemas de CORS ni de http/https. Si el bot no responde, la web muestra *offline*.
-
-**Variables de entorno en Vercel** (Settings → Environment Variables; después, Redeploy):
-- `ACTIVITY_BOT_URL`: URL completa del bot terminada en `/api/activity` (opcional; por defecto `http://fi4.bot-hosting.cloud:25319/api/activity`).
-- `ACTIVITY_BOT_TOKEN`: mismo valor que `API_TOKEN` del bot. Solo si el bot lo tiene configurado.
-
-**Pruebas:** `node --test tests/bot.test.js` (Node 18+). Las rutas `/api/*` no existen con `serve.py` en local; ahí la web
-muestra *offline* y la lista de música vacía.
-
+## Pendientes tras el cambio de nombre
+1. **Dominio:** busca `tu-dominio.com` (og:url, og:image, twitter:image, canonical, aviso de la consola) y cámbialo por tu dominio real.
+2. **Redes:** los enlaces y handles de GitHub, Instagram, Twitter, Twitch, Ko-fi, VGen, Steam y los repos siguen con el nombre viejo, en `_next/static/chunks/app/(site)/page-*.js` (busca `handle:`) y `@Akryst_` en los meta de `twitter:creator`. Cámbialos cuando renombres las cuentas.
+3. **Archivos que no vienen en el zip:** `favicon.ico`, `opengraph-image.png`, `twitter-image.png`, `/88x31/take.gif` y tus fotos de `/photos/`.
+4. **Mayúsculas:** el nombre quedó en minúscula (`take`) donde antes era `akryst`, y `Take` donde era `Akryst`. Si prefieres siempre `Take`, es un buscar y reemplazar.

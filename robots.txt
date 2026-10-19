@@ -1,0 +1,4 @@
+# TKWM-40632a5f-41f0-9fe6-22f804d522ac
+User-agent: *
+Disallow: /private/
+Disallow: /backup/
