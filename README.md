@@ -21,7 +21,7 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `videos/skyline.mp4` | Fondo en video |
 | `fonts/spanish.ttf` | Fuente del logo |
 | `sfx/` | `tic`/`tac` del menú y `ambient.mp3` (música de fondo) |
-| `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm`, `/api/lastfm/top-artist`, `/api/canary` |
+| `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm` (Last.fm), `/api/lastfm/top-artist`, `/api/canary` |
 | `tests/` | Pruebas: `node --test tests/bot.test.js tests/canary.test.js` (Node 18+) |
 | `serve.py`, `iniciar.bat` | Servidor local |
 | `vercel.json` | Rewrites de imágenes, `/photos` y los cebos de las trampas |
@@ -35,10 +35,20 @@ El código propio (`app/layout`, `app/not-found`, `app/(site)/page`, `4190-…`,
 para poder leerse; las librerías siguen minificadas.
 
 ## Presencia de Discord (bot propio)
-`/api/activity` y `/api/lastfm` llaman al bot desde el servidor de Vercel (el token no llega al navegador).
+`/api/activity` llama al bot desde el servidor de Vercel (el token no llega al navegador).
 Variables de entorno en Vercel (después, Redeploy):
 - `ACTIVITY_BOT_URL`: URL del bot terminada en `/api/activity` (opcional).
 - `ACTIVITY_BOT_TOKEN`: mismo valor que `API_TOKEN` del bot (solo si el bot lo tiene).
+
+## Música (Last.fm)
+La pestaña **music** lee tu historial real de Last.fm a través de `/api/lastfm` (últimas canciones + "now playing") y
+`/api/lastfm/top-artist` (artista más escuchado de los últimos 30 días). La API key se queda en el servidor de Vercel.
+1. Crea una API key en https://www.last.fm/api/account/create (solo pide un nombre de app).
+2. En Vercel → Settings → Environment Variables agrega `LASTFM_API_KEY` y `LASTFM_USER` (tu usuario de last.fm) y haz Redeploy.
+3. Para que aparezca "now playing", conecta Spotify (u otro reproductor) a Last.fm en https://www.last.fm/settings/applications.
+   Last.fm solo muestra lo que se *scrobblea*; sin esa conexión la lista queda vacía.
+Sin las variables, `/api/lastfm` responde 503 y la pestaña muestra "recent tracks are unavailable". La lista se refresca cada 30 s.
+Pruebas: `node --test tests/lastfm.test.js`.
 
 ## Fondo "Underwater": cubos 3D
 `js/cubes-bg.js` dibuja cubos blancos con glow flotando en 3D, con caras translúcidas y un punto de luz ("resalte"),

@@ -127,21 +127,3 @@ test("handler /api/activity: bot caido o 401 => 200 offline sin cachear", async 
     assert.equal(out.body.discord_status, "offline");
   });
 });
-
-test("handler /api/lastfm: 502 si el bot falla, tracks si responde, 405 en POST", async () => {
-  await withEnv({ ACTIVITY_BOT_URL: "http://127.0.0.1:9/api/activity" }, async () => {
-    const out = await call(require("../api/lastfm/index"), { limit: "20" });
-    assert.equal(out.status, 502);
-    assert.equal(out.headers["cache-control"], "no-store");
-  });
-  const bot = await fakeBot((req, res) => { res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify(snapshot())); });
-  await withEnv({ ACTIVITY_BOT_URL: `http://127.0.0.1:${bot.address().port}/` }, async () => {
-    const out = await call(require("../api/lastfm/index"), { limit: "3" });
-    assert.equal(out.body.tracks.length, 3);
-    const top = await call(require("../api/lastfm/top-artist"));
-    assert.equal(top.body.artist, "Uno");
-    const post = await call(require("../api/lastfm/index"), {}, "POST");
-    assert.equal(post.status, 405);
-  });
-  bot.close();
-});

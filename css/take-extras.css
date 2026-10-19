@@ -16,3 +16,25 @@
 }
 .settings-background button.is-locked:hover,
 .settings-background button:disabled:hover { background: transparent; border-color: #f3f4f51a; }
+
+/* --- Alineacion del menu y de los paneles ------------------------------------------------ */
+
+/* Movil: la flecha ▶ estaba dentro del flex y empujaba las etiquetas ~10px a la izquierda del centro
+   (logo, tagline y hint si estan centrados). Se saca del flujo para que la etiqueta quede centrada de verdad. */
+@media (max-width: 768px) {
+  .hero-menu-item { position: relative; }
+  .hero-menu-label { text-align: center; }
+  .hero-menu-arrow { position: absolute; right: 16px; top: 50%; margin-top: -.6em; line-height: 1.2; }
+}
+
+/* Escritorio: las etiquetas tienen 20px de padding dentro de su caja y quedaban sangradas respecto al logo,
+   al tagline y al hint. Se corre la caja 20px a la izquierda para que el TEXTO quede en el mismo borde. */
+@media (min-width: 769px) {
+  .hero-menu { margin-left: -20px; }
+  .hero-menu-hint { margin-left: 0; }
+  .hero-menu-stage .hero-menu-hint { padding-left: 0; }
+}
+
+/* El letter-spacing agrega espacio despues de la ultima letra y el titulo de la derecha ("about me")
+   quedaba unos px metido respecto a la linea divisoria. */
+.hero-panel-header h1 { margin-right: -.12em; }
