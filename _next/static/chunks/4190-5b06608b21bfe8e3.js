@@ -81,7 +81,7 @@
             K.current = t && /^[0-9a-f-]{36}$/i.test(t) ? t : crypto.randomUUID(), localStorage.setItem(u, K.current);
         }
         catch (e) { } K.current || (K.current = crypto.randomUUID()); }, []), (0, o.useEffect)(() => { var e; G.current = c, g([]), k([]), M([]), P([]), D([]), J(null), (null == (e = X.current) ? void 0 : e.readyState) === WebSocket.OPEN && X.current.send(JSON.stringify({ type: "route", path: c })); }, [c]), (0, o.useEffect)(() => { let e = !c.startsWith("/admin") && "/maintenance" !== c && window.matchMedia("(hover: hover) and (pointer: fine)").matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches; if (A(e), !e)
-            return; let t = !1, n = 0, r = 0, i = () => { let e = "https:" === location.protocol ? "wss:" : "ws:", r = new WebSocket("".concat(e, "//").concat(location.host, "/api/cursors")); X.current = r, r.addEventListener("open", () => { n = 0, R(!0), r.send(JSON.stringify({ type: "route", path: G.current })), en(r), r.send(JSON.stringify({ type: "scene", scene: d() })); }), r.addEventListener("message", e => { let t; try {
+            return; let t = !1, n = 0, r = 0, i = () => { let u0 = window.TAKE_CURSORS_URL; if (!u0) return; let r = new WebSocket(u0); X.current = r, r.addEventListener("open", () => { n = 0, R(!0), r.send(JSON.stringify({ type: "route", path: G.current })), en(r), r.send(JSON.stringify({ type: "scene", scene: d() })); }), r.addEventListener("message", e => { let t; try {
             t = JSON.parse(e.data);
         }
         catch (e) {

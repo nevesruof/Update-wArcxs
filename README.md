@@ -21,10 +21,13 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `videos/skyline.mp4` | Fondo en video |
 | `fonts/spanish.ttf` | Fuente del logo |
 | `sfx/` | `tic`/`tac` del menú y `ambient.mp3` (música de fondo) |
-| `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm` (Last.fm), `/api/lastfm/top-artist`, `/api/canary` |
-| `tests/` | Pruebas: `node --test tests/bot.test.js tests/canary.test.js` (Node 18+) |
+| `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm` (+`/top-artist`), `/api/canary`, y el backend nuevo: `/api/guestbook`, `/api/counter`, `/api/settings`, `/api/admin/verify`, `/api/admin/cursor-token` (lógica en `api/_lib/backend.js`) |
+| `cursors-server/` | Servidor WebSocket de los cursores compartidos (corre aparte de Vercel) |
+| `js/config.js` | Configuración pública: URL del servidor de cursores y dominios propios para `canary.js` |
+| `pages/admin.html` | Login de admin (se sirve en `/admin`) |
+| `tests/` | Pruebas: `node --test tests/*.test.js` (Node 18+). Las de cursores necesitan `npm install` dentro de `cursors-server/`; si no, se saltan |
 | `serve.py`, `iniciar.bat` | Servidor local |
-| `vercel.json` | Rewrites de imágenes, `/photos` y los cebos de las trampas |
+| `vercel.json` | Rewrites de imágenes, `/photos`, `/admin` y los cebos de las trampas |
 | `_next/static/` | Build compilado de la app (ver nota abajo) |
 
 ### Sobre `_next/static/`
@@ -68,6 +71,33 @@ audio sin un toque) y se activa/desactiva con "ambient sound" en la pestaña mus
 El botón **Skyline** de Settings → Background está desactivado (`disabled`) y en gris; solo queda **Underwater**.
 Para reactivarlo: en `_next/static/chunks/4190-*.js` busca `className: "is-locked"` y vuelve a poner `onClick: () => t(!1)` sin `disabled`.
 
+## Libro de visitas, contador, ajustes y admin
+Lo que la web llamaba en `/api/guestbook`, `/api/counter`, `/api/settings` y `/api/admin/*` ya existe. Pasos (una sola vez):
+1. **Base de datos:** Vercel → tu proyecto → Storage → crea una base **Upstash Redis** y conéctala al proyecto
+   (agrega solas las variables `KV_REST_API_URL` y `KV_REST_API_TOKEN`). Sin base de datos funciona en memoria, que en Vercel se borra sola.
+2. **Variables** (Settings → Environment Variables):
+   - `ADMIN_KEY` (obligatoria para el admin): una clave larga, mínimo 12 caracteres. Sin ella el admin queda desactivado.
+   - `CURSOR_SECRET` (opcional): secreto para que el servidor de cursores te reconozca como dueño; si no la pones se usa `ADMIN_KEY`.
+   - `HOME_MESSAGE`, `VISITS_BASE`, `IP_SALT` (opcionales): mensaje inicial, número que se suma al contador y sal para anonimizar IPs.
+3. **Redeploy.** Entra a `/admin`, escribe tu `ADMIN_KEY` y quedas como admin en esa pestaña: aparecen los botones de *reply* y *take liked this* en el libro de visitas.
+   La clave se guarda solo en `sessionStorage` (se borra al cerrar la pestaña) y se manda por HTTPS en la cabecera `x-admin-key`.
+
+Cómo se protege: la clave se compara en tiempo constante; 8 intentos fallidos bloquean esa red 10 minutos; el libro limita a 1 mensaje cada 20 s por visitante
+y 6 por hora por red, rechaza enlaces `javascript:`, URLs con usuario/clave y mensajes con más de 2 enlaces, y un visitante solo puede dar un like por mensaje.
+No se guardan IPs: solo un hash corto (con sal) para los límites. Cambiar el mensaje del home: `PUT /api/settings` con `{"homeMessage":"..."}` y la cabecera `x-admin-key`.
+Para probar las funciones en local usa `vercel dev` (`serve.py` solo sirve archivos estáticos).
+
+## Cursores compartidos (tiempo real)
+Vercel no soporta WebSocket, así que `cursors-server/` se despliega aparte (Render, Fly, Railway, un VPS...):
+```
+cd cursors-server && npm install && npm start      # puerto 8787, ruta /api/cursors
+```
+Variables del servidor: `CURSOR_SECRET` (igual que en Vercel), `ALLOWED_ORIGINS` (ej. `wwarcxs.vercel.app`, tu dominio nuevo; obligatorio en producción),
+`TRUST_PROXY=1` si va detrás de un proxy, `PORT`. Después pon la URL en `js/config.js`: `window.TAKE_CURSORS_URL = "wss://tu-servidor/api/cursors"`
+(con una web `https` tiene que ser `wss://`, o sea, con certificado; una IP:puerto pelada no sirve).
+Mientras `TAKE_CURSORS_URL` esté vacío los cursores compartidos están **desactivados** y la web no intenta conectarse a nada.
+Quedan sin implementar el minijuego de burbujas y los "encuentros"; la web funciona igual sin ellos. Salud del servidor: `GET /health`.
+
 ## Trampas (canaries)
 Pasivas: solo registran y avisan; no hacen nada contra el visitante.
 | Trampa | Cómo salta | Qué recibes |
@@ -80,7 +110,7 @@ Pasivas: solo registran y avisan; no hacen nada contra el visitante.
 **Configurar el aviso en Discord (opcional):** en un canal → Editar canal → Integraciones → Webhooks → Nuevo webhook → Copiar URL.
 En Vercel → Settings → Environment Variables agrega `CANARY_WEBHOOK_URL` con esa URL y haz Redeploy. Opcional: `CANARY_ALERT_ALL=1` para avisar también los escaneos.
 Sin webhook, todo queda en Vercel → Logs (filtra por `CANARY`). El aviso limpia el texto que llega (sin pings ni markdown), no repite el mismo origen en 10 minutos y envía como máximo 20 por hora.
-**Dominio propio:** si lo conectas, agrégalo con `<script>window.TAKE_ALLOWED_HOSTS=["midominio.com"]</script>` antes de `js/canary.js` y cambia el dominio base64 de ese archivo (`printf 'https://midominio.com' | base64`).
+**Dominio propio:** si lo conectas, agrégalo en `js/config.js` (`window.TAKE_ALLOWED_HOSTS = ["midominio.com"]`; si no, tu propio dominio se detectaría como copia) y cambia el dominio base64 de `js/canary.js` (`printf 'https://midominio.com' | base64`), que es adonde llega la señal.
 **Límites:** quien copie el sitio puede borrar `canary.js`; por eso hay varias capas. Como segunda capa independiente puedes crear un *Cloned Website* token gratis en canarytokens.org y pegar su snippet. Los rewrites de los cebos están en `vercel.json` y no pude probarlos en Vercel desde aquí (la lógica sí está probada).
 
 ## Auditoría de seguridad y privacidad
@@ -88,11 +118,9 @@ Se revisaron todos los archivos buscando trackers, balizas, ejecución dinámica
 - **Quitado:** el script `Watermark` (reportaba el dominio de quien copiara el sitio y cargaba un canarytoken)
   y el beacon de Cloudflare Analytics. Revisado de nuevo: no quedan trackers ni canarytokens de terceros, `eval`, `new Function`
   ni credenciales fijas. Lo único de este tipo son las **trampas propias** de abajo, que solo avisan a tu Vercel/Discord.
-- **Peticiones al mismo dominio** (`/api/counter`, `/api/guestbook`, `/api/settings`, `/api/admin/*`,
-  WebSocket `/api/cursors`): son funciones de la web original cuyo backend **no viene en este proyecto**.
-  Sin backend fallan en silencio; el WebSocket de cursores reintenta cada pocos segundos.
-  No envían nada a servidores de terceros.
-- **Panel admin:** si existe `admin_key` en `sessionStorage`, la web la manda a `/api/admin/*`.
+- **Peticiones al mismo dominio** (`/api/counter`, `/api/guestbook`, `/api/settings`, `/api/admin/*`): ahora las atiende el backend de este proyecto.
+  El WebSocket de cursores solo se abre si configuras `TAKE_CURSORS_URL` (tu propio servidor). Nada de esto se envía a terceros.
+- **Panel admin:** si existe `admin_key` en `sessionStorage`, la web la manda a `/api/admin/*`, que la valida contra `ADMIN_KEY`.
   No hay ninguna clave dentro del código.
 - **Único tercero en tiempo de ejecución:** los iconos usan Iconify y piden su SVG a
   `api.iconify.design` (con respaldo en `api.simplesvg.com` y `api.unisvg.com`).

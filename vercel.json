@@ -31,6 +31,10 @@
       "destination": "/pages/photos.html"
     },
     {
+      "source": "/admin",
+      "destination": "/pages/admin.html"
+    },
+    {
       "source": "/private/:path*",
       "destination": "/api/canary?trap=bait&p=/private/:path*"
     },

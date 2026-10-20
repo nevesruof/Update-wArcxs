@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>admin</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0b0620; color: #e8e6f5; font: 16px/1.5 system-ui, sans-serif; }
+  main { width: min(92vw, 340px); }
+  h1 { font-size: 1.1rem; font-weight: 600; margin: 0 0 1rem; }
+  input, button { width: 100%; box-sizing: border-box; padding: .7rem .8rem; border-radius: 8px; border: 1px solid #3b2f6b; background: #150d33; color: inherit; font: inherit; }
+  button { margin-top: .6rem; cursor: pointer; background: #3b2f6b; }
+  button:disabled { opacity: .6; cursor: default; }
+  p { min-height: 1.4em; margin: .8rem 0 0; font-size: .9rem; }
+  .err { color: #fda4af; } .ok { color: #86efac; }
+  a { color: #8dcfd7; }
+</style>
+</head>
+<body>
+<main>
+  <h1>admin</h1>
+  <form id="f" autocomplete="off">
+    <input id="k" type="password" placeholder="admin key" aria-label="admin key" required>
+    <button id="b" type="submit">entrar</button>
+  </form>
+  <button id="out" type="button" hidden>cerrar sesion</button>
+  <p id="m" role="status"></p>
+  <p><a href="/">&larr; volver al sitio</a></p>
+</main>
+<script>
+(function () {
+  var f = document.getElementById("f"), k = document.getElementById("k"), b = document.getElementById("b"),
+      m = document.getElementById("m"), out = document.getElementById("out");
+  function say(t, cls) { m.textContent = t; m.className = cls || ""; }
+  function show() {
+    var on = !!sessionStorage.getItem("admin_key");
+    f.hidden = on; out.hidden = !on;
+    if (on) say("sesion de admin activa en esta pestana", "ok");
+  }
+  f.addEventListener("submit", function (e) {
+    e.preventDefault(); b.disabled = true; say("comprobando...");
+    fetch("/api/admin/verify", { method: "POST", headers: { "x-admin-key": k.value } })
+      .then(function (r) {
+        if (r.ok) { sessionStorage.setItem("admin_key", k.value); k.value = ""; location.href = "/"; return; }
+        say(r.status === 429 ? "demasiados intentos, espera unos minutos" : r.status === 503 ? "el admin no esta configurado en el servidor" : "clave incorrecta", "err");
+      })
+      .catch(function () { say("no se pudo conectar", "err"); })
+      .then(function () { b.disabled = false; });
+  });
+  out.addEventListener("click", function () { sessionStorage.removeItem("admin_key"); say(""); show(); });
+  show();
+})();
+</script>
+</body>
+</html>

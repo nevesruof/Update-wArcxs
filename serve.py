@@ -6,6 +6,8 @@ antes hacia Next.js:
   * /_next/image?url=/algo.webp  -> devuelve el archivo local equivalente
   * /bg-fallback.webp            -> images/bg-fallback.jpeg (el fondo de flores)
   * /photos                      -> pages/photos.html
+  * /admin                       -> pages/admin.html
+Las funciones de /api/* NO corren aqui (usa `vercel dev` para probarlas).
 No modifica ningun archivo del sitio.
 """
 import http.server, os, sys, urllib.parse
@@ -15,6 +17,7 @@ PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
 ALIASES = {
     "/bg-fallback.webp": "/images/bg-fallback.jpeg",
     "/photos": "/pages/photos.html",
+    "/admin": "/pages/admin.html",
 }
 
 class Handler(http.server.SimpleHTTPRequestHandler):
