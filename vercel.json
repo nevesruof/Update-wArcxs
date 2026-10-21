@@ -31,6 +31,10 @@
       "destination": "/pages/photos.html"
     },
     {
+      "source": "/portfolio",
+      "destination": "/pages/portfolio.html"
+    },
+    {
       "source": "/admin",
       "destination": "/pages/admin.html"
     },

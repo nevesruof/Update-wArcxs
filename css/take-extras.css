@@ -38,3 +38,19 @@
 /* El letter-spacing agrega espacio despues de la ultima letra y el titulo de la derecha ("about me")
    quedaba unos px metido respecto a la linea divisoria. */
 .hero-panel-header h1 { margin-right: -.12em; }
+
+/* ===== About: stack con brillo, vistas previas tipo icono, "last active" y notas ===== */
+.bio-stack-label { margin: 16px 0 6px; color: #889298; font: 10px ui-monospace, monospace; letter-spacing: .14em; }
+.bio-tool { color: #b3bec5; }
+.bio-tool svg { display: block; transition: filter .2s, transform .2s; }
+.bio-tool:hover, .bio-tool:focus-visible { color: #fff; }
+.bio-tool:hover svg, .bio-tool:focus-visible svg { filter: drop-shadow(0 0 3px rgba(255,255,255,.9)) drop-shadow(0 0 9px rgba(255,255,255,.4)); transform: translateY(-1px); }
+.about-panel .bio-tools { gap: 9px 11px; }
+.bio-socials a:hover svg, .bio-socials a:focus-visible svg { filter: drop-shadow(0 0 6px rgba(255,255,255,.45)); }
+
+.bio-preview.bio-preview--icon { width: auto; display: flex; align-items: center; gap: 10px; padding: 7px 14px 7px 7px; white-space: nowrap; border-radius: 12px; background: #10161b; }
+.bio-preview.bio-preview--icon img { width: 36px; height: 36px; flex: none; border-radius: 8px; -o-object-fit: cover; object-fit: cover; background: #0b0f12; }
+.bio-preview.bio-preview--icon > span { display: block; padding: 0; background: none; color: #d4dbe0; font: 11px ui-monospace, monospace; }
+
+.bio-bullet { font-size: .7em; opacity: .55; line-height: 1; margin: 0 1px; }
+.settings-note { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; color: #889298; font: 10px ui-monospace, monospace; }

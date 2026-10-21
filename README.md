@@ -16,18 +16,22 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `css/take-extras.css` | Estilo del botón Skyline bloqueado |
 | `js/cubes-bg.js` | Fondo "Underwater": cubos 3D blancos con glow + partículas conectadas (Canvas 2D, sin librerías) |
 | `js/canary.js`, `robots.txt` | Trampas anti-copia (ver más abajo) |
+| `js/take-presence.js` | Consulta `/api/activity` desde que carga la página y la comparte (evento `take-presence`); precarga la foto de perfil |
+| `js/nowplaying.js`, `css/nowplaying.css` | Tarjeta "now playing" con micrófono, letras sincronizadas con rebote y "escuchar a la par" (YouTube) |
+| `js/take-icons.js` | Iconos SVG en línea del stack y de las redes (Simple Icons CC0 + Material Design Icons) |
+| `pages/portfolio.html`, `images/previews/` | Entrada de la T y redirección a `arcxsdev.com` (`/portfolio`); iconos de las vistas previas |
 | `css/turbo-boost.css`, `js/turbo-boost.js` | Cursor 3D y botón TURBO BOOST (solo en Skyline; inactivo mientras Skyline esté bloqueado) |
 | `images/` | Logo y fondos (`bg-fallback`, `bg-skyline`) |
 | `videos/skyline.mp4` | Fondo en video |
 | `fonts/spanish.ttf` | Fuente del logo |
 | `sfx/` | `tic`/`tac` del menú y `ambient.mp3` (música de fondo) |
-| `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm` (+`/top-artist`), `/api/canary`, y el backend nuevo: `/api/guestbook`, `/api/counter`, `/api/settings`, `/api/admin/verify`, `/api/admin/cursor-token` (lógica en `api/_lib/backend.js`) |
+| `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm` (+`/top-artist`), `/api/canary`, `/api/lyrics`, `/api/listen`, y el backend nuevo: `/api/guestbook`, `/api/counter`, `/api/settings`, `/api/admin/verify`, `/api/admin/cursor-token` (lógica en `api/_lib/backend.js`) |
 | `cursors-server/` | Servidor WebSocket de los cursores compartidos (corre aparte de Vercel) |
 | `js/config.js` | Configuración pública: URL del servidor de cursores y dominios propios para `canary.js` |
 | `pages/admin.html` | Login de admin (se sirve en `/admin`) |
 | `tests/` | Pruebas: `node --test tests/*.test.js` (Node 18+). Las de cursores necesitan `npm install` dentro de `cursors-server/`; si no, se saltan |
 | `serve.py`, `iniciar.bat` | Servidor local |
-| `vercel.json` | Rewrites de imágenes, `/photos`, `/admin` y los cebos de las trampas |
+| `vercel.json` | Rewrites de imágenes, `/photos`, `/portfolio`, `/admin` y los cebos de las trampas |
 | `_next/static/` | Build compilado de la app (ver nota abajo) |
 
 ### Sobre `_next/static/`
@@ -102,7 +106,7 @@ Quedan sin implementar el minijuego de burbujas y los "encuentros"; la web funci
 Pasivas: solo registran y avisan; no hacen nada contra el visitante.
 | Trampa | Cómo salta | Qué recibes |
 |---|---|---|
-| **Copia del sitio** (`js/canary.js`) | La página se abre desde un dominio que no es el tuyo (`wwarcxs.vercel.app`, sus previews, localhost y redes locales están permitidos) | Aviso con dominio, ruta, referrer, IP y navegador (una vez por sesión) |
+| **Copia del sitio** (`js/canary.js`) | La página se abre desde un dominio que no es el tuyo (`whoistake.vercel.app`, `whoistake.com`, el anterior `wwarcxs.vercel.app`, sus previews, localhost y redes locales están permitidos) | Aviso con dominio, ruta, referrer, IP y navegador (una vez por sesión) |
 | **Cebo** (`/private/*`, `/backup/*`) | Solo aparecen en `robots.txt` y en un enlace oculto del HTML. Un navegador normal nunca entra; un bot que ignora `robots.txt` o sigue enlaces ocultos, sí | Aviso (responde un 404 normal para no delatarse) |
 | **Escaneos** (`/wp-login.php`, `/.env`, `/.git/config`, `/xmlrpc.php`, `/phpmyadmin`…) | Escáneres automáticos | Solo en los logs (si no, sería mucho ruido) |
 | **Marca de agua** `TKWM-…` | Cadena única repetida en `index.html`, CSS, JS y `robots.txt` | Búscala en Google/GitHub (`"TKWM-40632a5f-41f0-9fe6-22f804d522ac"`) para encontrar copias |
@@ -112,6 +116,27 @@ En Vercel → Settings → Environment Variables agrega `CANARY_WEBHOOK_URL` con
 Sin webhook, todo queda en Vercel → Logs (filtra por `CANARY`). El aviso limpia el texto que llega (sin pings ni markdown), no repite el mismo origen en 10 minutos y envía como máximo 20 por hora.
 **Dominio propio:** si lo conectas, agrégalo en `js/config.js` (`window.TAKE_ALLOWED_HOSTS = ["midominio.com"]`; si no, tu propio dominio se detectaría como copia) y cambia el dominio base64 de `js/canary.js` (`printf 'https://midominio.com' | base64`), que es adonde llega la señal.
 **Límites:** quien copie el sitio puede borrar `canary.js`; por eso hay varias capas. Como segunda capa independiente puedes crear un *Cloned Website* token gratis en canarytokens.org y pegar su snippet. Los rewrites de los cebos están en `vercel.json` y no pude probarlos en Vercel desde aquí (la lógica sí está probada).
+
+## About: contenido y orden
+- **Texto:** "i've _edad_, i'm a mostly self-taught developer. sometimes i make stuff with **zed**…", "i've worked for **discord bots**… other projects on **github**" y "when i'm not studying…". Los tres enlaces tienen vista previa tipo icono: zed (`images/previews/zed.webp`, "code editor · dev"), discord bots → `arcxsdev.com` (favicon del sitio) y github → `github.com/iTake`.
+- **Stack:** 34 logos en línea (`js/take-icons.js`); se iluminan al pasar el cursor y muestran su nombre. Para cambiar el orden o agregar uno, edita `TakeStack` / `TakeIcons` en ese archivo.
+- **Redes:** solo GitHub (`iTake`), Spotify (`wArcxs`) y correo (`contact@whoistake.com`), en blanco como el resto de iconos.
+- **Estado:** cuando está offline muestra "offline on discord • last active 3 hours ago" (sale del historial de estados del bot).
+- **Foto de perfil:** la consulta de presencia ahora empieza al cargar la página (antes empezaba al abrir "about me"), la foto se precarga y se recuerda en `localStorage`.
+- **Lema bajo el logo:** `dev · bots · music`. **Contador:** muestra 18,789 como base (`DEFAULT_VISITS_BASE` en `api/_lib/backend.js`; la variable `VISITS_BASE` de Vercel la reemplaza, `0` = solo visitas reales).
+- **Settings:** bajo "Visible to visitors as…" aparece "• this doesn't work at the moment" mientras `TAKE_CURSORS_URL` esté vacío.
+- **Portfolio:** `/portfolio` muestra la entrada de la T (como la pantalla de carga) y a los 2.6 s redirige a `https://arcxsdev.com/` (ajusta `DEST`/`DELAY_MS` en `pages/portfolio.html`).
+
+## Now playing, letras y escuchar a la par
+Tarjeta arriba en el menú: portada, canción, artista y el segundo exacto (`1:23 / 3:20`) de lo que escuchas en Spotify (sale de tu presencia de Discord); si no estás escuchando, muestra la última canción ("last played 2 hours ago"). El botón circular del micrófono abre las letras.
+- **Segundo exacto:** `/api/activity` calcula en el servidor `positionMs = ahora - inicio` y la página suma la edad de la respuesta en caché y el tiempo transcurrido; no depende del reloj del visitante. Ajuste fino: `OFFSET_MS` al inicio de `js/nowplaying.js`.
+- **Letras:** `/api/lyrics` consulta [LRCLIB](https://lrclib.net) (letras con tiempos; las letras son de sus autores y no se guardan en el repo). La línea activa rebota, cada palabra "salta" al cantarse y los instrumentales muestran tres puntos. Sin letra sincronizada muestra texto plano; sin letra, un aviso.
+- **Escuchar a la par:** el botón "listen along" (dentro de las letras) busca la canción con la YouTube Data API (`/api/listen`), elige el video cuya duración coincide (±4 s; prefiere el canal "Topic", que es el audio del álbum) y la reproduce con el reproductor oficial en el mismo segundo, corrigiendo la deriva cada segundo. Pausa la música de fondo mientras tanto y la reanuda al detenerlo.
+  - **Variable en Vercel:** `YOUTUBE_API_KEY` (Settings → Environment Variables; **nunca** la pegues en el código ni en un chat). Sin ella el botón avisa "listening along isn't set up yet".
+  - **Cuota:** cada canción nueva cuesta ~101 de las 10,000 unidades diarias gratuitas; los resultados se guardan en caché (CDN + memoria).
+  - **Condiciones de YouTube:** el reproductor se muestra visible y de 200×200 (mínimo exigido; no se oculta ni se separa el audio). Por eso aparece un recuadro con botón de cerrar mientras escuchas a la par.
+  - **Límites:** en iPhone/Safari el navegador puede exigir un toque dentro del video para arrancar; si la canción de YouTube es otra versión (duración distinta) no se sincroniza.
+  - Se probó con un YouTube simulado; no se pudo probar contra YouTube real desde el entorno de desarrollo.
 
 ## Auditoría de seguridad y privacidad
 Se revisaron todos los archivos buscando trackers, balizas, ejecución dinámica y llamadas de red:

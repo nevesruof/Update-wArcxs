@@ -6,6 +6,7 @@ antes hacia Next.js:
   * /_next/image?url=/algo.webp  -> devuelve el archivo local equivalente
   * /bg-fallback.webp            -> images/bg-fallback.jpeg (el fondo de flores)
   * /photos                      -> pages/photos.html
+  * /portfolio                   -> pages/portfolio.html (entrada de la T y redireccion a arcxsdev.com)
   * /admin                       -> pages/admin.html
 Las funciones de /api/* NO corren aqui (usa `vercel dev` para probarlas).
 No modifica ningun archivo del sitio.
@@ -17,6 +18,7 @@ PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
 ALIASES = {
     "/bg-fallback.webp": "/images/bg-fallback.jpeg",
     "/photos": "/pages/photos.html",
+    "/portfolio": "/pages/portfolio.html",
     "/admin": "/pages/admin.html",
 }
 

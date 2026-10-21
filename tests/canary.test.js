@@ -6,16 +6,16 @@ const { isAllowedHost, check, CANON } = require("../js/canary.js");
 const { handleCanary, clean, isDiscordWebhook, _reset } = require("../api/_lib/canary");
 
 test("dominios permitidos: propios, localhost, LAN y previews; el resto no", () => {
-  for (const h of ["wwarcxs.vercel.app", "localhost", "127.0.0.1", "192.168.1.50", "10.0.0.7", "172.20.3.4", "[::1]", "x.localhost",
-                   "wwarcxs-git-main-nevesruofs-projects.vercel.app", "wwarcxs-abc123-nevesruofs-projects.vercel.app"]) {
+  for (const h of ["whoistake.vercel.app", "whoistake.com", "www.whoistake.com", "wwarcxs.vercel.app", "localhost", "127.0.0.1", "192.168.1.50", "10.0.0.7", "172.20.3.4", "[::1]", "x.localhost",
+                   "wwarcxs-git-main-nevesruofs-projects.vercel.app", "whoistake-abc123-nevesruofs-projects.vercel.app"]) {
     assert.equal(isAllowedHost(h), true, h);
   }
-  for (const h of ["evil.com", "wwarcxs.vercel.app.evil.com", "wwarcxs-evil.vercel.app", "otro-nevesruofs-projects.vercel.app",
-                   "copia.vercel.app", "172.32.0.1", "192.169.1.1", "wwarcxs.vercel.app.", "xwwarcxs.vercel.app"]) {
+  for (const h of ["evil.com", "wwarcxs.vercel.app.evil.com", "wwarcxs-evil.vercel.app", "whoistake.vercel.app.evil.com", "whoistake.com.evil.com", "whoistake-evil.vercel.app", "otro-nevesruofs-projects.vercel.app",
+                   "copia.vercel.app", "172.32.0.1", "192.169.1.1", "wwarcxs.vercel.app.", "xwwarcxs.vercel.app", "xwhoistake.vercel.app"]) {
     assert.equal(isAllowedHost(h), false, h);
   }
   assert.equal(isAllowedHost("midominio.com", ["midominio.com"]), true);
-  assert.equal(CANON, "https://wwarcxs.vercel.app");
+  assert.equal(CANON, "https://whoistake.vercel.app");
 });
 
 test("check(): senal solo desde un dominio ajeno y una vez por sesion", () => {
@@ -23,12 +23,12 @@ test("check(): senal solo desde un dominio ajeno y una vez por sesion", () => {
   const st = { getItem: (k) => store.get(k), setItem: (k, v) => store.set(k, v) };
   const nav = { sendBeacon: (u) => { sent.push(u); return true; } };
   const doc = { referrer: "https://google.com/" };
-  assert.equal(check({ hostname: "wwarcxs.vercel.app", pathname: "/" }, doc, nav, st), false);
+  assert.equal(check({ hostname: "whoistake.vercel.app", pathname: "/" }, doc, nav, st), false);
   assert.equal(sent.length, 0);
   assert.equal(check({ hostname: "evil.com", pathname: "/x" }, doc, nav, st), true);
   assert.equal(check({ hostname: "evil.com", pathname: "/x" }, doc, nav, st), false);   // ya avisado en esta sesion
   assert.equal(sent.length, 1);
-  assert.match(sent[0], /^https:\/\/wwarcxs\.vercel\.app\/api\/canary\?trap=clone&host=evil\.com&path=%2Fx&ref=/);
+  assert.match(sent[0], /^https:\/\/whoistake\.vercel\.app\/api\/canary\?trap=clone&host=evil\.com&path=%2Fx&ref=/);
 });
 
 // --- handler ------------------------------------------------------------------------------------------

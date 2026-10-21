@@ -181,13 +181,17 @@ async function guestbook(req, res, env = process.env, store = getStore(env)) {
 }
 
 // ---------- contador de visitas ----------
+// Visitas "heredadas": numero base al que se suman las visitas reales (con 3 reales se ve 18,789).
+// Se cambia con la variable VISITS_BASE en Vercel (VISITS_BASE=0 para empezar de cero).
+const DEFAULT_VISITS_BASE = 18786;
+
 async function counter(req, res, env = process.env, store = getStore(env)) {
   if (req.method !== "GET" && req.method !== "HEAD") return notAllowed(res, ["GET", "HEAD"]);
   try {
     let count;
     if (parseCookies(req)["tk-seen"] || req.method === "HEAD") count = Number(await store.get("take:visits")) || 0;
     else { count = await store.incr("take:visits"); addCookie(res, "tk-seen=1" + cookieAttrs(req, 43200)); } // cuenta 1 vez cada 12 h
-    return reply(res, 200, { count: count + (Number(env.VISITS_BASE) || 0) });
+    return reply(res, 200, { count: count + (env.VISITS_BASE !== undefined && env.VISITS_BASE !== "" ? Number(env.VISITS_BASE) || 0 : DEFAULT_VISITS_BASE) });
   } catch (e) {
     console.error("counter:", e && e.message);
     return reply(res, 500, { error: "Server error" });
