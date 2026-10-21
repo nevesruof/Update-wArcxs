@@ -51,7 +51,7 @@ function userInfo(profile) {
 }
 
 /** Estado vacio: se usa cuando el bot no responde o Discord no lo conoce (el bot lo marca "unknown"). */
-function offlinePresence(profile) {
+function offlinePresence(profile, raw) {
   return {
     discord_status: "offline",
     activities: [],
@@ -59,6 +59,30 @@ function offlinePresence(profile) {
     discord_user: userInfo(profile),
     listening_to_spotify: false,
     spotify: null,
+    now: Date.now(),
+    last_online_at: lastOnlineAt(raw),
+    recent_track: recentTrack(raw),
+  };
+}
+
+/** Ultima vez que estuvo online/idle/dnd (ms), a partir del historial de estados del bot. */
+function lastOnlineAt(raw) {
+  const list = Array.isArray(raw && raw.recentStatuses) ? raw.recentStatuses : [];
+  let best = 0;
+  for (const s of list) if (["online", "idle", "dnd"].includes(s && s.name) && Number(s.lastSeen) > best) best = Number(s.lastSeen);
+  return best ? Math.round(best * 1000) : null;
+}
+
+/** Ultima cancion registrada (la de ahora si esta escuchando, o la ultima que escucho). */
+function recentTrack(raw) {
+  const s = Array.isArray(raw && raw.recentSongs) ? raw.recentSongs[0] : null;
+  if (!s || !s.name) return null;
+  return {
+    song: s.name, artist: s.artist || "", album: s.album || null, albumArt: s.image || null,
+    url: s.url || null, trackId: s.trackId || null,
+    durationMs: s.endMs && s.startMs ? s.endMs - s.startMs : null,
+    endedAt: Math.round((Number(s.lastSeen) || 0) * 1000) || null,
+    active: !!s.active,
   };
 }
 
@@ -66,7 +90,7 @@ function offlinePresence(profile) {
 function toPresence(raw) {
   const d = (raw && raw.discord) || {};
   const profile = raw && raw.profile;
-  if (!STATUSES.has(d.status) || d.status === "offline") return offlinePresence(profile);
+  if (!STATUSES.has(d.status) || d.status === "offline") return offlinePresence(profile, raw);
 
   const list = Array.isArray(d.activities) ? d.activities : [];
   const custom = list.find((a) => a.type === 4);
@@ -98,8 +122,16 @@ function toPresence(raw) {
           albumArt: music.image || null,
           startTimestamp: music.startMs || null,
           endTimestamp: music.endMs || null,
+          trackId: music.trackId || null,
+          url: music.url || null,
+          durationMs: music.endMs && music.startMs ? music.endMs - music.startMs : null,
+          // segundo exacto en el que va, calculado en el servidor (no depende del reloj del visitante)
+          positionMs: music.startMs ? Math.max(0, Date.now() - music.startMs) : null,
         }
       : null,
+    now: Date.now(),
+    last_online_at: null,
+    recent_track: recentTrack(raw),
   };
 }
 
@@ -156,4 +188,4 @@ function route(build, { cache, onError }) {
   };
 }
 
-module.exports = { fetchSnapshot, toPresence, offlinePresence, toTracks, toTopArtist, route };
+module.exports = { fetchSnapshot, toPresence, offlinePresence, lastOnlineAt, recentTrack, toTracks, toTopArtist, route };

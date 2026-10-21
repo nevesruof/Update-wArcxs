@@ -21,8 +21,10 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `videos/skyline.mp4` | Fondo en video |
 | `fonts/spanish.ttf` | Fuente del logo |
 | `sfx/` | `tic`/`tac` del menú y `ambient.mp3` (música de fondo) |
-| `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm` (+`/top-artist`), `/api/canary`, y el backend nuevo: `/api/guestbook`, `/api/counter`, `/api/settings`, `/api/admin/verify`, `/api/admin/cursor-token` (lógica en `api/_lib/backend.js`) |
+| `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm` (+`/top-artist`), `/api/canary`, `/api/yt-search`, y el backend nuevo: `/api/guestbook`, `/api/counter`, `/api/settings`, `/api/admin/verify`, `/api/admin/cursor-token` (lógica en `api/_lib/backend.js`) |
 | `cursors-server/` | Servidor WebSocket de los cursores compartidos (corre aparte de Vercel) |
+| `js/presence.js` | Consulta `/api/activity` desde que carga la página y la comparte (`TakePresence`); precarga la foto de perfil |
+| `js/now-playing.js`, `css/about-extras.css` | Tarjeta "now playing" con micrófono, letras sincronizadas con rebote y audio de YouTube en el mismo segundo; estilos del about |
 | `js/config.js` | Configuración pública: URL del servidor de cursores y dominios propios para `canary.js` |
 | `pages/admin.html` | Login de admin (se sirve en `/admin`) |
 | `tests/` | Pruebas: `node --test tests/*.test.js` (Node 18+). Las de cursores necesitan `npm install` dentro de `cursors-server/`; si no, se saltan |
@@ -102,7 +104,7 @@ Quedan sin implementar el minijuego de burbujas y los "encuentros"; la web funci
 Pasivas: solo registran y avisan; no hacen nada contra el visitante.
 | Trampa | Cómo salta | Qué recibes |
 |---|---|---|
-| **Copia del sitio** (`js/canary.js`) | La página se abre desde un dominio que no es el tuyo (`wwarcxs.vercel.app`, sus previews, localhost y redes locales están permitidos) | Aviso con dominio, ruta, referrer, IP y navegador (una vez por sesión) |
+| **Copia del sitio** (`js/canary.js`) | La página se abre desde un dominio que no es el tuyo (`whoistake.vercel.app`, `whoistake.com`, el anterior `wwarcxs.vercel.app`, sus previews, localhost y redes locales están permitidos) | Aviso con dominio, ruta, referrer, IP y navegador (una vez por sesión) |
 | **Cebo** (`/private/*`, `/backup/*`) | Solo aparecen en `robots.txt` y en un enlace oculto del HTML. Un navegador normal nunca entra; un bot que ignora `robots.txt` o sigue enlaces ocultos, sí | Aviso (responde un 404 normal para no delatarse) |
 | **Escaneos** (`/wp-login.php`, `/.env`, `/.git/config`, `/xmlrpc.php`, `/phpmyadmin`…) | Escáneres automáticos | Solo en los logs (si no, sería mucho ruido) |
 | **Marca de agua** `TKWM-…` | Cadena única repetida en `index.html`, CSS, JS y `robots.txt` | Búscala en Google/GitHub (`"TKWM-40632a5f-41f0-9fe6-22f804d522ac"`) para encontrar copias |
@@ -132,3 +134,12 @@ Se revisaron todos los archivos buscando trackers, balizas, ejecución dinámica
 2. **Redes:** los enlaces y handles de GitHub, Instagram, Twitter, Twitch, Ko-fi, VGen, Steam y los repos siguen con el nombre viejo, en `_next/static/chunks/app/(site)/page-*.js` (busca `handle:`) y `@Akryst_` en los meta de `twitter:creator`. Cámbialos cuando renombres las cuentas.
 3. **Archivos que no vienen en el zip:** `favicon.ico`, `opengraph-image.png`, `twitter-image.png`, `/88x31/take.gif` y tus fotos de `/photos/`.
 4. **Mayúsculas:** el nombre quedó en minúscula (`take`) donde antes era `akryst`, y `Take` donde era `Akryst`. Si prefieres siempre `Take`, es un buscar y reemplazar.
+
+## About: now playing, letras y escuchar a la par
+- **Presencia:** `js/presence.js` consulta `/api/activity` desde que carga la página (no al abrir "about me"), precarga la foto de perfil y la recuerda en `localStorage` para que ya esté cargada al abrir el about.
+- **Offline:** `/api/activity` agrega `last_active` (guardado en el store, Upstash Redis en Vercel) y la web muestra "• last active 3 hours ago". Sin Redis solo dura mientras viva la instancia.
+- **Tarjeta now playing:** portada, canción, artista y el segundo exacto; el servidor manda `now` y la página suma la edad de la respuesta en caché, así que no depende del reloj del visitante. El botón circular con micrófono abre las letras (LRCLIB, con rebote en la línea activa).
+- **Escuchar a la par:** `/api/yt-search` busca en YouTube solo la canción que suena en tu Discord (no acepta consultas del visitante), elige el video con duración parecida y se guarda por canción. Requiere `YOUTUBE_API_KEY` en Vercel (Settings → Environment Variables, luego Redeploy); nunca la pegues en el código. `search.list` cuesta 100 unidades de 10,000 al día, por eso hay tope de 90 búsquedas diarias.
+- **Portfolio:** la opción del menú muestra la entrada de la T y a los pocos segundos abre `https://arcxsdev.com/`.
+- **Contador:** `VISITS_BASE` (por defecto 18786) se suma a las visitas reales; con 3 visitas se ve 18,789.
+- Pruebas: `node --test tests/*.test.js`.
