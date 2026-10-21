@@ -7,7 +7,7 @@
  *   ADMIN_KEY        clave de admin (minimo 12 caracteres). Sin ella el admin queda desactivado.
  *   CURSOR_SECRET    (opcional) secreto para firmar el token de dueno de los cursores; por defecto usa ADMIN_KEY.
  *   HOME_MESSAGE     (opcional) mensaje inicial del home.
- *   VISITS_BASE      (opcional) numero que se suma al contador de visitas.
+ *   VISITS_BASE      (opcional) numero que se suma al contador de visitas (por defecto 18786: con 3 visitas reales se ve 18,789).
  *   IP_SALT          (opcional) sal para anonimizar las IP en los limites de uso.
  *   + las del almacen (ver _lib/store.js).
  * No se guarda ninguna IP: solo un hash corto que sirve para limitar abusos.
@@ -181,13 +181,19 @@ async function guestbook(req, res, env = process.env, store = getStore(env)) {
 }
 
 // ---------- contador de visitas ----------
+const DEFAULT_VISITS_BASE = 18786;
+function visitsBase(env) {
+  const raw = env.VISITS_BASE;
+  if (raw === undefined || raw === "") return DEFAULT_VISITS_BASE;
+  return Number(raw) || 0;
+}
 async function counter(req, res, env = process.env, store = getStore(env)) {
   if (req.method !== "GET" && req.method !== "HEAD") return notAllowed(res, ["GET", "HEAD"]);
   try {
     let count;
     if (parseCookies(req)["tk-seen"] || req.method === "HEAD") count = Number(await store.get("take:visits")) || 0;
     else { count = await store.incr("take:visits"); addCookie(res, "tk-seen=1" + cookieAttrs(req, 43200)); } // cuenta 1 vez cada 12 h
-    return reply(res, 200, { count: count + (Number(env.VISITS_BASE) || 0) });
+    return reply(res, 200, { count: count + visitsBase(env) });
   } catch (e) {
     console.error("counter:", e && e.message);
     return reply(res, 500, { error: "Server error" });

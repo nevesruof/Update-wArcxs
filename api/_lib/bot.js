@@ -144,12 +144,12 @@ function route(build, { cache, onError }) {
       return res.status(405).json({ error: "method not allowed" });
     }
     try {
-      const body = build(await fetchSnapshot(), req);
+      const body = await build(await fetchSnapshot(), req);
       res.setHeader("Cache-Control", cache);
       return res.status(200).json(body);
     } catch (err) {
       res.setHeader("Cache-Control", "no-store");
-      const fallback = onError ? onError(err) : null;
+      const fallback = onError ? await onError(err) : null;
       if (fallback) return res.status(200).json(fallback);
       return res.status(502).json({ error: "bot unavailable" });
     }

@@ -107,7 +107,9 @@ test("handler /api/activity: envia el token Bearer y devuelve la presencia", asy
     assert.equal(seen, "Bearer secreto");
     assert.equal(out.status, 200);
     assert.equal(out.body.discord_status, "dnd");
-    assert.match(out.headers["cache-control"], /s-maxage=5/);
+    assert.match(out.headers["cache-control"], /s-maxage=2/);
+    assert.equal(typeof out.body.now, "number"); // hora del servidor para sincronizar el segundo de la cancion
+    assert.equal(out.body.last_active, null); // online: no hay "last active"
     assert.equal(JSON.stringify(out.body).includes("secreto"), false);
   });
   bot.close();
@@ -119,6 +121,7 @@ test("handler /api/activity: bot caido o 401 => 200 offline sin cachear", async 
     const out = await call(require("../api/activity"));
     assert.equal(out.status, 200);
     assert.equal(out.body.discord_status, "offline");
+    assert.equal(typeof out.body.now, "number");
     assert.equal(out.headers["cache-control"], "no-store");
   });
   bot.close();
