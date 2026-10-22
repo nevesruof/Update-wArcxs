@@ -228,7 +228,8 @@ test("about me: textos, enlaces, redes, stack y portfolio con intro", () => {
   assert.ok(!page.includes("setPIn") && !page.includes("TakeSplash"));
   // friends & cool places (88x31) y la tarjeta de musica del about ya no estan
   for (const gone of ["bio-friends", "panel-webring", "88x31", "bhop.codes", "TakeNowPlaying"]) assert.ok(!page.includes(gone), "queda " + gone);
-  assert.ok(page.includes("/images/discord-bots.svg"));
+  assert.ok(page.includes("/images/discord-bots.png") && !page.includes("icon: !0"), "discord bots: imagen grande, no icono");
+  assert.ok(page.includes('children: "zed"') && !page.includes('children: "zen"'));
   assert.ok(page.includes('"--brand"'));
   const settings = read("_next/static/chunks/4190-5b06608b21bfe8e3.js");
   assert.ok(settings.includes("this doesn't work at the moment"));

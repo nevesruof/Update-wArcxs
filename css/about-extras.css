@@ -9,10 +9,14 @@
 /* nota bajo el apodo del cursor (Settings) */
 .settings-note{display:flex;align-items:center;gap:6px;margin-top:6px;color:#7f8b92;font:10px ui-monospace,monospace}
 
-/* preview tipo icono (el de "discord bots") */
-.bio-preview.bio-preview--icon{display:flex;align-items:center;gap:9px;width:auto;padding:8px 12px 8px 8px;white-space:nowrap}
-.bio-preview.bio-preview--icon img{width:32px;height:32px;border-radius:9px;object-fit:contain;background:#0b1116;padding:4px;flex:none}
-.bio-preview.bio-preview--icon>span{padding:0;background:none}
+/* fondo animado de los cuadros de preview (images/preview-bg.webp, el GIF liquido azul/blanco); el velo oscuro mantiene legible el texto */
+.bio-preview{
+  background:linear-gradient(180deg,rgba(7,12,18,.02) 0%,rgba(7,12,18,.3) 100%),url(/images/preview-bg.webp) center/cover no-repeat #0d151b;
+}
+.bio-preview>span{background:none;text-shadow:0 1px 6px rgba(0,0,0,.75);color:#dbe6ea}
+@media (prefers-reduced-motion:reduce){
+  .bio-preview{background:linear-gradient(180deg,#1b2a36 0%,#0a1016 100%)}
+}
 
 /* stack: logos grises; al pasar el mouse, hacer click (mientras se mantiene) o enfocar con teclado recuperan su color original */
 .bio-tool{color:#8f9ca3;opacity:.7;transition:color .18s,opacity .18s;-webkit-tap-highlight-color:transparent}
