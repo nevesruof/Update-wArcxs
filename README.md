@@ -1,6 +1,6 @@
 # Take
 
-Sitio estático (menú con fondo de cubos 3D, Settings, galería de fotos, presencia de Discord y trampas anti-copia).
+Sitio estático (menú con fondo líquido animado, filamentos de luz y motas bokeh, Settings, galería de fotos, presencia de Discord y trampas anti-copia).
 
 ## Cómo verlo
 Windows: doble clic en `iniciar.bat` y abre http://localhost:8000
@@ -12,9 +12,9 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 |---|---|
 | `index.html` | El menú principal |
 | `pages/settings.html` | Inicio con el panel Settings abierto (captura) |
-| `pages/photos.html` | Galería de fotos (captura, se sirve en `/photos`) |
+| `pages/photos.html` | Galería de fotos (página estática, se sirve en `/photos`): 8 casillas vacías "About to fill up" con fondo de partículas |
 | `css/take-extras.css` | Estilo del botón Skyline bloqueado |
-| `js/cubes-bg.js` | Fondo "Underwater": cubos 3D blancos con glow + partículas conectadas (Canvas 2D, sin librerías) |
+| `js/menu-bg.js` | Fondo del menú: filamentos de luz + motas bokeh sobre el fondo líquido (Canvas 2D, sin librerías) |
 | `js/canary.js`, `robots.txt` | Trampas anti-copia (ver más abajo) |
 | `css/turbo-boost.css`, `js/turbo-boost.js` | Cursor 3D y botón TURBO BOOST (solo en Skyline; inactivo mientras Skyline esté bloqueado) |
 | `images/` | Logo y fondos (`bg-fallback`, `bg-skyline`) |
@@ -24,7 +24,10 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm` (+`/top-artist`), `/api/canary`, `/api/yt-search`, y el backend nuevo: `/api/guestbook`, `/api/counter`, `/api/settings`, `/api/admin/verify`, `/api/admin/cursor-token` (lógica en `api/_lib/backend.js`) |
 | `cursors-server/` | Servidor WebSocket de los cursores compartidos (corre aparte de Vercel) |
 | `js/presence.js` | Consulta `/api/activity` desde que carga la página y la comparte (`TakePresence`); precarga la foto de perfil |
-| `js/now-playing.js`, `css/about-extras.css` | Tarjeta "now playing" con micrófono, letras sincronizadas con rebote y audio de YouTube en el mismo segundo; estilos del about |
+| `js/music-pill.js`, `css/music-pill.css` | Píldora de música del menú (arriba al centro): suena sola con el primer click, en el mismo segundo que Discord (ver más abajo) |
+| `js/particles-bg.js` | Fondo de partículas conectadas de Photos (mismo estilo que el menú, más sutil) |
+| `js/photos-page.js` | Photos: aviso de hardware (X + se quita solo) y la transición de Portfolio |
+| `css/about-extras.css` | Estilos del about (previews, stack con color al pasar el mouse) |
 | `js/config.js` | Configuración pública: URL del servidor de cursores y dominios propios para `canary.js` |
 | `pages/admin.html` | Login de admin (se sirve en `/admin`) |
 | `tests/` | Pruebas: `node --test tests/*.test.js` (Node 18+). Las de cursores necesitan `npm install` dentro de `cursors-server/`; si no, se saltan |
@@ -55,14 +58,13 @@ La pestaña **music** lee tu historial real de Last.fm a través de `/api/lastfm
 Sin las variables, `/api/lastfm` responde 503 y la pestaña muestra "recent tracks are unavailable". La lista se refresca cada 30 s.
 Pruebas: `node --test tests/lastfm.test.js`.
 
-## Fondo "Underwater": cubos 3D
-`js/cubes-bg.js` dibuja cubos blancos con glow flotando en 3D, con caras translúcidas y un punto de luz ("resalte"),
-y partículas que se conectan con líneas (algunas como átomos con su órbita). Solo blanco y negro, en un `<canvas>` 2D.
-- El cursor o el dedo mueven la cámara un poco (parallax) y empujan apenas a los cubos, que vuelven a su sitio.
-- Los cubos lejanos o muy cercanos se ven más suaves (profundidad de campo falsa).
-- Se pausa con la pestaña oculta; con "reducir movimiento" activado queda una imagen fija; si el equipo va justo baja solo las partículas y el brillo.
-- Pantalla vertical (celular) usa otra disposición para no tapar el menú. Ajustes rápidos al inicio del archivo: `CUBES`, `CUBES_PORTRAIT`, `SIZE`, `PART_COUNT`, `LINK`, `LIGHT`, `FOCUS`.
-- Reemplaza a la escena de three.js (rayos de luz + avatar VRM) del módulo `1264`; el fondo de ciudad se quitó.
+## Fondo del menú: filamentos de luz y motas bokeh
+`js/menu-bg.js` (canvas 2D transparente, sin librerías) pinta dos cosas sobre el fondo líquido (`images/menu-bg.webp`, capa `.menu-liquid`):
+- **Filamentos de luz:** hilos finos cian que siguen un campo de flujo que cambia muy despacio (ondulan como las líneas del GIF), cada uno con una chispa que lo recorre.
+- **Motas de luz:** discos suaves, algunos con anillo (bokeh), que suben lentamente con vaivén; las cercanas son pequeñas y nítidas, las lejanas grandes y difusas. El cursor las aparta un poco y vuelven solas.
+- El cursor o el dedo mueven todo un poco según la profundidad (parallax). Se pausa con la pestaña oculta; con "reducir movimiento" queda una imagen fija sobre fondo negro; si el equipo va justo baja a la mitad de hilos y motas.
+- Ajustes rápidos al inicio del archivo: `FILAMENTS`, `STEPS`, `MOTES`, `COLOR`, `ALPHA` (y `flow()` si quieres otra forma de hilos).
+- Reemplaza a los cubos 3D con partículas conectadas (y antes a la escena de three.js del módulo `1264`). El fondo de Photos (`js/particles-bg.js`) conserva las partículas conectadas.
 
 ## Música de fondo
 `sfx/ambient.mp3` reemplaza al piano/ambiente anterior. Arranca al tocar la pantalla de carga (los navegadores no permiten
@@ -132,14 +134,19 @@ Se revisaron todos los archivos buscando trackers, balizas, ejecución dinámica
 ## Pendientes tras el cambio de nombre
 1. **Dominio:** busca `tu-dominio.com` (og:url, og:image, twitter:image, canonical, aviso de la consola) y cámbialo por tu dominio real.
 2. **Redes:** los enlaces y handles de GitHub, Instagram, Twitter, Twitch, Ko-fi, VGen, Steam y los repos siguen con el nombre viejo, en `_next/static/chunks/app/(site)/page-*.js` (busca `handle:`) y `@Akryst_` en los meta de `twitter:creator`. Cámbialos cuando renombres las cuentas.
-3. **Archivos que no vienen en el zip:** `favicon.ico`, `opengraph-image.png`, `twitter-image.png`, `/88x31/take.gif` y tus fotos de `/photos/`.
+3. **Archivos que no vienen en el zip:** `favicon.ico`, `opengraph-image.png`, `twitter-image.png`, y, cuando las tengas, tus fotos de `/photos/`.
 4. **Mayúsculas:** el nombre quedó en minúscula (`take`) donde antes era `akryst`, y `Take` donde era `Akryst`. Si prefieres siempre `Take`, es un buscar y reemplazar.
 
-## About: now playing, letras y escuchar a la par
+## About, música y Photos
 - **Presencia:** `js/presence.js` consulta `/api/activity` desde que carga la página (no al abrir "about me"), precarga la foto de perfil y la recuerda en `localStorage` para que ya esté cargada al abrir el about.
 - **Offline:** `/api/activity` agrega `last_active` (guardado en el store, Upstash Redis en Vercel) y la web muestra "• last active 3 hours ago". Sin Redis solo dura mientras viva la instancia.
-- **Tarjeta now playing:** portada, canción, artista y el segundo exacto; el servidor manda `now` y la página suma la edad de la respuesta en caché, así que no depende del reloj del visitante. El botón circular con micrófono abre las letras (LRCLIB, con rebote en la línea activa).
-- **Escuchar a la par:** `/api/yt-search` busca en YouTube solo la canción que suena en tu Discord (no acepta consultas del visitante), elige el video con duración parecida y se guarda por canción. Requiere `YOUTUBE_API_KEY` en Vercel (Settings → Environment Variables, luego Redeploy); nunca la pegues en el código. `search.list` cuesta 100 unidades de 10,000 al día, por eso hay tope de 90 búsquedas diarias.
-- **Portfolio:** la opción del menú muestra la entrada de la T y a los pocos segundos abre `https://arcxsdev.com/`.
+- **Píldora de música:** `js/music-pill.js` la crea en `<body>` (no depende de React, así no se corta al abrir paneles). Muestra `canción - artista` con portada, ecualizador y una línea de progreso; si no suena nada en Discord, enseña la última de Last.fm atenuada. Se oculta con about me / guestbook / settings abiertos; en Photos va en la esquina superior derecha. Click en la portada = silenciar, click en el texto = letra sincronizada (una línea con rebote).
+- **Suena sola (sin confirmación):** con el primer click/toque/tecla en la página, `/api/yt-search` busca en YouTube (Data API v3) solo la canción que suena en tu Discord y el IFrame Player la reproduce en el mismo segundo; se corrige cada segundo y cambia sola de canción. Requiere `YOUTUBE_API_KEY` en Vercel (Settings → Environment Variables, luego Redeploy); nunca la pegues en el código. `search.list` cuesta 100 unidades de 10,000 al día, por eso hay tope de 90 búsquedas diarias. Mientras suena, la música ambiente se pausa (`window.TakeAmbient`) y vuelve cuando no hay nada o YouTube no encuentra el video.
+- **Portfolio:** usa exactamente la misma transición que Photos (barrido diagonal + logo, `PageTransitionProvider` en `4190-*.js`) y, a los 600 ms, abre `https://arcxsdev.com/`. Ya no hay intro propia.
+- **Stack del about:** los iconos van en gris y, al pasar el mouse, mantener el click o enfocar con teclado, toman el color de su marca (`TakeBrand` en `page-*.js`, variable CSS `--brand`; los logos negros usan blanco para verse sobre el fondo oscuro).
+- **Previews del about** (zed, discord bots, github): imagen grande con pie. `images/discord-bots.png` es un recorte de la captura de la página de iTake (proporción 168×104; cámbiala por otra conservando el nombre). El fondo de los cuadros es `images/preview-bg.webp` (tu GIF líquido azul/blanco convertido a webp animado: 120 KB en vez de 4.4 MB); se cambia en `css/about-extras.css` (`.bio-preview`).
+- **Fondo líquido del menú:** `js/menu-bg.js` pone una capa `.menu-liquid` (`images/menu-bg.webp`, tu GIF azul/blanco a 500 px, 215 KB) detrás de su canvas, que es transparente. El velo oscuro y el `inset:-3%` (recorta el marco negro del GIF) están en `css/take-extras.css`. Se desvanece al abrir about me / guestbook / settings, y con "reducir movimiento" vuelve el fondo negro.
+- **Photos:** 8 casillas vacías ("About to fill up", fecha `-`, usuarios `Unset`) en `pages/photos.html`; cuando haya fotos, cada casilla es un bloque `.photo-slot` (ahí se añade el `<img>`). Fondo de partículas en `js/particles-bg.js` (`COUNT`, `LINK`, `ALPHA`).
+- **Aviso de hardware:** sale solo si el equipo renderiza por software o pide menos movimiento; se cierra con la X o se quita solo a los 8 s bajando (`css/take-extras.css`, `layout-*.js` y `js/photos-page.js`). A propósito no se apaga con "reducir movimiento".
 - **Contador:** `VISITS_BASE` (por defecto 18786) se suma a las visitas reales; con 3 visitas se ve 18,789.
 - Pruebas: `node --test tests/*.test.js`.
