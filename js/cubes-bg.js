@@ -53,8 +53,21 @@
   const EF = E.map(([a, b]) => { const r = []; F.forEach((f, i) => { if (f.includes(a) && f.includes(b)) r.push(i); }); return r; });
 
   function mount(canvas, opts = {}) {
-    const ctx = canvas.getContext('2d', { alpha: false });
+    // Fondo liquido (images/menu-bg.webp, animado) como capa CSS DETRAS del canvas: por eso el canvas es transparente.
+    // Con "reducir movimiento" no se pone y el canvas vuelve a pintar su fondo negro de siempre.
+    const useLiquid = opts.liquid !== false && !rmq.matches && !!canvas.parentNode;
+    const ctx = canvas.getContext('2d', { alpha: useLiquid });
     if (!ctx) return () => {};
+    let liquid = null;
+    if (useLiquid) {
+      liquid = document.createElement('div');
+      liquid.className = 'menu-liquid';
+      liquid.setAttribute('aria-hidden', 'true');
+      canvas.parentNode.insertBefore(liquid, canvas);
+      const im = new Image();   // se precarga para que aparezca con fundido, sin saltos
+      im.onload = () => { if (liquid) liquid.classList.add('is-on'); };
+      im.src = '/images/menu-bg.webp';
+    }
     const R = rng(20261018);
     const coarse = coarseq.matches;
     const S = { W: 0, H: 0, dpr: 1, U: 1, cx: 0, cy: 0, raf: 0, last: 0, t: 0, ema: 16, slow: 0, low: false,
@@ -150,7 +163,7 @@
     function draw() {
       const { W, H } = S, t = S.t;
       ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      if (liquid) ctx.clearRect(0, 0, W, H); else { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); }
       const g = ctx.createRadialGradient(W * 0.55, H * 0.45, 0, W * 0.55, H * 0.45, Math.max(W, H) * 0.7);
       g.addColorStop(0, 'rgba(255,255,255,0.055)'); g.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
@@ -285,6 +298,7 @@
       window.removeEventListener('resize', resize); document.removeEventListener('visibilitychange', onVis);
       rmq.removeEventListener && rmq.removeEventListener('change', onRm);
       delete canvas.__takeCubes;
+      if (liquid) { liquid.remove(); liquid = null; }
     };
   }
 

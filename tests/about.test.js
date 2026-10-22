@@ -258,3 +258,12 @@ test("photos.html: sin fotos ni fechas, con casillas por llenarse, particulas y 
   assert.ok(html.includes("data-take-particles") && html.includes("/js/particles-bg.js"));
   assert.ok(html.includes("data-hw-close") && html.includes("/js/photos-page.js"));
 });
+
+test("menu principal: fondo liquido animado detras del canvas de cubos", () => {
+  const js = read("js/cubes-bg.js");
+  assert.ok(js.includes("menu-liquid") && js.includes("/images/menu-bg.webp") && js.includes("liquid.remove()"));
+  assert.ok(js.includes("alpha: useLiquid"), "el canvas debe ser transparente para ver el fondo");
+  const css = read("css/take-extras.css");
+  assert.ok(css.includes(".menu-liquid") && css.includes("body:has(.home-screen--panel) .menu-liquid"));
+  assert.ok(fs.existsSync(path.join(__dirname, "..", "images/menu-bg.webp")));
+});
