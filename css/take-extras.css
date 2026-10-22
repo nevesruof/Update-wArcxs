@@ -38,3 +38,12 @@
 /* El letter-spacing agrega espacio despues de la ultima letra y el titulo de la derecha ("about me")
    quedaba unos px metido respecto a la linea divisoria. */
 .hero-panel-header h1 { margin-right: -.12em; }
+
+/* --- Aviso "Hardware acceleration is disabled" ---------------------------------------------------------
+   Sube al aparecer, se puede cerrar con la X y, si no, se quita solo a los pocos segundos bajando.
+   Usa la propiedad `translate` (no `transform`) para no pisar el -translate-x-1/2 que lo centra.
+   A proposito NO se apaga con "reducir movimiento": ese es justo el caso en el que sale el aviso y se quiere ver. */
+.hw-toast{animation:hw-toast-in .5s cubic-bezier(.22,1,.36,1) both}
+.hw-toast--leaving{animation:hw-toast-out .5s cubic-bezier(.55,0,.8,.3) forwards;pointer-events:none}
+@keyframes hw-toast-in{from{translate:0 calc(100% + 28px);opacity:0}to{translate:0 0;opacity:1}}
+@keyframes hw-toast-out{from{translate:0 0;opacity:1}to{translate:0 calc(100% + 28px);opacity:0}}

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="iTake">
+  <defs>
+    <linearGradient id="rim" x1="0.1" y1="0.55" x2="0.95" y2="0.25">
+      <stop offset="0" stop-color="#00e8ff"/>
+      <stop offset="0.55" stop-color="#16a6f2"/>
+      <stop offset="1" stop-color="#1b5fd1"/>
+    </linearGradient>
+    <radialGradient id="body" cx="0.42" cy="0.38" r="0.75">
+      <stop offset="0" stop-color="#171a22"/>
+      <stop offset="0.55" stop-color="#05060a"/>
+      <stop offset="1" stop-color="#000"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="2.2"/>
+    </filter>
+  </defs>
+  <!-- brillo del aro -->
+  <path d="M13.5 38.5 A19 19 0 0 0 51 41.5 A19 19 0 0 0 49.5 21" fill="none" stroke="url(#rim)" stroke-width="5" stroke-linecap="round" opacity=".7" filter="url(#glow)"/>
+  <!-- cuerpo oscuro -->
+  <circle cx="31.5" cy="32.5" r="17.5" fill="url(#body)"/>
+  <path d="M20 30.5c4-2.6 9.5-2.2 14.5.6" fill="none" stroke="#fff" stroke-opacity=".10" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- aro de neon -->
+  <path d="M13.5 38.5 A19 19 0 0 0 51 41.5 A19 19 0 0 0 49.5 21" fill="none" stroke="url(#rim)" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M45.5 17.5 A19 19 0 0 1 50.5 28" fill="none" stroke="#7df4ff" stroke-width="1.6" stroke-linecap="round" opacity=".9"/>
+  <!-- tapa y punto -->
+  <rect x="28" y="13.2" width="11" height="3.4" rx="1.7" fill="#eadbc2"/>
+  <circle cx="33.5" cy="9.6" r="1.9" fill="#27e0e0"/>
+</svg>

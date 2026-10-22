@@ -12,7 +12,7 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 |---|---|
 | `index.html` | El menú principal |
 | `pages/settings.html` | Inicio con el panel Settings abierto (captura) |
-| `pages/photos.html` | Galería de fotos (captura, se sirve en `/photos`) |
+| `pages/photos.html` | Galería de fotos (página estática, se sirve en `/photos`): 8 casillas vacías "About to fill up" con fondo de partículas |
 | `css/take-extras.css` | Estilo del botón Skyline bloqueado |
 | `js/cubes-bg.js` | Fondo "Underwater": cubos 3D blancos con glow + partículas conectadas (Canvas 2D, sin librerías) |
 | `js/canary.js`, `robots.txt` | Trampas anti-copia (ver más abajo) |
@@ -24,7 +24,10 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm` (+`/top-artist`), `/api/canary`, `/api/yt-search`, y el backend nuevo: `/api/guestbook`, `/api/counter`, `/api/settings`, `/api/admin/verify`, `/api/admin/cursor-token` (lógica en `api/_lib/backend.js`) |
 | `cursors-server/` | Servidor WebSocket de los cursores compartidos (corre aparte de Vercel) |
 | `js/presence.js` | Consulta `/api/activity` desde que carga la página y la comparte (`TakePresence`); precarga la foto de perfil |
-| `js/now-playing.js`, `css/about-extras.css` | Tarjeta "now playing" con micrófono, letras sincronizadas con rebote y audio de YouTube en el mismo segundo; estilos del about |
+| `js/music-pill.js`, `css/music-pill.css` | Píldora de música del menú (arriba al centro): suena sola con el primer click, en el mismo segundo que Discord (ver más abajo) |
+| `js/particles-bg.js` | Fondo de partículas conectadas de Photos (mismo estilo que el menú, más sutil) |
+| `js/photos-page.js` | Photos: aviso de hardware (X + se quita solo) y la transición de Portfolio |
+| `css/about-extras.css` | Estilos del about (previews, stack con color al pasar el mouse) |
 | `js/config.js` | Configuración pública: URL del servidor de cursores y dominios propios para `canary.js` |
 | `pages/admin.html` | Login de admin (se sirve en `/admin`) |
 | `tests/` | Pruebas: `node --test tests/*.test.js` (Node 18+). Las de cursores necesitan `npm install` dentro de `cursors-server/`; si no, se saltan |
@@ -132,14 +135,18 @@ Se revisaron todos los archivos buscando trackers, balizas, ejecución dinámica
 ## Pendientes tras el cambio de nombre
 1. **Dominio:** busca `tu-dominio.com` (og:url, og:image, twitter:image, canonical, aviso de la consola) y cámbialo por tu dominio real.
 2. **Redes:** los enlaces y handles de GitHub, Instagram, Twitter, Twitch, Ko-fi, VGen, Steam y los repos siguen con el nombre viejo, en `_next/static/chunks/app/(site)/page-*.js` (busca `handle:`) y `@Akryst_` en los meta de `twitter:creator`. Cámbialos cuando renombres las cuentas.
-3. **Archivos que no vienen en el zip:** `favicon.ico`, `opengraph-image.png`, `twitter-image.png`, `/88x31/take.gif` y tus fotos de `/photos/`.
+3. **Archivos que no vienen en el zip:** `favicon.ico`, `opengraph-image.png`, `twitter-image.png`, y, cuando las tengas, tus fotos de `/photos/`.
 4. **Mayúsculas:** el nombre quedó en minúscula (`take`) donde antes era `akryst`, y `Take` donde era `Akryst`. Si prefieres siempre `Take`, es un buscar y reemplazar.
 
-## About: now playing, letras y escuchar a la par
+## About, música y Photos
 - **Presencia:** `js/presence.js` consulta `/api/activity` desde que carga la página (no al abrir "about me"), precarga la foto de perfil y la recuerda en `localStorage` para que ya esté cargada al abrir el about.
 - **Offline:** `/api/activity` agrega `last_active` (guardado en el store, Upstash Redis en Vercel) y la web muestra "• last active 3 hours ago". Sin Redis solo dura mientras viva la instancia.
-- **Tarjeta now playing:** portada, canción, artista y el segundo exacto; el servidor manda `now` y la página suma la edad de la respuesta en caché, así que no depende del reloj del visitante. El botón circular con micrófono abre las letras (LRCLIB, con rebote en la línea activa).
-- **Escuchar a la par:** `/api/yt-search` busca en YouTube solo la canción que suena en tu Discord (no acepta consultas del visitante), elige el video con duración parecida y se guarda por canción. Requiere `YOUTUBE_API_KEY` en Vercel (Settings → Environment Variables, luego Redeploy); nunca la pegues en el código. `search.list` cuesta 100 unidades de 10,000 al día, por eso hay tope de 90 búsquedas diarias.
-- **Portfolio:** la opción del menú muestra la entrada de la T y a los pocos segundos abre `https://arcxsdev.com/`.
+- **Píldora de música:** `js/music-pill.js` la crea en `<body>` (no depende de React, así no se corta al abrir paneles). Muestra `canción - artista` con portada, ecualizador y una línea de progreso; si no suena nada en Discord, enseña la última de Last.fm atenuada. Se oculta con about me / guestbook / settings abiertos; en Photos va en la esquina superior derecha. Click en la portada = silenciar, click en el texto = letra sincronizada (una línea con rebote).
+- **Suena sola (sin confirmación):** con el primer click/toque/tecla en la página, `/api/yt-search` busca en YouTube (Data API v3) solo la canción que suena en tu Discord y el IFrame Player la reproduce en el mismo segundo; se corrige cada segundo y cambia sola de canción. Requiere `YOUTUBE_API_KEY` en Vercel (Settings → Environment Variables, luego Redeploy); nunca la pegues en el código. `search.list` cuesta 100 unidades de 10,000 al día, por eso hay tope de 90 búsquedas diarias. Mientras suena, la música ambiente se pausa (`window.TakeAmbient`) y vuelve cuando no hay nada o YouTube no encuentra el video.
+- **Portfolio:** usa exactamente la misma transición que Photos (barrido diagonal + logo, `PageTransitionProvider` en `4190-*.js`) y, a los 600 ms, abre `https://arcxsdev.com/`. Ya no hay intro propia.
+- **Stack del about:** los iconos van en gris y, al pasar el mouse, mantener el click o enfocar con teclado, toman el color de su marca (`TakeBrand` en `page-*.js`, variable CSS `--brand`; los logos negros usan blanco para verse sobre el fondo oscuro).
+- **Preview de "discord bots":** `images/discord-bots.svg` (recreación del avatar de iTake). Cámbiala por el archivo original conservando el nombre, o cambia la ruta en `page-*.js` (`image:`).
+- **Photos:** 8 casillas vacías ("About to fill up", fecha `-`, usuarios `Unset`) en `pages/photos.html`; cuando haya fotos, cada casilla es un bloque `.photo-slot` (ahí se añade el `<img>`). Fondo de partículas en `js/particles-bg.js` (`COUNT`, `LINK`, `ALPHA`).
+- **Aviso de hardware:** sale solo si el equipo renderiza por software o pide menos movimiento; se cierra con la X o se quita solo a los 8 s bajando (`css/take-extras.css`, `layout-*.js` y `js/photos-page.js`). A propósito no se apaga con "reducir movimiento".
 - **Contador:** `VISITS_BASE` (por defecto 18786) se suma a las visitas reales; con 3 visitas se ve 18,789.
 - Pruebas: `node --test tests/*.test.js`.

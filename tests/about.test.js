@@ -154,11 +154,17 @@ test("yt-search handler: 405 en POST, sin spotify => video null, sin key => 503"
   }
 });
 
-// ---------- navegador: now-playing.js y presence.js ----------
-test("now-playing: parsea LRC (varias marcas por linea, ignora etiquetas) y limpia titulos", () => {
+// ---------- navegador: music-pill.js y presence.js ----------
+test("music-pill: parsea LRC (varias marcas por linea, ignora etiquetas) y limpia titulos", () => {
   const win = {};
-  vm.runInNewContext(read("js/now-playing.js"), { window: win, Intl, URLSearchParams, Promise, document: {} });
-  const np = win.TakeNowPlaying;
+  win.TakePresence = { get: () => null, subscribe: () => () => { }, now: () => 0 };
+  const el = () => ({ append() { }, classList: { add() { }, toggle() { } }, setAttribute() { }, addEventListener() { }, style: { setProperty() { }, removeProperty() { } } });
+  const doc = { body: { append() { } }, createElement: el, addEventListener() { }, head: { appendChild() { } }, hidden: false };
+  vm.runInNewContext(read("js/music-pill.js"), {
+    window: Object.assign(win, { addEventListener() { } }), Intl, URLSearchParams, Promise, document: doc, MutationObserver: class { observe() { } },
+    localStorage: { getItem: () => null, setItem() { } }, fetch: async () => ({ ok: false }), setInterval: () => 0, console,
+  });
+  const np = win.TakeMusic;
   const lines = np._parseLrc("[ar:Alguien]\n[00:12.50]hola\n[00:05.00][00:30.25]coro\n\n[01:02]fin");
   assert.equal(JSON.stringify(lines.map((l) => [l.t, l.text])), JSON.stringify([[5000, "coro"], [12500, "hola"], [30250, "coro"], [62000, "fin"]]));
   assert.equal(np._cleanTitle("Song - Remastered 2011"), "Song");
@@ -217,8 +223,37 @@ test("about me: textos, enlaces, redes, stack y portfolio con intro", () => {
   for (const label of ["TypeScript", "Golang", "Rust", "Kotlin", "Kubernetes", "Elysia", "Cloudflare", "VSCode"]) assert.ok(page.includes('label: "' + label + '"'), label);
   assert.ok(page.includes('"dev \\xb7 anticheat \\xb7 forensics"'));
   assert.ok(page.includes("SplashIntro"));
+  // Portfolio usa la misma transicion que Photos (navigateTo), ya no la intro propia
+  assert.ok(page.includes('label: "Portfolio", view: null, href: "https://arcxsdev.com/"'));
+  assert.ok(!page.includes("setPIn") && !page.includes("TakeSplash"));
+  // friends & cool places (88x31) y la tarjeta de musica del about ya no estan
+  for (const gone of ["bio-friends", "panel-webring", "88x31", "bhop.codes", "TakeNowPlaying"]) assert.ok(!page.includes(gone), "queda " + gone);
+  assert.ok(page.includes("/images/discord-bots.svg"));
+  assert.ok(page.includes('"--brand"'));
   const settings = read("_next/static/chunks/4190-5b06608b21bfe8e3.js");
   assert.ok(settings.includes("this doesn't work at the moment"));
   const html = read("index.html");
   assert.ok(html.indexOf("/js/presence.js") < html.indexOf("/_next/static/chunks/main-app"));
+});
+
+test("Portfolio (enlace externo) pasa por el barrido y despues se abre; el aviso de hardware se cierra solo", () => {
+  const trans = read("_next/static/chunks/4190-5b06608b21bfe8e3.js");
+  assert.ok(trans.includes("window.location.assign(e)"));
+  assert.ok(trans.includes("window.TakeAmbient"));
+  const layout = read("_next/static/chunks/app/layout-e0b28ddd9ecfb41b.js");
+  assert.ok(layout.includes("hw-toast--leaving") && layout.includes("8e3"));
+  assert.ok(layout.includes('href: "https://arcxsdev.com/", label: "Portfolio"'));
+  const css = read("css/take-extras.css");
+  assert.ok(css.includes("@keyframes hw-toast-out"));
+});
+
+test("photos.html: sin fotos ni fechas, con casillas por llenarse, particulas y aviso con X", () => {
+  const html = read("pages/photos.html");
+  assert.ok(html.includes("Screenshots from my adventures.") && !html.includes("VRChat."));
+  assert.equal((html.match(/class="photo-slot /g) || []).length, 8);
+  assert.equal((html.match(/About to fill up/g) || []).length, 8);
+  assert.equal((html.match(/users Unset/g) || []).length, 8);
+  assert.ok(!html.includes("data:image/webp") && !/Apr 25, 2026|Floating Breath/.test(html));
+  assert.ok(html.includes("data-take-particles") && html.includes("/js/particles-bg.js"));
+  assert.ok(html.includes("data-hw-close") && html.includes("/js/photos-page.js"));
 });
