@@ -48,14 +48,15 @@
 @keyframes hw-toast-in{from{translate:0 calc(100% + 28px);opacity:0}to{translate:0 0;opacity:1}}
 @keyframes hw-toast-out{from{translate:0 0;opacity:1}to{translate:0 calc(100% + 28px);opacity:0}}
 
-/* --- Fondo liquido del menu principal (capa creada por js/menu-bg.js, detras de su canvas) ---------
-   images/menu-bg.webp = el GIF azul/blanco. El velo oscuro baja el brillo para que el logo, el menu y la pildora
-   de musica se lean; se ve solo con el menu abierto (con about me / guestbook / settings abiertos se desvanece). */
+/* --- Fondo liquido del menu principal (capa creada por js/menu-bg.js, detras de su canvas) -------------------
+   <video> en bucle (images/menu-bg.mp4/.webm, decodifica por hardware; poster estatico si el autoplay esta bloqueado).
+   El velo oscuro baja el brillo para que el logo, el menu y la pildora de musica se lean. Se ve solo con el menu abierto:
+   con about me / guestbook / settings abiertos (<html class="panel-open">, lo pone js/menu-bg.js) se desvanece y se pausa. */
 .menu-liquid{
-  position:fixed;inset:-3%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.4s ease; /* -3%: recorta el marco negro que trae el GIF */
-  background:
-    linear-gradient(180deg,rgba(0,0,0,.42) 0%,rgba(0,0,0,.6) 50%,rgba(0,0,0,.82) 100%),
-    url(/images/menu-bg.webp) center top/cover no-repeat #000;
+  position:fixed;inset:-3%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.4s ease;   /* -3%: recorta el borde del video */
+  background:#000;overflow:hidden;contain:strict;transform:translateZ(0);
 }
+.menu-liquid video,.menu-liquid img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+.menu-liquid::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.42) 0%,rgba(0,0,0,.6) 50%,rgba(0,0,0,.82) 100%)}
 .menu-liquid.is-on{opacity:1}
-body:has(.home-screen--panel) .menu-liquid.is-on{opacity:0;transition-duration:.5s}
+html.panel-open .menu-liquid.is-on{opacity:0;transition-duration:.5s}

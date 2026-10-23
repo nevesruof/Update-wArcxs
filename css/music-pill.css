@@ -1,18 +1,17 @@
 /* Pildora de musica (js/music-pill.js): arriba al centro del menu, pequena y casi transparente. */
 .np-pill{
   position:fixed;top:max(22px,env(safe-area-inset-top));left:50%;z-index:40;
-  display:flex;align-items:center;gap:9px;max-width:min(380px,calc(100vw - 32px));
-  padding:5px 12px 5px 5px;border-radius:14px;
-  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.075);
-  backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);
-  box-shadow:0 6px 24px rgba(0,0,0,.28);
+  display:flex;align-items:center;gap:10px;max-width:min(300px,calc(100vw - 32px));
+  padding:6px 14px 6px 6px;border-radius:16px;
+  background:rgba(14,20,28,.34);border:1px solid rgba(255,255,255,.085);   /* sin desenfoque del fondo: re-desenfocar un fondo animado en cada frame pesa mucho */
+  box-shadow:0 6px 20px rgba(0,0,0,.25);
   color:#eceff1;overflow:hidden;
   transform:translateX(-50%);
   transition:opacity .35s ease,transform .35s cubic-bezier(.22,1,.36,1),background .2s,border-color .2s;
   animation:np-pill-in .6s cubic-bezier(.22,1,.36,1) backwards;
 }
 .np-pill[hidden]{display:none}
-.np-pill:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.np-pill:hover{background:rgba(22,30,40,.42);border-color:rgba(255,255,255,.13)}
 .np-pill.is-last{opacity:.6}
 .np-pill.is-last:hover{opacity:.9}
 
@@ -25,7 +24,7 @@
 .np-pill.is-live::after{opacity:1}
 
 .np-pill-cover{
-  position:relative;flex:none;width:26px;height:26px;padding:0;border:0;border-radius:9px;overflow:hidden;
+  position:relative;flex:none;width:38px;height:38px;padding:0;border:0;border-radius:11px;overflow:hidden;
   background:rgba(255,255,255,.08);color:#9fb7bd;cursor:pointer;
 }
 .np-pill-cover:disabled{cursor:default}
@@ -37,13 +36,14 @@
 .np-pill-cover:not(:disabled):hover .np-pill-vol,.np-pill-cover:not(:disabled):focus-visible .np-pill-vol,.np-pill.is-muted .np-pill-vol{opacity:1}
 
 .np-pill-text{
-  min-width:0;padding:0;border:0;background:none;cursor:pointer;text-align:left;
-  font:600 12px/1.2 ui-monospace,SF Mono,Menlo,Consolas,monospace;color:inherit;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  min-width:0;padding:0;border:0;background:none;cursor:pointer;text-align:left;color:inherit;
+  display:flex;flex-direction:column;gap:2px;
+  font:600 12px/1.2 ui-monospace,SF Mono,Menlo,Consolas,monospace;
 }
-.np-pill-title{font-weight:700;color:#f3f4f5}
-.np-pill-sep,.np-pill-artist{font-weight:500;color:rgba(236,239,241,.62)}
-.np-pill-sep[hidden]{display:none}
+.np-pill-title,.np-pill-artist{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-pill-title{font-size:12.5px;font-weight:700;color:#f3f4f5}
+.np-pill-artist{font-size:10.5px;font-weight:500;color:rgba(236,239,241,.6)}
+.np-pill-artist:empty{display:none}
 
 /* ecualizador: se mueve solo mientras suena */
 .np-eq{display:flex;align-items:flex-end;gap:2px;flex:none;height:11px;margin-left:1px}
@@ -56,7 +56,7 @@
 
 /* letra: una linea con rebote bajo la pildora */
 .np-pill-lyrics{
-  position:fixed;top:calc(max(22px,env(safe-area-inset-top)) + 46px);left:50%;z-index:39;transform:translateX(-50%);
+  position:fixed;top:calc(max(22px,env(safe-area-inset-top)) + 58px);left:50%;z-index:39;transform:translateX(-50%);
   width:min(420px,calc(100vw - 32px));padding:6px 12px;text-align:center;pointer-events:none;
   font:600 13px/1.35 ui-monospace,SF Mono,Menlo,Consolas,monospace;color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.6);
 }
@@ -69,9 +69,9 @@
 /* reproductor de YouTube: fuera de pantalla */
 .np-yt{position:fixed;left:-400px;top:0;width:200px;height:200px;opacity:.01;pointer-events:none;overflow:hidden}
 
-/* en el menu: solo se ve con el menu abierto (no con about me / guestbook / settings abiertos) */
-body:has(.home-screen--panel) .np-pill,
-body:has(.home-screen--panel) .np-pill-lyrics{opacity:0;pointer-events:none;transform:translate(-50%,-10px)}
+/* en el menu: solo se ve con el menu abierto (no con about me / guestbook / settings abiertos); js/menu-bg.js pone <html class="panel-open"> */
+html.panel-open .np-pill,
+html.panel-open .np-pill-lyrics{opacity:0;pointer-events:none;transform:translate(-50%,-10px)}
 
 /* paginas sin menu (Photos): esquina superior derecha, para no chocar con la barra de arriba */
 html[data-np-pos="corner"] .np-pill{left:auto;right:max(18px,env(safe-area-inset-right));transform:none;animation-name:np-pill-in-corner}
@@ -93,7 +93,8 @@ html[data-np-pos="corner"] .np-pill-lyrics{left:auto;right:max(18px,env(safe-are
 }
 /* celular: el logo "take" y el menu van arriba y al centro; la pildora queda mas pegada al borde y mas pequena */
 @media (max-width:768px){
-  .np-pill{top:max(10px,env(safe-area-inset-top));max-width:calc(100vw - 24px);padding-right:10px}
-  .np-pill-text{font-size:11px}
-  .np-pill-lyrics{top:calc(max(10px,env(safe-area-inset-top)) + 42px)}
+  .np-pill{top:max(10px,env(safe-area-inset-top));max-width:calc(100vw - 24px);padding-right:12px}
+  .np-pill-title{font-size:12px}
+  .np-pill-artist{font-size:10px}
+  .np-pill-lyrics{top:calc(max(10px,env(safe-area-inset-top)) + 54px)}
 }

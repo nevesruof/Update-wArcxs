@@ -1,7 +1,7 @@
 /*
  * Pildora de musica (menu principal, arriba al centro).
  *
- *  - Muestra lo que suena en tu Discord/Spotify ("cancion - artista") o, si no hay nada, la ultima de Last.fm (atenuada).
+ *  - Muestra lo que suena en tu Discord/Spotify (nombre arriba y artista debajo) o, si no hay nada, la ultima de Last.fm (atenuada).
  *  - La cancion SUENA SOLA: con el primer click/toque/tecla en la pagina se busca el video en YouTube
  *    (/api/yt-search, YouTube Data API v3) y se reproduce con el IFrame Player en el mismo segundo que en Discord.
  *    Sin confirmacion y sin boton de "escuchar": el navegador solo exige ese primer gesto.
@@ -166,9 +166,8 @@
   text.type = "button";
   text.setAttribute("aria-pressed", "false");
   var tTitle = el("strong", "np-pill-title");
-  var tSep = el("span", "np-pill-sep", " - ");
   var tArtist = el("span", "np-pill-artist");
-  text.append(tTitle, tSep, tArtist);
+  text.append(tTitle, tArtist);   // nombre arriba, artista debajo
   var eq = el("span", "np-eq", "<i></i><i></i><i></i>");
   eq.setAttribute("aria-hidden", "true");
   root.append(cover, text, eq);
@@ -251,7 +250,6 @@
     root.classList.toggle("is-muted", state.muted);
     tTitle.textContent = t.song;
     tArtist.textContent = mainArtist(t.artist) || t.artist;
-    tSep.hidden = !tArtist.textContent;
     if (t.art) {
       if (img.getAttribute("src") !== t.art) img.src = t.art;
       img.hidden = false;

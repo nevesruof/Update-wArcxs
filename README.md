@@ -70,12 +70,20 @@ Sin las variables, `/api/lastfm` responde 503 y la pestaña muestra "recent trac
 Pruebas: `node --test tests/lastfm.test.js`.
 
 ## Fondo del menú: filamentos de luz y motas bokeh
-`js/menu-bg.js` (canvas 2D transparente, sin librerías) pinta dos cosas sobre el fondo líquido (`images/menu-bg.webp`, capa `.menu-liquid`):
-- **Filamentos de luz:** hilos finos cian que siguen un campo de flujo que cambia muy despacio (ondulan como las líneas del GIF), cada uno con una chispa que lo recorre.
+`js/menu-bg.js` (canvas 2D transparente, sin librerías) pinta dos cosas sobre el fondo líquido:
+- **Filamentos de luz:** hilos finos cian que siguen un campo de flujo que cambia muy despacio (ondulan como las líneas del fondo), cada uno con una chispa que lo recorre.
 - **Motas de luz:** discos suaves, algunos con anillo (bokeh), que suben lentamente con vaivén; las cercanas son pequeñas y nítidas, las lejanas grandes y difusas. El cursor las aparta un poco y vuelven solas.
-- El cursor o el dedo mueven todo un poco según la profundidad (parallax). Se pausa con la pestaña oculta; con "reducir movimiento" queda una imagen fija sobre fondo negro; si el equipo va justo baja a la mitad de hilos y motas.
-- Ajustes rápidos al inicio del archivo: `FILAMENTS`, `STEPS`, `MOTES`, `COLOR`, `ALPHA` (y `flow()` si quieres otra forma de hilos).
-- Reemplaza a los cubos 3D con partículas conectadas (y antes a la escena de three.js del módulo `1264`). El fondo de Photos (`js/particles-bg.js`) conserva las partículas conectadas.
+- **Fondo líquido:** `<video>` en bucle (`images/menu-bg.mp4` / `.webm`, tu GIF azul/blanco: 32 KB / 24 KB) en la capa `.menu-liquid`, con `images/menu-bg-poster.webp` como imagen fija. Si el navegador bloquea el autoplay (ahorro de batería) queda el póster y arranca con el primer toque; si no soporta ningún formato de vídeo cae al `images/menu-bg.webp` animado.
+- El cursor o el dedo mueven todo un poco según la profundidad (parallax).
+
+**Rendimiento** (todo en `js/menu-bg.js`; se nota sobre todo en celular):
+- Dibuja a 30 fps (15 con un panel abierto): el movimiento es lento y más fps no se ve, pero cuestan el doble.
+- Resolución de dibujo adaptable: parte de 1x (celular) / 1.25x (PC) y baja sola hasta 0.6x si el equipo va justo; si aun así va justo, usa la mitad de hilos y motas.
+- Motas y chispas son sprites pre-dibujados (`drawImage`); cada hilo es un solo trazo con degradado a lo largo.
+- El vídeo decodifica por hardware y se pausa con un panel abierto (about me, guestbook, settings) o con la pestaña oculta. El estado del panel se marca con `<html class="panel-open">` (el CSS lo usa en vez de `:has()`, que cuesta en cada cambio del DOM).
+- La píldora de música no usa `backdrop-filter` (re-desenfocar un fondo animado en cada frame pesa mucho).
+- Con "reducir movimiento" queda una imagen fija sobre fondo negro.
+- Ajustes rápidos al inicio del archivo: `FILAMENTS`, `STEPS`, `MOTES`, `COLOR`, `ALPHA`, `FPS`, `SCALE`.
 
 ## Música de fondo
 `sfx/ambient.mp3` reemplaza al piano/ambiente anterior. Arranca al tocar la pantalla de carga (los navegadores no permiten
@@ -151,12 +159,11 @@ Se revisaron todos los archivos buscando trackers, balizas, ejecución dinámica
 ## About, música y Photos
 - **Presencia:** `js/presence.js` consulta `/api/activity` desde que carga la página (no al abrir "about me"), precarga la foto de perfil y la recuerda en `localStorage` para que ya esté cargada al abrir el about.
 - **Offline:** `/api/activity` agrega `last_active` (guardado en el store, Upstash Redis en Vercel) y la web muestra "• last active 3 hours ago". Sin Redis solo dura mientras viva la instancia.
-- **Píldora de música:** `js/music-pill.js` la crea en `<body>` (no depende de React, así no se corta al abrir paneles). Muestra `canción - artista` con portada, ecualizador y una línea de progreso; si no suena nada en Discord, enseña la última de Last.fm atenuada. Se oculta con about me / guestbook / settings abiertos; en Photos va en la esquina superior derecha. Click en la portada = silenciar, click en el texto = letra sincronizada (una línea con rebote).
+- **Píldora de música:** `js/music-pill.js` la crea en `<body>` (no depende de React, así no se corta al abrir paneles). Muestra el nombre de la canción y, debajo, el artista, con portada, ecualizador y una línea de progreso; si no suena nada en Discord, enseña la última de Last.fm atenuada. Se oculta con about me / guestbook / settings abiertos; en Photos va en la esquina superior derecha. Click en la portada = silenciar, click en el texto = letra sincronizada (una línea con rebote).
 - **Suena sola (sin confirmación):** con el primer click/toque/tecla en la página, `/api/yt-search` busca en YouTube (Data API v3) solo la canción que suena en tu Discord y el IFrame Player la reproduce en el mismo segundo; se corrige cada segundo y cambia sola de canción. Requiere `YOUTUBE_API_KEY` en Vercel (Settings → Environment Variables, luego Redeploy); nunca la pegues en el código. `search.list` cuesta 100 unidades de 10,000 al día, por eso hay tope de 90 búsquedas diarias. Mientras suena, la música ambiente se pausa (`window.TakeAmbient`) y vuelve cuando no hay nada o YouTube no encuentra el video.
 - **Portfolio:** usa exactamente la misma transición que Photos (barrido diagonal + logo, `PageTransitionProvider` en `4190-*.js`) y, a los 600 ms, abre `https://arcxsdev.com/`. Ya no hay intro propia.
 - **Stack del about:** los iconos van en gris y, al pasar el mouse, mantener el click o enfocar con teclado, toman el color de su marca (`TakeBrand` en `page-*.js`, variable CSS `--brand`; los logos negros usan blanco para verse sobre el fondo oscuro).
 - **Previews del about** (zed, discord bots, github): imagen grande con pie. `images/discord-bots.png` es un recorte de la captura de la página de iTake (proporción 168×104; cámbiala por otra conservando el nombre). El fondo de los cuadros es `images/preview-bg.webp` (tu GIF líquido azul/blanco convertido a webp animado: 120 KB en vez de 4.4 MB); se cambia en `css/about-extras.css` (`.bio-preview`).
-- **Fondo líquido del menú:** `js/menu-bg.js` pone una capa `.menu-liquid` (`images/menu-bg.webp`, tu GIF azul/blanco a 500 px, 215 KB) detrás de su canvas, que es transparente. El velo oscuro y el `inset:-3%` (recorta el marco negro del GIF) están en `css/take-extras.css`. Se desvanece al abrir about me / guestbook / settings, y con "reducir movimiento" vuelve el fondo negro.
 - **Photos:** 8 casillas vacías ("About to fill up", fecha `-`, usuarios `Unset`) en `pages/photos.html`; cuando haya fotos, cada casilla es un bloque `.photo-slot` (ahí se añade el `<img>`). Fondo de partículas en `js/particles-bg.js` (`COUNT`, `LINK`, `ALPHA`).
 - **Aviso de hardware:** sale solo si el equipo renderiza por software o pide menos movimiento; se cierra con la X o se quita solo a los 8 s bajando (`css/take-extras.css`, `layout-*.js` y `js/photos-page.js`). A propósito no se apaga con "reducir movimiento".
 - **Contador:** `VISITS_BASE` (por defecto 18786) se suma a las visitas reales; con 3 visitas se ve 18,789.

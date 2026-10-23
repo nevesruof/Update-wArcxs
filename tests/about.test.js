@@ -259,13 +259,15 @@ test("photos.html: sin fotos ni fechas, con casillas por llenarse, particulas y 
   assert.ok(html.includes("data-hw-close") && html.includes("/js/photos-page.js"));
 });
 
-test("menu principal: fondo liquido animado detras del canvas de cubos", () => {
+test("menu principal: fondo liquido (video) detras del canvas, sin :has() ni backdrop-filter en la pildora", () => {
   const js = read("js/menu-bg.js");
-  assert.ok(js.includes("menu-liquid") && js.includes("/images/menu-bg.webp") && js.includes("liquid.remove()"));
+  assert.ok(js.includes("menu-liquid") && js.includes("/images/menu-bg.mp4") && js.includes("/images/menu-bg.webm") && js.includes("/images/menu-bg.webp") && js.includes("liquid.dispose()"));
   assert.ok(js.includes("alpha: useLiquid"), "el canvas debe ser transparente para ver el fondo");
   const css = read("css/take-extras.css");
-  assert.ok(css.includes(".menu-liquid") && css.includes("body:has(.home-screen--panel) .menu-liquid"));
-  assert.ok(fs.existsSync(path.join(__dirname, "..", "images/menu-bg.webp")));
+  assert.ok(css.includes(".menu-liquid") && css.includes("html.panel-open .menu-liquid") && !css.includes(":has("));
+  const pill = read("css/music-pill.css");
+  assert.ok(!pill.includes("backdrop-filter:") && !pill.includes(":has(") && pill.includes("html.panel-open .np-pill"));
+  for (const f of ["menu-bg.mp4", "menu-bg.webm", "menu-bg-poster.webp", "menu-bg.webp"]) assert.ok(fs.existsSync(path.join(__dirname, "..", "images", f)), f);
 });
 
 test("menu principal: sin cubos ni particulas conectadas, con filamentos y motas", () => {
@@ -276,4 +278,17 @@ test("menu principal: sin cubos ni particulas conectadas, con filamentos y motas
   assert.ok(read("index.html").includes("/js/menu-bg.js") && !read("index.html").includes("cubes-bg"));
   const chunk = read("_next/static/chunks/1264-0f2c24e6ca5570ba.js");
   assert.ok(chunk.includes("window.TakeMenuBg") && !chunk.includes("TakeCubes"));
+});
+
+test("menu-bg: optimizado (30 fps, resolucion adaptable, sprites, un trazo por hilo)", () => {
+  const js = read("js/menu-bg.js");
+  assert.ok(/FPS = \{ normal: 30, panel: 15 \}/.test(js) && js.includes("SCALE") && js.includes("S.degraded"));
+  assert.ok(js.includes("drawImage(SP.spark") && js.includes("createLinearGradient") && !js.includes("createRadialGradient(x, y, 0, x, y, r)"));
+  assert.ok(js.includes("panel-open") && js.includes("setPlaying"));
+});
+
+test("pildora de musica: nombre arriba y artista debajo", () => {
+  const js = read("js/music-pill.js"), css = read("css/music-pill.css");
+  assert.ok(js.includes("text.append(tTitle, tArtist)") && !js.includes("tSep"));
+  assert.ok(/\.np-pill-text\{[^}]*flex-direction:column/.test(css));
 });
