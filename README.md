@@ -19,7 +19,8 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `css/turbo-boost.css`, `js/turbo-boost.js` | Cursor 3D y botón TURBO BOOST (solo en Skyline; inactivo mientras Skyline esté bloqueado) |
 | `images/` | Logo y fondos (`bg-fallback`, `bg-skyline`) |
 | `videos/skyline.mp4` | Fondo en video |
-| `fonts/spanish.ttf` | Fuente del logo |
+| `fonts/spanish.woff` | Fuente del título `TAKE` (subconjunto de 17 KB, se precarga). `spanish.ttf` es el original completo, solo para regenerarla |
+| `favicon.ico`, `images/icons/` | Favicon: la T sin fondo (`favicon.svg` blanca en tema oscuro y negra en claro; el `.ico` es blanco) y `apple-touch-icon.png` (iOS no admite transparencia, por eso lleva fondo oscuro) |
 | `sfx/` | `tic`/`tac` del menú y `ambient.mp3` (música de fondo) |
 | `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm` (+`/top-artist`), `/api/canary`, `/api/yt-search`, y el backend nuevo: `/api/guestbook`, `/api/counter`, `/api/settings`, `/api/admin/verify`, `/api/admin/cursor-token` (lógica en `api/_lib/backend.js`) |
 | `cursors-server/` | Servidor WebSocket de los cursores compartidos (corre aparte de Vercel) |
@@ -29,7 +30,8 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `js/photos-page.js` | Photos: aviso de hardware (X + se quita solo) y la transición de Portfolio |
 | `css/about-extras.css` | Estilos del about (previews, stack con color al pasar el mouse) |
 | `js/config.js` | Configuración pública: URL del servidor de cursores y dominios propios para `canary.js` |
-| `pages/admin.html` | Login de admin (se sirve en `/admin`) |
+| `pages/admin.html`, `css/admin.css`, `js/admin.js` | Login de admin (se sirve en `/admin`): campo y botón del estilo del sitio |
+| `js/admin-particles.js` | Fondo de partículas que se conectan de `/admin` (distinto de `particles-bg.js`, el de Photos) |
 | `tests/` | Pruebas: `node --test tests/*.test.js` (Node 18+). Las de cursores necesitan `npm install` dentro de `cursors-server/`; si no, se saltan |
 | `serve.py`, `iniciar.bat` | Servidor local |
 | `vercel.json` | Rewrites de imágenes, `/photos`, `/admin` y los cebos de las trampas |
@@ -41,6 +43,15 @@ Es el resultado compilado de Next.js; no hay código fuente en este proyecto. Lo
 **no se pueden renombrar**: Next guarda sus nombres dentro de `index.html` y renombrarlos rompe la carga.
 El código propio (`app/layout`, `app/not-found`, `app/(site)/page`, `4190-…`, `1264-…`) está formateado
 para poder leerse; las librerías siguen minificadas.
+
+## Carga inicial sin parpadeos
+Antes, al entrar se veía un instante el home con la fuente por defecto y luego la T. Ahora:
+- **Primera visita de la sesión:** la pantalla negra con la T (la del componente de intro) viene ya en `index.html` (`.take-splash`) y se ve desde el primer pintado, cubriendo el home. Un script del `<head>` decide antes de pintar si toca (misma regla que la intro: una vez por sesión y no con "reducir movimiento"). Cuando React monta su intro, esta arranca ya visible y la relevo sin que se note (misma posición, medida al píxel). Si el JS no carga, la pantalla se quita sola a los 9 s.
+- **Siguientes cargas:** el menú y el título no se ocultan ni repiten su animación de entrada al hidratar (antes se veía un parpadeo). Al abrir y cerrar paneles las animaciones siguen igual.
+- **Fuentes:** `spanish.woff` pesa 17 KB (el `.ttf` pesaba 716 KB y llegaba tarde), se precarga, y las fuentes con archivo local usan `font-display: block` para que nunca se vea la de por defecto.
+- **Contador y mensaje del home:** ya no vienen pegados en el HTML (eran de una captura vieja); salen en vivo de `/api/counter` y `/api/settings`. Para que se vea el mensaje pon `HOME_MESSAGE` en Vercel o cámbialo con `PUT /api/settings`.
+- `font-display: block` solo en las fuentes que se precargan (DM Sans, Barlow 700/800 y el título); las demás siguen en `swap`.
+- No vienen en el zip `Barlow Condensed` 400 y 600 (latin; el CSS las declara pero el archivo no está). Hoy el menú usa solo 700/800 y no se nota; si algún día usas esos pesos, bájalas de Google Fonts a `_next/static/media/` con los nombres que pide el CSS.
 
 ## Presencia de Discord (bot propio)
 `/api/activity` llama al bot desde el servidor de Vercel (el token no llega al navegador).
@@ -134,7 +145,7 @@ Se revisaron todos los archivos buscando trackers, balizas, ejecución dinámica
 ## Pendientes tras el cambio de nombre
 1. **Dominio:** busca `tu-dominio.com` (og:url, og:image, twitter:image, canonical, aviso de la consola) y cámbialo por tu dominio real.
 2. **Redes:** los enlaces y handles de GitHub, Instagram, Twitter, Twitch, Ko-fi, VGen, Steam y los repos siguen con el nombre viejo, en `_next/static/chunks/app/(site)/page-*.js` (busca `handle:`) y `@Akryst_` en los meta de `twitter:creator`. Cámbialos cuando renombres las cuentas.
-3. **Archivos que no vienen en el zip:** `favicon.ico`, `opengraph-image.png`, `twitter-image.png`, y, cuando las tengas, tus fotos de `/photos/`.
+3. **Archivos que no vienen en el zip:** `opengraph-image.png`, `twitter-image.png`, y, cuando las tengas, tus fotos de `/photos/`.
 4. **Mayúsculas:** el nombre quedó en minúscula (`take`) donde antes era `akryst`, y `Take` donde era `Akryst`. Si prefieres siempre `Take`, es un buscar y reemplazar.
 
 ## About, música y Photos
