@@ -71,6 +71,18 @@
     });
   }
 
+  /** Capa de rayos de luz (.menu-atmo): va delante del video y detras del canvas.
+   *  Son dos haces CSS (take-extras.css) que se mecen despacio y se funden solos
+   *  con la animacion take-atmo-in; aqui solo se crea el contenedor y se quita
+   *  al dispose. */
+  function makeAtmo(parent, before) {
+    const el = document.createElement('div');
+    el.className = 'menu-atmo';
+    el.setAttribute('aria-hidden', 'true');
+    parent.insertBefore(el, before);
+    return { el, dispose() { el.remove(); } };
+  }
+
   /** Capa de fondo liquido: <video> en bucle (hardware) con poster estatico. Devuelve { el, setPlaying, dispose }. */
   function makeLiquid(parent, before) {
     const el = document.createElement('div');
@@ -121,6 +133,7 @@
     const ctx = canvas.getContext('2d', { alpha: useLiquid });
     if (!ctx) return () => {};
     const liquid = useLiquid ? makeLiquid(canvas.parentNode, canvas) : null;
+    const atmo = makeAtmo(canvas.parentNode, canvas);
 
     const R = rng(20261022);
     const coarse = coarseq.matches;
@@ -200,7 +213,9 @@
       ctx.beginPath(); ctx.moveTo(ax, ay);
       for (let i = 1; i < n; i++) ctx.lineTo(pts[i * 2], pts[i * 2 + 1]);
       const k = ALPHA.thread * (0.45 + 0.55 * depth);
-      if (glow) { ctx.lineWidth = 4.6; ctx.globalAlpha = 0.17 * k; ctx.stroke(); }
+      // dos pasadas de halo (ancha + media) y el trazo fino: el hilo "bloombea"
+      // como los filamentos de las referencias submarinas, a coste de 2 strokes
+      if (glow) { ctx.lineWidth = 10; ctx.globalAlpha = 0.055 * k; ctx.stroke(); ctx.lineWidth = 4.6; ctx.globalAlpha = 0.17 * k; ctx.stroke(); }
       ctx.lineWidth = 1.1; ctx.globalAlpha = k; ctx.stroke();
       // chispa que recorre el hilo
       const bi = Math.floor(((f.bead + t * f.bs) % 1) * (n - 1)), e = Math.pow(Math.sin(Math.PI * (bi + 0.5) / (n - 1)), 1.3), br = 7 * depth + 3;
@@ -293,6 +308,7 @@
       document.documentElement.classList.remove('panel-open');
       delete canvas.__takeMenuBg;
       if (liquid) liquid.dispose();
+      if (atmo) atmo.dispose();
     };
   }
 

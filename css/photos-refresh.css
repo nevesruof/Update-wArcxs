@@ -1,0 +1,107 @@
+/* ============================================================================
+   photos-refresh.css — Renovación visual 2026 de /photos (capa aditiva)
+   Cargar después de los estilos inline de la página.
+   ============================================================================ */
+
+:root {
+  --take-ice: #8dcfd7;
+  --take-ice-bright: #bfe9ee;
+}
+
+/* Viñeta + resplandor superior sobre las partículas (la capa la inyecta el
+   propio HTML, justo detrás del canvas). Estática: cero coste de animación. */
+.photos-atmo {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(110% 70% at 50% -10%, rgba(96, 170, 190, .1) 0%, rgba(0, 0, 0, 0) 55%),
+    radial-gradient(140% 120% at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(2, 5, 8, .5) 100%);
+}
+
+/* píldora de navegación: mismo cian hielo del sitio */
+.header-pill {
+  border-color: rgba(141, 207, 215, .16) !important;
+  border-top-color: rgba(191, 233, 238, .24) !important;
+  box-shadow:
+    0 2px 32px rgba(0, 10, 40, .45),
+    0 0 26px rgba(141, 207, 215, .07),
+    inset 0 1px 0 rgba(180, 220, 255, .07) !important;
+}
+.header-nav-text { transition: color .16s ease, background .16s ease, text-shadow .16s ease; }
+.header-nav-text--active {
+  color: #fff !important;
+  background: rgba(141, 207, 215, .1) !important;
+  text-shadow: 0 0 12px rgba(141, 207, 215, .4);
+}
+.header-home-btn { border-color: rgba(255, 255, 255, .14); }
+
+/* enlace "Back" */
+.photos-back {
+  color: rgba(179, 190, 197, .55) !important;
+  border-radius: 8px;
+  padding: 4px 10px 4px 6px;
+  margin-left: -10px;
+  transition: color .16s ease, background .16s ease, transform .2s cubic-bezier(.22, 1, .36, 1) !important;
+}
+.photos-back:hover {
+  color: rgba(243, 244, 245, .95) !important;
+  background: rgba(141, 207, 215, .07);
+  transform: translateX(-3px);
+}
+
+/* título */
+.photos-title {
+  text-shadow: 0 0 30px rgba(141, 207, 215, .18), 0 2px 24px rgba(0, 0, 0, .5);
+  letter-spacing: -.01em;
+}
+.photos-count {
+  color: rgba(141, 207, 215, .45) !important;
+  font-variant-numeric: tabular-nums;
+}
+.photos-sub { color: rgba(179, 190, 197, .5) !important; letter-spacing: .02em; }
+
+/* casillas de fotos: tarjeta con hover que levita y un barrido de luz */
+.photo-slot {
+  background: linear-gradient(160deg, rgba(141, 207, 215, .05) 0%, rgba(255, 255, 255, .018) 100%) !important;
+  border: 1px solid rgba(141, 207, 215, .1) !important;
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+  transition: transform .25s cubic-bezier(.22, 1, .36, 1), border-color .25s ease, box-shadow .25s ease;
+}
+@media (hover: hover) {
+  .photo-slot:hover {
+    transform: translateY(-3px);
+    border-color: rgba(141, 207, 215, .3) !important;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, .55), 0 0 26px rgba(141, 207, 215, .09);
+  }
+}
+.photo-slot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg,
+    rgba(191, 233, 238, 0) 32%,
+    rgba(191, 233, 238, .07) 48%,
+    rgba(191, 233, 238, 0) 62%);
+  transform: translateX(-110%);
+  transition: transform .8s cubic-bezier(.22, 1, .36, 1);
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .photo-slot:hover::after { transform: translateX(110%); }
+}
+.photo-slot p { text-shadow: 0 1px 8px rgba(0, 0, 0, .7); }
+
+/* detalles globales de la página */
+::selection { background: rgba(141, 207, 215, .28); color: #fff; }
+:focus-visible {
+  outline: 1.5px solid rgba(141, 207, 215, .65) !important;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-slot, .photo-slot::after, .photos-back { transition: none; }
+}

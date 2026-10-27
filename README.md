@@ -13,8 +13,10 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `index.html` | El menú principal |
 | `pages/settings.html` | Inicio con el panel Settings abierto (captura) |
 | `pages/photos.html` | Galería de fotos (página estática, se sirve en `/photos`): 8 casillas vacías "About to fill up" con fondo de partículas |
-| `css/take-extras.css` | Estilo del botón Skyline bloqueado |
-| `js/menu-bg.js` | Fondo del menú: filamentos de luz + motas bokeh sobre el fondo líquido (Canvas 2D, sin librerías) |
+| `css/take-extras.css` | Estilo del botón Skyline bloqueado + velo renovado del fondo líquido (resplandor superior, viñeta) y rayos de luz `.menu-atmo` |
+| `css/take-refresh.css` | **Renovación visual 2026** de la home: grano fílmico, paneles de cristal oscuro, menú con hover luminoso, scrollbars/selection/focus. Capa aditiva: se carga la última y no toca reglas base |
+| `css/photos-refresh.css` | **Renovación visual 2026** de `/photos`: viñeta `.photos-atmo`, casillas con hover que levita y barrido de luz, píldora de navegación en cian hielo |
+| `js/menu-bg.js` | Fondo del menú: filamentos de luz (doble halo) + motas bokeh sobre el fondo líquido (Canvas 2D, sin librerías); inyecta la capa de rayos `.menu-atmo` |
 | `js/canary.js`, `robots.txt` | Trampas anti-copia (ver más abajo) |
 | `css/turbo-boost.css`, `js/turbo-boost.js` | Cursor 3D y botón TURBO BOOST (solo en Skyline; inactivo mientras Skyline esté bloqueado) |
 | `images/` | Logo y fondos (`bg-fallback`, `bg-skyline`) |

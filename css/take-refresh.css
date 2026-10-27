@@ -1,0 +1,439 @@
+/* ============================================================================
+   take-refresh.css — Renovación visual 2026 (capa aditiva)
+   No modifica reglas base: solo añade y refina. Cargar SIEMPRE después de
+   db114cc300aecac3.css y de los css/ extras. Si algo de aquí choca con el
+   diseño original, basta con quitar este archivo.
+   ============================================================================ */
+
+:root {
+  --take-ink: #04070b;          /* negro azulado profundo */
+  --take-panel: #0a1218;        /* base de paneles */
+  --take-line: rgba(141, 207, 215, .16);   /* bordes cian hielo */
+  --take-line-soft: rgba(141, 207, 215, .09);
+  --take-ice: #8dcfd7;          /* acento existente del sitio */
+  --take-ice-bright: #bfe9ee;
+  --take-text: #f3f4f5;
+  --take-muted: #b3bec5;
+  --take-faint: #7f8b92;
+  --take-ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* ----------------------------------------------------------------------------
+   1. GRANO FÍLMICO sobre el fondo (por encima del canvas z:0, bajo el
+      contenido z:2; no toca los paneles). SVG de ruido estático, casi gratis.
+   ---------------------------------------------------------------------------- */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* ----------------------------------------------------------------------------
+   2. SPLASH: la pantalla de entrada gana una penumbra radial en vez de negro
+      plano, y el logo respira con un halo cian muy suave.
+   ---------------------------------------------------------------------------- */
+.take-splash {
+  background:
+    radial-gradient(120% 90% at 50% 38%, rgba(20, 42, 52, .55) 0%, rgba(6, 10, 14, 0) 55%),
+    radial-gradient(140% 120% at 50% 115%, rgba(2, 4, 7, .9) 0%, rgba(0, 0, 0, 0) 60%),
+    #000;
+}
+.take-splash__logo img {
+  filter: drop-shadow(0 0 26px rgba(141, 207, 215, .28));
+}
+
+/* ----------------------------------------------------------------------------
+   3. HERO: nombre, tagline y contador
+   ---------------------------------------------------------------------------- */
+.hero-name-glitch {
+  text-shadow:
+    0 0 22px rgba(141, 207, 215, .22),
+    0 2px 34px rgba(0, 0, 0, .5);
+}
+.hero-name-glitch span {
+  transition: color .18s ease, text-shadow .18s ease;
+}
+.hero-name-glitch .glitch-char--active {
+  text-shadow: 0 0 18px rgba(191, 233, 238, .55);
+}
+
+.hero-tagline {
+  color: rgba(243, 244, 245, .6);
+  letter-spacing: .22em;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, .6);
+}
+
+/* contador inferior derecha: separación más aireada y jerarquía */
+.hero-counter-badge { color: rgba(243, 244, 245, .72); }
+.hero-counter-sep   { color: rgba(141, 207, 215, .35); }
+.hero-counter-version {
+  color: rgba(141, 207, 215, .5);
+  text-shadow: 0 0 12px rgba(141, 207, 215, .25);
+}
+
+/* ----------------------------------------------------------------------------
+   4. MENÚ PRINCIPAL: reglas con degradado, items con lavado de luz al hover,
+      etiqueta que se desliza y barra activa con halo (antes verde plana).
+   ---------------------------------------------------------------------------- */
+.hero-menu-rule {
+  background: linear-gradient(90deg,
+    rgba(141, 207, 215, 0) 0%,
+    rgba(141, 207, 215, .22) 50%,
+    rgba(141, 207, 215, 0) 100%);
+}
+
+.hero-menu-item {
+  border-radius: 10px;
+  margin: 1px 0;
+  transition: background .18s var(--take-ease);
+}
+@media (hover: hover) {
+  .hero-menu-item:hover {
+    background: linear-gradient(90deg,
+      rgba(141, 207, 215, .08) 0%,
+      rgba(141, 207, 215, .02) 60%,
+      rgba(141, 207, 215, 0) 100%);
+  }
+}
+
+.hero-menu-label {
+  transition: color .18s ease, transform .22s var(--take-ease), text-shadow .22s ease;
+  will-change: transform;
+}
+@media (hover: hover) {
+  .hero-menu-item:hover .hero-menu-label {
+    color: rgba(243, 244, 245, .95);
+    transform: translateX(5px);
+    text-shadow: 0 0 16px rgba(141, 207, 215, .35);
+  }
+  .hero-menu a:hover .hero-menu-label {
+    color: rgba(243, 244, 245, .95);
+    transform: translateX(5px);
+    text-shadow: 0 0 16px rgba(141, 207, 215, .35);
+  }
+}
+
+.hero-menu-item--active {
+  background: linear-gradient(90deg,
+    rgba(141, 207, 215, .10) 0%,
+    rgba(141, 207, 215, .03) 55%,
+    rgba(141, 207, 215, 0) 100%);
+}
+.hero-menu-label--active {
+  text-shadow: 0 0 18px rgba(141, 207, 215, .3);
+}
+
+/* la barra del item activo venía en verde inline desde el bundle: la pasamos
+   al cian del sitio con un halo suave a lo largo de toda la fila */
+.hero-menu-bar {
+  background: linear-gradient(180deg,
+    rgba(141, 207, 215, 0) 0%,
+    rgba(141, 207, 215, .85) 30%,
+    rgba(191, 233, 238, 1) 50%,
+    rgba(141, 207, 215, .85) 70%,
+    rgba(141, 207, 215, 0) 100%) !important;
+  box-shadow: 0 0 12px rgba(141, 207, 215, .55);
+  width: 2px;
+}
+
+.hero-menu-hint {
+  color: rgba(179, 190, 197, .55);
+  letter-spacing: .1em;
+  animation: take-hint-breathe 5s ease-in-out infinite;
+}
+@keyframes take-hint-breathe {
+  0%, 100% { opacity: .6; }
+  50%      { opacity: .95; }
+}
+
+/* ----------------------------------------------------------------------------
+   5. PANELES (about me / guestbook / settings / music): contenedor de cristal
+      oscuro. Antes el texto flotaba crudo sobre el fondo; ahora el panel tiene
+      cuerpo, borde fino cian, sombra ambiental y desenfoque de fondo.
+   ---------------------------------------------------------------------------- */
+.home-screen--panel:before {
+  background:
+    radial-gradient(90% 120% at 78% 30%, rgba(14, 28, 36, .72) 0%, rgba(7, 12, 17, .55) 55%, rgba(4, 7, 11, .35) 100%);
+}
+
+.hero-content-panel {
+  background:
+    linear-gradient(165deg,
+      rgba(13, 22, 29, .92) 0%,
+      rgba(8, 13, 18, .95) 55%,
+      rgba(5, 9, 13, .96) 100%);
+  border: 1px solid var(--take-line);
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, .6),
+    0 4px 24px rgba(0, 0, 0, .45),
+    0 0 0 1px rgba(0, 0, 0, .35),
+    inset 0 1px 0 rgba(255, 255, 255, .045);
+  overflow: hidden;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .hero-content-panel {
+    -webkit-backdrop-filter: blur(16px) saturate(1.25);
+    backdrop-filter: blur(16px) saturate(1.25);
+    background:
+      linear-gradient(165deg,
+        rgba(13, 22, 29, .82) 0%,
+        rgba(8, 13, 18, .86) 55%,
+        rgba(5, 9, 13, .88) 100%);
+  }
+}
+/* filo de luz superior del panel */
+.hero-content-panel::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    rgba(141, 207, 215, 0) 0%,
+    rgba(191, 233, 238, .5) 50%,
+    rgba(141, 207, 215, 0) 100%);
+  pointer-events: none;
+}
+
+/* cabecera del panel: línea divisoria con degradado en vez de trazo plano */
+.hero-panel-header {
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg,
+    rgba(141, 207, 215, 0) 0%,
+    rgba(141, 207, 215, .28) 30%,
+    rgba(141, 207, 215, .28) 70%,
+    rgba(141, 207, 215, 0) 100%) 1;
+  padding-bottom: 16px;
+}
+
+/* pestañas (about me / music): subrayado que crece desde el centro */
+.panel-tabs button {
+  position: relative;
+  transition: color .18s ease;
+  letter-spacing: .02em;
+}
+.panel-tabs button::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    rgba(141, 207, 215, 0),
+    var(--take-ice),
+    rgba(141, 207, 215, 0));
+  transform: scaleX(0);
+  transition: transform .25s var(--take-ease);
+}
+.panel-tabs button:hover { color: rgba(243, 244, 245, .85); }
+.panel-tabs button[aria-selected=true]::after { transform: scaleX(1); }
+.panel-tabs button[aria-selected=true] {
+  border-color: transparent;
+  text-shadow: 0 0 14px rgba(141, 207, 215, .3);
+}
+
+/* prosa del about: un pelín más de aire y mejor contraste sobre el cristal */
+.bio-prose { color: rgba(194, 203, 209, .82); }
+.bio-link {
+  text-decoration-color: rgba(141, 207, 215, .55);
+  transition: color .15s ease, text-decoration-color .15s ease;
+}
+.bio-link:hover { color: var(--take-ice-bright); text-decoration-color: var(--take-ice-bright); }
+
+/* enlaces sociales: brillo del color de marca al hover */
+.bio-socials a {
+  transition: color .2s ease, transform .2s var(--take-ease), filter .2s ease;
+}
+.bio-socials a:hover {
+  color: var(--take-ice-bright);
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px rgba(141, 207, 215, .5));
+}
+
+/* estado de discord: el punto online/idle/dnd respira */
+.bio-status .status-dot { box-shadow: 0 0 8px currentColor; }
+
+/* entrada del guestbook y tarjetas de música: tarjeta fina con hover */
+.guestbook-entry {
+  background: rgba(243, 244, 245, .025);
+  border: 1px solid rgba(243, 244, 245, .07);
+  border-radius: 10px;
+  transition: background .2s ease, border-color .2s ease, transform .2s var(--take-ease);
+}
+@media (hover: hover) {
+  .guestbook-entry:hover {
+    background: rgba(141, 207, 215, .045);
+    border-color: rgba(141, 207, 215, .16);
+    transform: translateY(-1px);
+  }
+}
+.guestbook-entry-meta .gb-author { color: #dccbbc; }
+
+.music-track {
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 0 -12px;
+  transition: background .18s ease;
+}
+@media (hover: hover) {
+  a.music-track:hover,
+  .music-track:hover { background: rgba(141, 207, 215, .05); }
+}
+.music-track img, .music-art-placeholder { border-radius: 8px; }
+.music-art-placeholder { background: rgba(141, 207, 215, .06); }
+.music-track small { color: var(--take-ice); }
+
+/* pie del guestbook y paginación: separación más limpia */
+.guestbook-footer { border-top-color: rgba(141, 207, 215, .12); }
+.panel-pagination button {
+  border-radius: 6px;
+  padding: 8px 10px;
+  transition: background .15s ease, color .15s ease;
+}
+.panel-pagination button:hover { background: rgba(141, 207, 215, .08); color: var(--take-ice-bright); }
+
+/* botones de acción del panel (Save name, Reset, sign, send...) */
+.panel-action {
+  border: 1px solid rgba(141, 207, 215, .22);
+  border-radius: 8px;
+  background: rgba(141, 207, 215, .05);
+  transition: background .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s var(--take-ease);
+}
+.panel-action:hover {
+  background: rgba(141, 207, 215, .12);
+  border-color: rgba(141, 207, 215, .4);
+  box-shadow: 0 0 18px rgba(141, 207, 215, .18);
+  transform: translateY(-1px);
+}
+.panel-action:active { transform: translateY(0); }
+.hero-content-panel button:disabled { opacity: .35; }
+
+/* campos de texto (nickname, guestbook, chat del cursor): fondo hundido y
+   foco con halo cian */
+.settings-panel input,
+.panel-form input,
+.panel-form textarea,
+.cursor-chat-form input {
+  background: rgba(2, 5, 8, .55) !important;
+  border: 1px solid rgba(141, 207, 215, .14) !important;
+  border-radius: 8px !important;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+  caret-color: var(--take-ice);
+}
+.settings-panel input:focus,
+.panel-form input:focus,
+.panel-form textarea:focus,
+.cursor-chat-form input:focus {
+  outline: none;
+  border-color: rgba(141, 207, 215, .55) !important;
+  box-shadow: 0 0 0 3px rgba(141, 207, 215, .14), 0 0 22px rgba(141, 207, 215, .12);
+  background: rgba(3, 7, 10, .75) !important;
+}
+.settings-panel input::placeholder,
+.panel-form input::placeholder,
+.panel-form textarea::placeholder,
+.cursor-chat-form input::placeholder { color: rgba(179, 190, 197, .4); }
+
+/* ajustes: tarjeta de fondo (Underwater / Skyline) con hover luminoso */
+.settings-background button {
+  border-radius: 10px;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.settings-background button:not(:disabled):not(.is-locked):hover {
+  border-color: rgba(141, 207, 215, .4);
+  box-shadow: 0 0 20px rgba(141, 207, 215, .12);
+}
+.settings-actions .panel-action { min-width: 84px; justify-content: center; }
+
+/* Settings: Reset y Save name son botones de texto sin clase (bundle); los
+   pasamos al mismo lenguaje: Reset fantasma, Save name como acción cian */
+.settings-actions { gap: 10px; }
+.settings-actions button {
+  padding: 7px 16px !important;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: color .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease !important;
+}
+.settings-actions button:hover {
+  color: #fff !important;
+  background: rgba(141, 207, 215, .08);
+}
+.settings-actions button[type=submit] {
+  color: var(--take-ice) !important;
+  border-color: rgba(141, 207, 215, .28);
+  background: rgba(141, 207, 215, .07);
+}
+.settings-actions button[type=submit]:hover {
+  color: var(--take-ice-bright) !important;
+  background: rgba(141, 207, 215, .14);
+  border-color: rgba(141, 207, 215, .45);
+  box-shadow: 0 0 18px rgba(141, 207, 215, .2);
+}
+
+/* scrollbars interiores de los paneles: finas, oscuras, con hover cian */
+.guestbook-scroll::-webkit-scrollbar,
+.music-track-list::-webkit-scrollbar,
+.hero-content-panel ::-webkit-scrollbar { width: 6px; }
+.guestbook-scroll::-webkit-scrollbar-thumb,
+.music-track-list::-webkit-scrollbar-thumb,
+.hero-content-panel ::-webkit-scrollbar-thumb {
+  background: rgba(141, 207, 215, .16);
+  border-radius: 3px;
+}
+.guestbook-scroll::-webkit-scrollbar-thumb:hover,
+.music-track-list::-webkit-scrollbar-thumb:hover,
+.hero-content-panel ::-webkit-scrollbar-thumb:hover { background: rgba(141, 207, 215, .3); }
+
+/* ----------------------------------------------------------------------------
+   6. INTERACCIONES DE CURSOR (chat / react / burbujas): botones del pie con
+      el mismo lenguaje del menú.
+   ---------------------------------------------------------------------------- */
+.cursor-interactions-hint button {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: rgba(179, 190, 197, .65);
+  border-radius: 6px;
+  padding: 4px 8px;
+  transition: color .16s ease, background .16s ease, text-shadow .16s ease;
+}
+.cursor-interactions-hint button:hover {
+  color: rgba(243, 244, 245, .95);
+  background: rgba(141, 207, 215, .08);
+  text-shadow: 0 0 12px rgba(141, 207, 215, .4);
+}
+
+/* ----------------------------------------------------------------------------
+   7. DETALLES GLOBALES
+   ---------------------------------------------------------------------------- */
+::selection {
+  background: rgba(141, 207, 215, .28);
+  color: #fff;
+}
+
+/* foco visible coherente en todo el sitio */
+:focus-visible {
+  outline: 1.5px solid rgba(141, 207, 215, .65) !important;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* píldora de música (now playing): borde y halo acordes con la nueva atmósfera */
+.np-pill {
+  border-color: rgba(141, 207, 215, .18) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+/* ----------------------------------------------------------------------------
+   8. MOVIMIENTO REDUCIDO: todo lo nuevo se apaga sin romper nada
+   ---------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .hero-menu-hint { animation: none; }
+  .hero-menu-label, .hero-menu-item, .panel-action, .guestbook-entry,
+  .music-track, .cursor-interactions-hint button { transition: none; }
+  .panel-tabs button::after { transition: none; }
+}
