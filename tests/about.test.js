@@ -1,5 +1,4 @@
 "use strict";
-// node --test tests/about.test.js
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -13,7 +12,6 @@ const ytSearch = require("../api/yt-search");
 
 const read = (f) => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
 
-// ---------- last active ----------
 test("last active: online guarda la hora; offline la devuelve; `now` siempre viene", async () => {
   _reset();
   const store = createMemoryStore();
@@ -56,7 +54,6 @@ test("last active: si el store falla la presencia sigue funcionando", async () =
   assert.equal(off.last_active, null);
 });
 
-// ---------- YouTube ----------
 test("youtube: limpia titulos y artistas, parsea duraciones", () => {
   assert.equal(yt.cleanTitle("Song (feat. Someone) - Remastered 2011"), "Song");
   assert.equal(yt.cleanTitle("Moneda"), "Moneda");
@@ -74,7 +71,6 @@ test("youtube: pickBest prefiere la version con la misma duracion y descarta liv
   ];
   const best = yt.pickBest(cands, { title: "Moneda", artist: "Artista", durationMs: 200000 });
   assert.equal(best.videoId, "good");
-  // ninguno parece la cancion => null (mejor silencio que otra cancion)
   assert.equal(yt.pickBest([{ videoId: "x", title: "Otra cosa", channel: "Nadie", durationMs: 90000 }], { title: "Moneda", artist: "Artista", durationMs: 200000 }), null);
 });
 
@@ -112,7 +108,6 @@ test("yt-search: busca una sola vez por cancion (cache en el store) y respeta el
   assert.equal(a.video.videoId, "abc");
   assert.deepEqual(a, b);
   assert.equal(searches, 1);
-  // limite diario
   let err;
   for (let i = 0; i < 100; i++) {
     try { await ytSearch.lookup({ ...sp, song: "otra " + i }, { store, find }); } catch (e) { err = e; break; }
@@ -154,7 +149,6 @@ test("yt-search handler: 405 en POST, sin spotify => video null, sin key => 503"
   }
 });
 
-// ---------- navegador: music-pill.js y presence.js ----------
 test("music-pill: parsea LRC (varias marcas por linea, ignora etiquetas) y limpia titulos", () => {
   const win = {};
   win.TakePresence = { get: () => null, subscribe: () => () => { }, now: () => 0 };
@@ -195,7 +189,6 @@ test("presence.js: avatar recordado de la visita anterior, sondeo a /api/activit
   };
   vm.runInNewContext(read("js/presence.js"), ctx);
   const P = win.TakePresence;
-  // antes de que responda la API ya conocemos el avatar y ya se esta descargando
   assert.equal(P.avatar(), "https://cdn/old.png");
   assert.ok(preloads.includes("img:https://cdn/old.png"));
   await new Promise((r) => setImmediate(r));
@@ -204,11 +197,9 @@ test("presence.js: avatar recordado de la visita anterior, sondeo a /api/activit
   assert.equal(P.get().last_active, 4_000_000);
   assert.equal(P.avatar(), "https://cdn/new.png");
   assert.equal(JSON.parse(store["take:presence:v1"]).avatar, "https://cdn/new.png");
-  // reloj: servidor(5_100_000) + Age(2 s) - navegador(5_000_000) = 102 s de diferencia
   assert.equal(P.now(), nowMs + 102_000);
 });
 
-// ---------- el sitio: textos y enlaces pedidos ----------
 test("about me: textos, enlaces, redes, stack y portfolio con intro", () => {
   const page = read("_next/static/chunks/app/(site)/page-2c8153006850d793.js");
   assert.ok(page.includes("i'm a mostly self-taught developer"));
@@ -218,15 +209,13 @@ test("about me: textos, enlaces, redes, stack y portfolio con intro", () => {
   assert.ok(page.includes("mailto:contact@whoistake.com"));
   assert.ok(page.includes("https://open.spotify.com/user/wArcxs"));
   for (const old of ["akryst", "Akryst", "strawbunnyvr", "moonlight-ps4", "instagram", "vgen", "twitch.tv", "steamcommunity"]) {
-    assert.ok(!page.includes(old) || old === "Akryst" /* nombre de funcion AkrAge no lo contiene */, "queda " + old);
+    assert.ok(!page.includes(old) || old === "Akryst" , "queda " + old);
   }
   for (const label of ["TypeScript", "Golang", "Rust", "Kotlin", "Kubernetes", "Elysia", "Cloudflare", "VSCode"]) assert.ok(page.includes('label: "' + label + '"'), label);
   assert.ok(page.includes('"dev \\xb7 anticheat \\xb7 forensics"'));
   assert.ok(page.includes("SplashIntro"));
-  // Portfolio usa la misma transicion que Photos (navigateTo), ya no la intro propia
   assert.ok(page.includes('label: "Portfolio", view: null, href: "https://arcxsdev.com/"'));
   assert.ok(!page.includes("setPIn") && !page.includes("TakeSplash"));
-  // friends & cool places (88x31) y la tarjeta de musica del about ya no estan
   for (const gone of ["bio-friends", "panel-webring", "88x31", "bhop.codes", "TakeNowPlaying"]) assert.ok(!page.includes(gone), "queda " + gone);
   assert.ok(page.includes("/images/discord-bots.png") && !page.includes("icon: !0"), "discord bots: imagen grande, no icono");
   assert.ok(page.includes('children: "zed"') && !page.includes('children: "zen"'));

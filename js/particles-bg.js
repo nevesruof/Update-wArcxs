@@ -1,24 +1,11 @@
-/*! particles-bg.js - fondo de particulas conectadas para las paginas sin menu (Photos).
- *  Puntos blancos con glow, lineas finas que se unen por cercania y algunos "atomos" con su orbita (el estilo que tenia
- *  el menu principal antes de js/menu-bg.js), pero muy sutil (pocas particulas, lineas tenues) para que no sature y
- *  el contenido siga siendo lo importante.
- *
- *  Canvas 2D transparente (deja ver el color de fondo de la pagina), sin dependencias.
- *  El cursor mueve las particulas un poco (parallax); se pausa con la pestana oculta; con "reducir movimiento"
- *  queda una imagen fija.
- *
- *  Uso: <canvas data-take-particles></canvas> + este script  (se monta solo), o window.TakeParticles.mount(canvas).
- *  Ajustes rapidos: COUNT, LINK, ALPHA aqui abajo.
- */
 (() => {
   'use strict';
   if (window.TakeParticles) return;
 
-  // ---- Ajustes ------------------------------------------------------------------------------------------------
-  const COUNT = { desktop: 46, mobile: 26 };  // particulas (el menu usa 64 / 34)
-  const LINK = 0.15;                          // distancia maxima de union, como fraccion del lado mayor de la pantalla
-  const ALPHA = { line: 0.2, dot: 0.55, glow: 0.06 };   // intensidades maximas (el menu va bastante mas fuerte)
-  const SPEED = 0.02;                         // velocidad de deriva
+  const COUNT = { desktop: 46, mobile: 26 };
+  const LINK = 0.15;
+  const ALPHA = { line: 0.2, dot: 0.55, glow: 0.06 };
+  const SPEED = 0.02;
 
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -35,7 +22,6 @@
     if (!ctx) return () => {};
     const R = rng(20261021);
     const N = coarseq.matches ? COUNT.mobile : COUNT.desktop;
-    // x,y en 0..1 de la pantalla; z = profundidad (0 cerca, 1 lejos): cambia tamano, brillo y parallax
     const parts = Array.from({ length: N }, (_, i) => ({
       x: R(), y: R(), z: R(),
       vx: (R() - .5) * SPEED, vy: (R() - .5) * SPEED,
@@ -66,7 +52,6 @@
       const { W, H } = S, t = S.t;
       ctx.globalCompositeOperation = 'source-over';
       ctx.clearRect(0, 0, W, H);
-      // el mismo velo de luz tenue del menu, mucho mas suave
       const g = ctx.createRadialGradient(W * 0.55, H * 0.4, 0, W * 0.55, H * 0.4, Math.max(W, H) * 0.7);
       g.addColorStop(0, 'rgba(255,255,255,0.03)'); g.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
@@ -76,7 +61,7 @@
       const n = S.low ? Math.ceil(parts.length / 2) : parts.length;
       const pts = [];
       for (let i = 0; i < n; i++) {
-        const p = parts[i], depth = 1 - p.z * 0.65;           // cerca = 1, lejos = .35
+        const p = parts[i], depth = 1 - p.z * 0.65;
         pts.push([p.x * W + S.px * 16 * depth, p.y * H + S.py * 12 * depth, depth, p]);
       }
       const th = LINK * Math.max(W, H), th2 = th * th;
@@ -95,7 +80,7 @@
         ctx.beginPath(); ctx.arc(x, y, r * 4.2, 0, 6.283); ctx.fill();
         ctx.fillStyle = `rgba(255,255,255,${(ALPHA.dot * (p.nuc ? 1.25 : 1) * (0.6 + 0.4 * s)).toFixed(3)})`;
         ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
-        if (p.nuc) {   // orbita fina con un electron
+        if (p.nuc) {
           const a = 8 * s + 4, ang = t * 0.7 + p.ph;
           ctx.strokeStyle = 'rgba(255,255,255,0.11)'; ctx.lineWidth = 0.8;
           ctx.beginPath(); ctx.ellipse(x, y, a * 1.9, a * 0.7, p.tilt, 0, 6.283); ctx.stroke();
@@ -110,7 +95,7 @@
     function frame(now) {
       if (S.dead) return;
       const dt = Math.min(0.05, (now - (S.last || now)) / 1000); S.last = now; S.t += dt;
-      S.ema = lerp(S.ema, dt * 1000, 0.05);   // si va justo, baja a la mitad de particulas
+      S.ema = lerp(S.ema, dt * 1000, 0.05);
       if (!S.low && S.ema > 30 && ++S.slow > 90) S.low = true; else if (S.ema <= 30) S.slow = 0;
       update(dt); draw();
       if (!S.ready) { S.ready = true; opts.onReady && opts.onReady(); }
@@ -131,7 +116,7 @@
     resize();
     if (rmq.matches) { draw(); S.ready = true; opts.onReady && opts.onReady(); } else S.raf = requestAnimationFrame(frame);
 
-    canvas.__takeParticles = S;   // ayuda para pruebas
+    canvas.__takeParticles = S;
     return function dispose() {
       S.dead = true; cancelAnimationFrame(S.raf); S.raf = 0;
       window.removeEventListener('pointermove', onMove);

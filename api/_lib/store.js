@@ -1,16 +1,7 @@
 "use strict";
-/*
- * Almacenamiento del backend (libro de visitas, contador, ajustes y limites de uso).
- *
- *  - Con Upstash Redis (o Vercel KV) cuando existen las variables de entorno:
- *        UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN   (o KV_REST_API_URL + KV_REST_API_TOKEN)
- *  - Sin ellas usa memoria: sirve para probar en local, pero en Vercel se pierde entre invocaciones.
- *
- * Los dos almacenes exponen la misma interfaz, asi el resto del codigo no sabe cual esta usando.
- */
 
 function createMemoryStore(now = () => Date.now()) {
-  const data = new Map(); // clave -> { v, exp }
+  const data = new Map();
   const live = (k) => {
     const e = data.get(k);
     if (!e) return undefined;
@@ -25,7 +16,7 @@ function createMemoryStore(now = () => Date.now()) {
     async set(k, v) { data.set(k, { v: String(v) }); },
     async del(k) { data.delete(k); },
     async incr(k) { const e = live(k); const n = (e ? Number(e.v) : 0) + 1; data.set(k, { v: String(n), exp: e && e.exp }); return n; },
-    async hit(k, ttl) { // contador con caducidad que empieza en el primer golpe
+    async hit(k, ttl) {
       const e = live(k); const n = (e ? Number(e.v) : 0) + 1;
       data.set(k, { v: String(n), exp: e ? e.exp : now() + ttl * 1000 });
       return n;

@@ -1,33 +1,21 @@
-/*! admin-particles.js - fondo de particulas que se conectan (red de constelacion) de la pagina /admin. Canvas 2D, sin dependencias.
- *
- *  - Las particulas flotan despacio; las que estan cerca se unen con lineas que se desvanecen con la distancia.
- *  - El cursor / dedo atrae suavemente las particulas cercanas y se une a ellas con lineas.
- *  - Una sola rueda de requestAnimationFrame; se pausa con la pestana oculta; prefers-reduced-motion = imagen fija.
- *  - Si el equipo va justo, baja la cantidad de particulas una vez.
- *
- *  Uso:  const dispose = window.TakeAdminParticles.mount(canvas);   dispose() para quitarlo.
- *  Ajustes rapidos: DENSITY, MAX_COUNT, LINK, SPEED y COLOR aqui abajo.
- *  TKWM-40632a5f-41f0-9fe6-22f804d522ac
- */
+/* TKWM-40632a5f-41f0-9fe6-22f804d522ac */
 (() => {
   'use strict';
   if (window.TakeAdminParticles) return;
 
-  // ---- Ajustes ---------------------------------------------------------------------------------------------
-  const DENSITY = 1 / 13000;          // particulas por pixel cuadrado (CSS)
+  const DENSITY = 1 / 13000;
   const MIN_COUNT = 36, MAX_COUNT = 110;
-  const LINK = 0.16;                  // distancia maxima de union, como fraccion del lado mayor de la pantalla (max. 170 px)
-  const SPEED = 14;                   // velocidad media en px/s
-  const POINTER_RADIUS = 150;         // alcance del cursor en px
-  const COLOR = '176, 208, 255';      // r, g, b de las lineas y las particulas
+  const LINK = 0.16;
+  const SPEED = 14;
+  const POINTER_RADIUS = 150;
+  const COLOR = '176, 208, 255';
 
-  // ---- Utilidades ------------------------------------------------------------------------------------------
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   const mq = (q) => (window.matchMedia ? window.matchMedia(q) : { matches: false });
   const reduced = mq('(prefers-reduced-motion: reduce)');
   const coarse = mq('(hover: none), (pointer: coarse)');
 
-  function glowSprite() {            // halo suave precalculado: dibujarlo es mucho mas barato que shadowBlur
+  function glowSprite() {
     const c = document.createElement('canvas');
     c.width = c.height = 64;
     const g = c.getContext('2d');
@@ -50,7 +38,7 @@
       const prev = S.parts;
       S.parts = Array.from({ length: count }, (_, i) => {
         if (prev[i]) return prev[i];
-        const z = 0.35 + Math.random() * 0.65;               // profundidad: lo lejano es mas chico, tenue y lento
+        const z = 0.35 + Math.random() * 0.65;
         const a = Math.random() * Math.PI * 2;
         return { x: Math.random() * S.W, y: Math.random() * S.H, z, a, vx: Math.cos(a) * SPEED * z, vy: Math.sin(a) * SPEED * z,
                  r: 0.8 + z * 1.5, tw: Math.random() * Math.PI * 2 };
@@ -69,7 +57,7 @@
       canvas.width = Math.round(S.W * S.dpr); canvas.height = Math.round(S.H * S.dpr);
       ctx.setTransform(S.dpr, 0, 0, S.dpr, 0, 0);
       S.link = Math.min(170, Math.max(S.W, S.H) * LINK);
-      if (oldW > 1) for (const p of S.parts) { p.x *= S.W / oldW; p.y *= S.H / oldH; }   // conserva la distribucion al girar el telefono
+      if (oldW > 1) for (const p of S.parts) { p.x *= S.W / oldW; p.y *= S.H / oldH; }
       seed(targetCount());
       if (reduced.matches) draw(0);
     }
@@ -77,7 +65,7 @@
     function step(dt) {
       const m = 20;
       for (const p of S.parts) {
-        p.a += (Math.random() - 0.5) * 0.9 * dt;              // la direccion cambia muy poco a poco
+        p.a += (Math.random() - 0.5) * 0.9 * dt;
         const sp = SPEED * p.z;
         p.vx += (Math.cos(p.a) * sp - p.vx) * Math.min(1, dt * 0.8);
         p.vy += (Math.sin(p.a) * sp - p.vy) * Math.min(1, dt * 0.8);
@@ -95,7 +83,7 @@
       ctx.clearRect(0, 0, S.W, S.H);
       const P = S.parts, n = P.length, L = S.link, L2 = L * L;
       ctx.lineWidth = 1;
-      for (let i = 0; i < n; i++) {                           // lineas entre particulas cercanas
+      for (let i = 0; i < n; i++) {
         const a = P[i];
         for (let j = i + 1; j < n; j++) {
           const b = P[j], dx = a.x - b.x;
@@ -107,7 +95,7 @@
           ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
         }
       }
-      if (S.hasPointer) {                                     // lineas hacia el cursor
+      if (S.hasPointer) {
         const R = L * 1.25;
         for (const p of P) {
           const d = Math.hypot(p.x - S.px, p.y - S.py);
@@ -116,7 +104,7 @@
           ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(S.px, S.py); ctx.stroke();
         }
       }
-      for (const p of P) {                                    // particulas con halo
+      for (const p of P) {
         const tw = 0.75 + 0.25 * Math.sin(p.tw), s = p.r * 7;
         ctx.globalAlpha = clamp(p.z * tw, 0, 1) * 0.9;
         ctx.drawImage(sprite, p.x - s, p.y - s, s * 2, s * 2);
@@ -134,7 +122,7 @@
       if (dt > 0) {
         S.ema += (dt * 1000 - S.ema) * 0.05;
         S.slow = S.ema > 26 ? S.slow + dt : Math.max(0, S.slow - dt);
-        if (S.slow > 2 && !S.shrunk) { S.shrunk = true; seed(targetCount()); S.parts.length = targetCount(); }   // equipo justo: menos particulas
+        if (S.slow > 2 && !S.shrunk) { S.shrunk = true; seed(targetCount()); S.parts.length = targetCount(); }
       }
       step(dt); draw();
       schedule();

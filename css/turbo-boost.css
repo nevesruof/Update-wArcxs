@@ -1,5 +1,4 @@
-/* Turbo Boost (Skyline background) - palette: violet / magenta / cyan on dark */
-.turbo-fx{position:fixed;inset:0;z-index:1;pointer-events:none}   /* above .home (z1, earlier in DOM), below the z-[2] page content */
+.turbo-fx{position:fixed;inset:0;z-index:1;pointer-events:none}
 .turbo-fx canvas{display:block;position:absolute;inset:0;pointer-events:none}
 
 .turbo-ui{
@@ -20,7 +19,6 @@
   transition:border-color .22s,box-shadow .28s,color .22s,background .3s;
   -webkit-tap-highlight-color:transparent;
 }
-/* subtle idle shimmer: one soft pass along the border every ~6.5 s (not a constant pulse) */
 .turbo-btn::before{
   content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;opacity:0;
   background:linear-gradient(100deg,transparent 38%,rgba(103,232,249,.95) 50%,transparent 62%) 130% 0/260% 100% no-repeat;
@@ -43,7 +41,6 @@
 .turbo-btn:active{transform:translateY(1px)}
 .turbo-btn:focus-visible{outline:2px solid #67e8f9;outline-offset:4px;box-shadow:0 0 0 5px rgba(34,211,238,.16),0 8px 26px rgba(8,2,28,.5)}
 
-/* engaged state (restored automatically when the boost ends) */
 .turbo-btn[data-state="boost"]{
   border-color:#f5d0fe;color:#fff;cursor:default;
   background:linear-gradient(100deg,rgba(124,58,237,.92),rgba(217,70,239,.88) 48%,rgba(34,211,238,.9));

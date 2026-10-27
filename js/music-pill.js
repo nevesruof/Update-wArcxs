@@ -1,18 +1,3 @@
-/*
- * Pildora de musica (menu principal, arriba al centro).
- *
- *  - Muestra lo que suena en tu Discord/Spotify (nombre arriba y artista debajo) o, si no hay nada, la ultima de Last.fm (atenuada).
- *  - La cancion SUENA SOLA: con el primer click/toque/tecla en la pagina se busca el video en YouTube
- *    (/api/yt-search, YouTube Data API v3) y se reproduce con el IFrame Player en el mismo segundo que en Discord.
- *    Sin confirmacion y sin boton de "escuchar": el navegador solo exige ese primer gesto.
- *  - Se mantiene sincronizada cada segundo y cambia sola de cancion cuando cambia en Discord.
- *  - Click en la portada = silenciar / activar. Click en el texto = letra sincronizada (lrclib.net), una linea con rebote.
- *  - Mientras suena la cancion de Discord se pausa la musica ambiente del sitio (window.TakeAmbient) y vuelve cuando no hay nada.
- *
- * Es un singleton: vive en <body>, no depende de React, y no se desmonta al cambiar de panel, asi no se corta la musica.
- * Depende de window.TakePresence (js/presence.js). En el menu se oculta cuando hay un panel abierto (ver css/music-pill.css).
- * API: window.TakeMusic = { wantsAudio(), isPlaying() }
- */
 (function () {
   "use strict";
   if (window.TakeMusic) return;
@@ -20,8 +5,8 @@
   if (!P) return;
 
   var LRC_API = "https://lrclib.net/api";
-  var LEAD_MS = 300; // el audio tarda un poco en arrancar: lo adelantamos
-  var DRIFT_MS = 1200; // desfase maximo antes de corregir con seekTo
+  var LEAD_MS = 300;
+  var DRIFT_MS = 1200;
   var MUTE_KEY = "take:music:muted";
   var ICON = {
     note: '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3z"/></svg>',
@@ -29,7 +14,6 @@
     off: '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63m2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.8 8.8 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71M4.27 3L3 4.27L7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a9 9 0 0 0 3.69-1.81L19.73 21L21 19.73l-9-9zM12 4L9.91 6.09L12 8.18z"/></svg>',
   };
 
-  // ---------- utilidades ----------
   function cleanTitle(name) {
     return String(name || "")
       .replace(/\s*[\(\[][^)\]]*(feat|ft\.|with|remaster|version|edit|live|mono|stereo)[^)\]]*[\)\]]/gi, "")
@@ -48,12 +32,10 @@
     return fetch(url).then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); });
   }
   function readMuted() { try { return localStorage.getItem(MUTE_KEY) === "1"; } catch (e) { return false; } }
-  function writeMuted(v) { try { localStorage.setItem(MUTE_KEY, v ? "1" : "0"); } catch (e) { /* modo privado */ } }
+  function writeMuted(v) { try { localStorage.setItem(MUTE_KEY, v ? "1" : "0"); } catch (e) { } }
 
-  // ---------- letras (lrclib.net) ----------
   var lyricsCache = {};
 
-  /** "[01:23.45] texto" -> [{ t: ms, text }] ordenado. Ignora etiquetas como [ar:...]. */
   function parseLrc(lrc) {
     var out = [];
     String(lrc || "").split(/\r?\n/).forEach(function (line) {
@@ -95,7 +77,6 @@
       var q = new URLSearchParams({ artist_name: artist, track_name: title });
       return getJson(LRC_API + "/search?" + q).then(function (list) {
         if (!Array.isArray(list)) return null;
-        // preferimos letra sincronizada y la duracion mas cercana
         list = list.slice().sort(function (a, b) {
           var sa = a.syncedLyrics ? 0 : 1, sb = b.syncedLyrics ? 0 : 1;
           if (sa !== sb) return sa - sb;
@@ -113,11 +94,10 @@
       }, Promise.resolve(found));
     });
     lyricsCache[key] = p;
-    p.then(function (v) { if (!v) delete lyricsCache[key]; }); // no recordar fallos: se puede reintentar
+    p.then(function (v) { if (!v) delete lyricsCache[key]; });
     return p;
   }
 
-  // ---------- YouTube IFrame API ----------
   var ytApi = null;
   function loadYouTube() {
     if (ytApi) return ytApi;
@@ -133,23 +113,21 @@
     return ytApi;
   }
 
-  // ---------- estado ----------
   var state = {
-    live: null, // { song, artist, album, art, start, end, duration } desde Discord/Spotify
-    last: null, // ultima cancion de Last.fm
-    armed: false, // ya hubo un primer gesto del usuario (el navegador ya permite el audio)
+    live: null,
+    last: null,
+    armed: false,
     muted: readMuted(),
     playing: false,
     lyricsOpen: false,
-    lyrics: null, // { synced, plain } | "loading" | "none"
+    lyrics: null,
     lyricsKey: "",
   };
   var yt = { player: null, ready: false, videoId: null, key: "", pending: false, calibrated: "" };
-  var ambient = { skipped: false, paused: false }; // skipped: no arranco por la cancion; paused: la pausamos nosotros
+  var ambient = { skipped: false, paused: false };
   var lastLine = -2;
   var lastSecond = -1;
 
-  // ---------- DOM ----------
   var root = el("div", "np-pill");
   root.setAttribute("role", "group");
   root.setAttribute("aria-label", "Now playing");
@@ -167,7 +145,7 @@
   text.setAttribute("aria-pressed", "false");
   var tTitle = el("strong", "np-pill-title");
   var tArtist = el("span", "np-pill-artist");
-  text.append(tTitle, tArtist);   // nombre arriba, artista debajo
+  text.append(tTitle, tArtist);
   var eq = el("span", "np-eq", "<i></i><i></i><i></i>");
   eq.setAttribute("aria-hidden", "true");
   root.append(cover, text, eq);
@@ -179,9 +157,6 @@
 
   function mountDom() {
     document.body.append(root, lyricsBox, ytHost);
-    // El snapshot de index.html no coincide con lo que pinta React y este vuelve a pintar el <body> entero al
-    // hidratar (error #418), llevandose lo que no es suyo. Si pasa, se vuelve a colocar; el iframe de YouTube
-    // se reinicia porque al sacarlo del documento el reproductor muere.
     new MutationObserver(function () {
       if (!root.isConnected || !lyricsBox.isConnected) document.body.append(root, lyricsBox);
       if (!ytHost.isConnected) {
@@ -194,7 +169,6 @@
   }
   if (document.body) mountDom(); else document.addEventListener("DOMContentLoaded", mountDom);
 
-  // ---------- datos ----------
   function current() { return state.live || state.last; }
   function elapsed() {
     var t = state.live;
@@ -239,7 +213,6 @@
     }).catch(function () { });
   }
 
-  // ---------- pintado ----------
   function render() {
     var t = current();
     root.hidden = !t;
@@ -282,7 +255,6 @@
   }
   setInterval(tick, 250);
 
-  // ---------- letras ----------
   function loadLyrics() {
     var t = current();
     if (!t) return;
@@ -324,7 +296,6 @@
     if (next && next.text) { var n = el("p", "np-line is-next"); n.textContent = next.text; lyricsBox.append(n); }
   }
 
-  // ---------- audio (YouTube) ----------
   function setAmbient(hold) {
     var A = window.TakeAmbient;
     if (!A) return;
@@ -336,7 +307,7 @@
         ambient.skipped = false;
         A.play().catch(function () { });
       }
-    } catch (e) { /* sin ambiente: da igual */ }
+    } catch (e) { }
   }
 
   function setPlaying(on) {
@@ -351,7 +322,7 @@
     setPlaying(false);
   }
 
-  function failOpen() { // no hay audio de YouTube para esta cancion: que vuelva la musica ambiente
+  function failOpen() {
     setPlaying(false);
     setAmbient(false);
   }
@@ -362,7 +333,7 @@
     yt.pending = true;
     getJson("/api/yt-search").then(function (r) {
       yt.pending = false;
-      if (trackKey() !== key) { resolveVideo(); return; } // cambio de cancion mientras buscaba
+      if (trackKey() !== key) { resolveVideo(); return; }
       yt.key = key;
       if (!r || !r.video || !r.video.videoId) { yt.videoId = null; pausePlayer(); failOpen(); return; }
       yt.videoId = r.video.videoId;
@@ -393,7 +364,7 @@
       applyMute();
       return;
     }
-    if (yt.player) return; // todavia creandose
+    if (yt.player) return;
     loadYouTube().then(function (YT) {
       if (yt.player || !state.live) return;
       var holder = el("div");
@@ -411,7 +382,6 @@
             var st = e && e.data;
             if (st === 1) {
               setPlaying(true);
-              // la primera vez que suena cada cancion: ajuste fino (el video tardo en cargar)
               if (yt.calibrated !== trackKey()) {
                 yt.calibrated = trackKey();
                 try {
@@ -429,7 +399,6 @@
     }).catch(function () { yt.player = null; failOpen(); });
   }
 
-  /** Cada segundo: mantiene el audio en el mismo segundo que Discord. */
   setInterval(function () {
     if (!state.armed || !yt.player || !yt.ready) return;
     var t = state.live;
@@ -449,8 +418,6 @@
     resolveVideo();
   }
 
-  // ---------- eventos ----------
-  /** Primer gesto del usuario: desde aqui el navegador deja sonar. */
   function arm() {
     if (state.armed) return;
     state.armed = true;
@@ -480,7 +447,6 @@
   loadLast();
 
   window.TakeMusic = {
-    /** true si hay una cancion de Discord que va a sonar aqui: la musica ambiente no debe arrancar. */
     wantsAudio: function () {
       var want = !!state.live && !state.muted;
       if (want) ambient.skipped = true;

@@ -1,15 +1,9 @@
-/* About me: detalles nuevos (presencia, previews, stack). La musica vive ahora en css/music-pill.css. */
-
-/* punto diminuto (mas chico que el status-dot) */
 .tiny-dot{display:inline-block;width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.75;flex:none;vertical-align:middle}
 
-/* "last active 1 hour ago" cuando estas offline en Discord */
 .bio-last-seen{display:inline-flex;align-items:center;gap:5px;margin-left:4px;color:#7f8b92;font:9px ui-monospace,monospace}
 
-/* nota bajo el apodo del cursor (Settings) */
 .settings-note{display:flex;align-items:center;gap:6px;margin-top:6px;color:#7f8b92;font:10px ui-monospace,monospace}
 
-/* fondo animado de los cuadros de preview (images/preview-bg.webp, el GIF liquido azul/blanco); el velo oscuro mantiene legible el texto */
 .bio-preview{
   background:linear-gradient(180deg,rgba(7,12,18,.02) 0%,rgba(7,12,18,.3) 100%),url(/images/preview-bg.webp) center/cover no-repeat #0d151b;
 }
@@ -18,7 +12,6 @@
   .bio-preview{background:linear-gradient(180deg,#1b2a36 0%,#0a1016 100%)}
 }
 
-/* stack: logos grises; al pasar el mouse, hacer click (mientras se mantiene) o enfocar con teclado recuperan su color original */
 .bio-tool{color:#8f9ca3;opacity:.7;transition:color .18s,opacity .18s;-webkit-tap-highlight-color:transparent}
 .bio-tool svg{transition:filter .18s,transform .18s}
 .bio-tool:hover,.bio-tool:focus-visible,.bio-tool:active{color:var(--brand,#fff);opacity:1}

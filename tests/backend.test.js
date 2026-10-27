@@ -1,5 +1,4 @@
 "use strict";
-// node --test tests/
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const B = require("../api/_lib/backend");

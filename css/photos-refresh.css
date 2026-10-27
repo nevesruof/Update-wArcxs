@@ -1,15 +1,8 @@
-/* ============================================================================
-   photos-refresh.css — Renovación visual 2026 de /photos (capa aditiva)
-   Cargar después de los estilos inline de la página.
-   ============================================================================ */
-
 :root {
   --take-ice: #8dcfd7;
   --take-ice-bright: #bfe9ee;
 }
 
-/* Viñeta + resplandor superior sobre las partículas (la capa la inyecta el
-   propio HTML, justo detrás del canvas). Estática: cero coste de animación. */
 .photos-atmo {
   position: fixed;
   inset: 0;
@@ -20,7 +13,6 @@
     radial-gradient(140% 120% at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(2, 5, 8, .5) 100%);
 }
 
-/* píldora de navegación: mismo cian hielo del sitio */
 .header-pill {
   border-color: rgba(141, 207, 215, .16) !important;
   border-top-color: rgba(191, 233, 238, .24) !important;
@@ -37,7 +29,6 @@
 }
 .header-home-btn { border-color: rgba(255, 255, 255, .14); }
 
-/* enlace "Back" */
 .photos-back {
   color: rgba(179, 190, 197, .55) !important;
   border-radius: 8px;
@@ -51,7 +42,6 @@
   transform: translateX(-3px);
 }
 
-/* título */
 .photos-title {
   text-shadow: 0 0 30px rgba(141, 207, 215, .18), 0 2px 24px rgba(0, 0, 0, .5);
   letter-spacing: -.01em;
@@ -62,7 +52,6 @@
 }
 .photos-sub { color: rgba(179, 190, 197, .5) !important; letter-spacing: .02em; }
 
-/* casillas de fotos: tarjeta con hover que levita y un barrido de luz */
 .photo-slot {
   background: linear-gradient(160deg, rgba(141, 207, 215, .05) 0%, rgba(255, 255, 255, .018) 100%) !important;
   border: 1px solid rgba(141, 207, 215, .1) !important;
@@ -94,7 +83,6 @@
 }
 .photo-slot p { text-shadow: 0 1px 8px rgba(0, 0, 0, .7); }
 
-/* detalles globales de la página */
 ::selection { background: rgba(141, 207, 215, .28); color: #fff; }
 :focus-visible {
   outline: 1.5px solid rgba(141, 207, 215, .65) !important;

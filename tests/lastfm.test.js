@@ -1,5 +1,4 @@
 "use strict";
-// node --test tests/
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const http = require("node:http");
@@ -29,7 +28,7 @@ test("tracks: nowPlaying, fecha en ms, portada placeholder => null, limit", () =
   assert.equal(t[1].album, null);
   assert.equal(toTracks(recent, "2").tracks.length, 2);
   assert.deepEqual(toTracks({}, 20), { tracks: [] });
-  assert.equal(toTracks({ recenttracks: { track: recent.recenttracks.track[0] } }, 20).tracks.length, 1); // limit=1 => objeto
+  assert.equal(toTracks({ recenttracks: { track: recent.recenttracks.track[0] } }, 20).tracks.length, 1);
   assert.equal(pickImage(undefined), null);
 });
 
@@ -40,7 +39,6 @@ test("top artist: nombre de Last.fm y portada de su cancion reciente", () => {
   assert.deepEqual(toTopArtist({ topartists: { artist: [] } }, null), {});
 });
 
-// --- handlers contra un Last.fm falso -------------------------------------------------------
 function fake(handler) {
   return new Promise((resolve) => { const s = http.createServer(handler).listen(0, "127.0.0.1", () => resolve(s)); });
 }

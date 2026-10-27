@@ -1,14 +1,6 @@
-/*
- * Photos (pages/photos.html es una pagina estatica): lo que antes hacia la app de Next.
- *
- *  1. Aviso "Hardware acceleration is disabled": solo sale si el equipo renderiza por software (o pide menos movimiento),
- *     igual que en el resto del sitio. Se puede cerrar con la X y, si no, se quita solo a los 8 s bajando.
- *  2. Portfolio (arcxsdev.com): el mismo barrido diagonal + logo que usa el menu al abrir Photos, y despues se abre la pagina.
- */
 (function () {
   "use strict";
 
-  // ---------- 1. aviso de hardware ----------
   var toast = document.getElementById("hw-toast");
   var AUTO_HIDE_MS = 8000;
   var LEAVE_MS = 500;
@@ -50,7 +42,6 @@
     if (close) close.addEventListener("click", hide);
   }
 
-  // ---------- 2. Portfolio con la transicion del menu ----------
   var busy = false;
   function wipeTo(url) {
     if (busy) return;
@@ -79,7 +70,7 @@
       logoWrap.style.opacity = "1";
     }
     setTimeout(function () { window.location.assign(url); }, 600);
-    window.addEventListener("pageshow", function (ev) { // volver con "atras": quita el barrido
+    window.addEventListener("pageshow", function (ev) {
       if (!ev.persisted) return;
       busy = false;
       panel.remove();

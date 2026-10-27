@@ -1,7 +1,5 @@
 "use strict";
 (self.webpackChunk_N_E = self.webpackChunk_N_E || []).push([[1264], { 1264: (e, t, n) => { n.d(t, { k: () => v }); var o = n(5155), a = n(2115);
-        /* Fondo del menu: filamentos de luz + motas bokeh sobre el fondo liquido. El motor esta en /js/menu-bg.js
-           (antes: cubos 3D con particulas conectadas, y antes escena three.js con avatar VRM). */
         function v(e) { let { onReady: t } = e, n = (0, a.useRef)(null), i = (0, a.useRef)(t); return i.current = t, (0, a.useEffect)(() => { let e = n.current; if (!e)
             return; let r = () => { }, s = !1, l = () => { s || (r = window.TakeMenuBg.mount(e, { onReady: () => { var e; null == (e = i.current) || e.call(i); } })); }; if (window.TakeMenuBg)
             l();

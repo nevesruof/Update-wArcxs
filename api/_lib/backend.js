@@ -1,17 +1,4 @@
 "use strict";
-/*
- * Backend de la web: libro de visitas, contador, ajustes y acceso de admin.
- * Cada funcion de /api/* es un envoltorio de una linea sobre estas (igual que canary.js).
- *
- * Variables de entorno en Vercel:
- *   ADMIN_KEY        clave de admin (minimo 12 caracteres). Sin ella el admin queda desactivado.
- *   CURSOR_SECRET    (opcional) secreto para firmar el token de dueno de los cursores; por defecto usa ADMIN_KEY.
- *   HOME_MESSAGE     (opcional) mensaje inicial del home.
- *   VISITS_BASE      (opcional) numero que se suma al contador de visitas (por defecto 18786: con 3 visitas reales se ve 18,789).
- *   IP_SALT          (opcional) sal para anonimizar las IP en los limites de uso.
- *   + las del almacen (ver _lib/store.js).
- * No se guarda ninguna IP: solo un hash corto que sirve para limitar abusos.
- */
 const crypto = require("node:crypto");
 const { getStore } = require("./store");
 
@@ -19,7 +6,6 @@ const LIMITS = { name: 50, website: 200, message: 200, reply: 500, home: 200, ma
 const CONTROL = /[\u0000-\u0008\u000b-\u001f\u007f\u200b-\u200f\u202a-\u202e\u2028\u2029\u2066-\u2069\ufeff]/g;
 const GB = "take:gb", GB_LIKES = "take:gb:likes";
 
-// ---------- utilidades ----------
 function clean(v, max, multiline = false) {
   let s = String(v == null ? "" : v).normalize("NFC").replace(CONTROL, "");
   s = multiline ? s.replace(/\r\n?/g, "\n").replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n") : s.replace(/\s+/g, " ");
@@ -76,14 +62,12 @@ function normalizeUrl(v) {
   } catch (_) { return null; }
 }
 
-// ---------- admin ----------
 const sha = (s) => crypto.createHash("sha256").update(String(s)).digest();
 const adminConfigured = (env) => typeof env.ADMIN_KEY === "string" && env.ADMIN_KEY.length >= 12;
 function keyMatches(req, env) {
   const given = req.headers["x-admin-key"];
   return adminConfigured(env) && typeof given === "string" && crypto.timingSafeEqual(sha(given), sha(env.ADMIN_KEY));
 }
-/** "ok" | "denied" | "limited" | "disabled". Tras 8 fallos desde la misma red, bloquea 10 minutos. */
 async function adminCheck(req, store, env) {
   if (!adminConfigured(env)) return "disabled";
   const key = "take:rl:admin:" + ipHash(req, env);
@@ -108,7 +92,6 @@ function verifyOwnerToken(token, secret, now = Date.now()) {
   return crypto.timingSafeEqual(Buffer.from(m[2], "hex"), good);
 }
 
-// ---------- libro de visitas ----------
 const publicEntry = (e, likes, liked) => ({
   id: e.id, name: e.name, ...(e.website ? { website: e.website } : {}), message: e.message,
   timestamp: e.timestamp, likes: likes || 0, liked: !!liked, ownerLiked: !!e.ownerLiked, reply: e.reply || null,
@@ -143,7 +126,7 @@ async function guestbook(req, res, env = process.env, store = getStore(env)) {
         name: clean(b.name, LIMITS.name) || "Anonymous", website, message, timestamp: new Date().toISOString(),
       };
       await store.hset(GB, entry.id, JSON.stringify(entry));
-      if ((await store.hlen(GB)) > LIMITS.maxEntries) { // recorta las mas viejas
+      if ((await store.hlen(GB)) > LIMITS.maxEntries) {
         const old = (await loadEntries(store)).slice(LIMITS.maxEntries);
         for (const o of old) { await store.hdel(GB, o.id); }
       }
@@ -156,7 +139,7 @@ async function guestbook(req, res, env = process.env, store = getStore(env)) {
       const raw = await store.hget(GB, id);
       if (!raw) return reply(res, 404, { error: "Message not found" });
       const entry = JSON.parse(raw);
-      if (!b.action) { // like de un visitante: una vez por visitante
+      if (!b.action) {
         if ((await store.hit("take:rl:like:" + ipHash(req, env), 3600)) > 60) return reply(res, 429, { error: "Too many likes. Try again later" });
         const vid = visitorId(req, res);
         const added = await store.sadd("take:gb:liked:" + vid, id);
@@ -180,7 +163,6 @@ async function guestbook(req, res, env = process.env, store = getStore(env)) {
   }
 }
 
-// ---------- contador de visitas ----------
 const DEFAULT_VISITS_BASE = 18786;
 function visitsBase(env) {
   const raw = env.VISITS_BASE;
@@ -192,7 +174,7 @@ async function counter(req, res, env = process.env, store = getStore(env)) {
   try {
     let count;
     if (parseCookies(req)["tk-seen"] || req.method === "HEAD") count = Number(await store.get("take:visits")) || 0;
-    else { count = await store.incr("take:visits"); addCookie(res, "tk-seen=1" + cookieAttrs(req, 43200)); } // cuenta 1 vez cada 12 h
+    else { count = await store.incr("take:visits"); addCookie(res, "tk-seen=1" + cookieAttrs(req, 43200)); }
     return reply(res, 200, { count: count + visitsBase(env) });
   } catch (e) {
     console.error("counter:", e && e.message);
@@ -200,7 +182,6 @@ async function counter(req, res, env = process.env, store = getStore(env)) {
   }
 }
 
-// ---------- ajustes ----------
 async function settings(req, res, env = process.env, store = getStore(env)) {
   try {
     if (req.method === "GET") {
@@ -223,7 +204,6 @@ async function settings(req, res, env = process.env, store = getStore(env)) {
   }
 }
 
-// ---------- admin: verificar clave y token de cursores ----------
 async function adminVerify(req, res, env = process.env, store = getStore(env)) {
   if (req.method !== "POST") return notAllowed(res, ["POST"]);
   try {

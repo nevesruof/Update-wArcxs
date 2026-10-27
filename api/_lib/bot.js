@@ -1,15 +1,4 @@
 "use strict";
-/*
- * Puente entre la web y el bot de actividad (bot/main.py -> GET /api/activity).
- *
- * El bot corre en su hosting; estas funciones corren en Vercel (servidor). Asi el token del bot
- * nunca llega al navegador y no hay problemas de CORS ni de contenido mixto (http/https).
- *
- * Variables de entorno en Vercel (Settings -> Environment Variables):
- *   ACTIVITY_BOT_URL    URL completa del bot terminada en /api/activity
- *                       (por defecto http://fi4.bot-hosting.cloud:25319/api/activity)
- *   ACTIVITY_BOT_TOKEN  mismo valor que API_TOKEN del bot (solo si el bot lo tiene configurado)
- */
 const DEFAULT_URL = "http://fi4.bot-hosting.cloud:25319/api/activity";
 const TIMEOUT_MS = 8000;
 const STATUSES = new Set(["online", "idle", "dnd", "offline"]);
@@ -50,7 +39,6 @@ function userInfo(profile) {
   };
 }
 
-/** Estado vacio: se usa cuando el bot no responde o Discord no lo conoce (el bot lo marca "unknown"). */
 function offlinePresence(profile, raw) {
   return {
     discord_status: "offline",
@@ -65,7 +53,6 @@ function offlinePresence(profile, raw) {
   };
 }
 
-/** Ultima vez que estuvo online/idle/dnd (ms), a partir del historial de estados del bot. */
 function lastOnlineAt(raw) {
   const list = Array.isArray(raw && raw.recentStatuses) ? raw.recentStatuses : [];
   let best = 0;
@@ -73,7 +60,6 @@ function lastOnlineAt(raw) {
   return best ? Math.round(best * 1000) : null;
 }
 
-/** Ultima cancion registrada (la de ahora si esta escuchando, o la ultima que escucho). */
 function recentTrack(raw) {
   const s = Array.isArray(raw && raw.recentSongs) ? raw.recentSongs[0] : null;
   if (!s || !s.name) return null;
@@ -86,7 +72,6 @@ function recentTrack(raw) {
   };
 }
 
-/** Respuesta del bot -> mismo formato que antes entregaba Lanyard (lo que espera la interfaz). */
 function toPresence(raw) {
   const d = (raw && raw.discord) || {};
   const profile = raw && raw.profile;
@@ -125,7 +110,6 @@ function toPresence(raw) {
           trackId: music.trackId || null,
           url: music.url || null,
           durationMs: music.endMs && music.startMs ? music.endMs - music.startMs : null,
-          // segundo exacto en el que va, calculado en el servidor (no depende del reloj del visitante)
           positionMs: music.startMs ? Math.max(0, Date.now() - music.startMs) : null,
         }
       : null,
@@ -135,7 +119,6 @@ function toPresence(raw) {
   };
 }
 
-/** Historial de Spotify del bot -> { tracks: [...] } (lista "on repeat" de la pestana music). */
 function toTracks(raw, limit) {
   const max = Math.max(1, Math.min(parseInt(limit, 10) || 20, 50));
   const songs = Array.isArray(raw && raw.recentSongs) ? raw.recentSongs : [];
@@ -151,7 +134,6 @@ function toTracks(raw, limit) {
   };
 }
 
-/** Artista mas escuchado dentro del historial reciente que entrega el bot (hasta 100 canciones). */
 function toTopArtist(raw) {
   const songs = Array.isArray(raw && raw.recentSongs) ? raw.recentSongs : [];
   const count = new Map();
@@ -160,7 +142,7 @@ function toTopArtist(raw) {
     if (!main) continue;
     const entry = count.get(main) || { n: 0, image: null };
     entry.n += 1;
-    if (!entry.image && s.image) entry.image = s.image; // portada de la cancion mas reciente de ese artista
+    if (!entry.image && s.image) entry.image = s.image;
     count.set(main, entry);
   }
   let best = null;
@@ -168,7 +150,6 @@ function toTopArtist(raw) {
   return best ? { artist: best.artist, image: best.image } : {};
 }
 
-/** Envuelve una funcion de Vercel: GET, cache de CDN corta y errores sin cachear. */
 function route(build, { cache, onError }) {
   return async function handler(req, res) {
     if (req.method && req.method !== "GET" && req.method !== "HEAD") {

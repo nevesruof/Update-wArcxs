@@ -1,24 +1,10 @@
 "use strict";
-/* TKWM-40632a5f-41f0-9fe6-22f804d522ac
- * Trampas (canaries) del sitio: avisan cuando algo toca lo que un visitante normal nunca toca.
- * Son pasivas: solo registran y avisan, no hacen nada contra nadie.
- *
- *   trap=clone  /js/canary.js manda una senal si el sitio se carga desde un dominio que no es el tuyo (copia/proxy).
- *   trap=bait   cebo: rutas /private/* y /backup/* (solo aparecen en robots.txt y en un enlace oculto). Quien entra
- *               ahi es un scraper/bot que ignora robots.txt o sigue enlaces ocultos.
- *   trap=scan   rutas tipicas de escaneres (/wp-login.php, /.env, /.git/config...). Solo se registran en los logs.
- *
- * Variables de entorno en Vercel (opcionales):
- *   CANARY_WEBHOOK_URL  webhook de un canal de Discord para recibir el aviso (clone y bait).
- *   CANARY_ALERT_ALL=1  tambien avisa por Discord los "scan" (puede ser mucho ruido).
- * Sin webhook, todo queda igualmente en Vercel -> Logs (busca "CANARY").
- */
-const DEDUPE_MS = 10 * 60 * 1000;      // misma trampa + misma IP + mismo host: un solo aviso cada 10 min
-const MAX_WEBHOOKS_PER_HOUR = 20;      // tope por instancia, por si alguien intenta inundarte el canal
+/* TKWM-40632a5f-41f0-9fe6-22f804d522ac */
+const DEDUPE_MS = 10 * 60 * 1000;
+const MAX_WEBHOOKS_PER_HOUR = 20;
 const seen = new Map();
 let sent = [];
 
-/** Texto controlado por el atacante -> seguro para logs y para Discord (sin pings, markdown ni saltos de linea). */
 function clean(v, max = 120) {
   return String(v == null ? "" : v).replace(/[\u0000-\u001f\u007f\u200b-\u200f\u2028\u2029`*_~|>@<\[\]()]/g, "").trim().slice(0, max);
 }
@@ -58,11 +44,10 @@ async function handleCanary(req, res, env = process.env, now = Date.now()) {
   const trap = ["clone", "bait", "scan"].includes(one(q.trap)) ? one(q.trap) : "scan";
   const entry = {
     trap, ip: clientIp(req), ua: clean(req.headers && req.headers["user-agent"], 160),
-    host: clean(one(q.host), 100),                       // clone: dominio desde el que se cargo la copia
+    host: clean(one(q.host), 100),
     path: clean(one(q.path) || one(q.p), 160),
     ref: clean(one(q.ref) || (req.headers && req.headers.referer), 160),
   };
-  // una linea de log estructurada por aviso (Vercel -> Logs; filtra por CANARY)
   const key = trap + "|" + entry.ip + "|" + entry.host;
   const dup = seen.has(key) && now - seen.get(key) < DEDUPE_MS;
   if (!dup) {
@@ -74,7 +59,7 @@ async function handleCanary(req, res, env = process.env, now = Date.now()) {
   res.setHeader("Cache-Control", "no-store");
   if (trap === "clone") { res.setHeader("Access-Control-Allow-Origin", "*"); return res.status(204).end(); }
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
-  return res.status(404).send("Not Found");          // igual que cualquier 404: no delata la trampa
+  return res.status(404).send("Not Found");
 }
 
 function _reset() { seen.clear(); sent = []; }

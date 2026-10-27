@@ -1,21 +1,10 @@
 "use strict";
-/*
- * Busca en YouTube el video de la cancion que esta sonando en Spotify para poder reproducirla en la web
- * (YouTube IFrame Player) justo en el mismo segundo.
- *
- * Variable de entorno en Vercel (Settings -> Environment Variables, despues Redeploy):
- *   YOUTUBE_API_KEY   API key de YouTube Data API v3 (console.cloud.google.com -> APIs -> YouTube Data API v3)
- *
- * Cuota: search.list cuesta 100 unidades (10 000 al dia = ~100 busquedas) y videos.list 1. Por eso el resultado
- * se guarda en el store por cancion y solo se busca una vez por cancion.
- */
 const API = "https://www.googleapis.com/youtube/v3";
 const TIMEOUT_MS = 8000;
 const BAD_WORDS = /\b(live|cover|remix|sped up|speed up|slowed|reverb|nightcore|8d|instrumental|karaoke|lyrics? video|reaction|tutorial|mashup|acoustic|version)\b/i;
 
 class ConfigError extends Error {}
 
-/** "Song (feat. X) - Remastered 2011" -> "Song". */
 function cleanTitle(name) {
   return String(name || "")
     .replace(/\s*[\(\[][^)\]]*(feat|ft\.|with|remaster|version|edit|live|mono|stereo)[^)\]]*[\)\]]/gi, "")
@@ -24,7 +13,6 @@ function cleanTitle(name) {
     .trim();
 }
 
-/** Spotify separa artistas con ";" -> usamos el primero. */
 function mainArtist(artist) {
   return String(artist || "").split(/[;,]/)[0].trim();
 }
@@ -33,7 +21,6 @@ function norm(s) {
   return String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
 }
 
-/** "PT3M45S" / "PT1H2M3S" -> milisegundos. */
 function parseDuration(iso) {
   const m = /^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(String(iso || ""));
   if (!m) return 0;
@@ -41,11 +28,6 @@ function parseDuration(iso) {
   return (((d * 24 + h) * 60 + mi) * 60 + s) * 1000;
 }
 
-/**
- * Elige el mejor candidato: la duracion parecida a la de Spotify pesa mas (si el video dura distinto, el segundo
- * ya no coincide), despues que el titulo trate de la cancion y que el canal sea el artista o un "- Topic".
- * candidates: [{ videoId, title, channel, durationMs }]
- */
 function pickBest(candidates, { title, artist, durationMs }) {
   const wanted = norm(cleanTitle(title));
   const who = norm(mainArtist(artist));
@@ -67,7 +49,6 @@ function pickBest(candidates, { title, artist, durationMs }) {
     if (!best || score > best.score) best = { ...c, score };
   }
   if (!best) return null;
-  // sin ninguna pista de que sea la cancion no devolvemos nada (mejor silencio que otra cancion)
   if (best.score < 0) return null;
   return best;
 }
@@ -88,7 +69,6 @@ async function getJson(url, fetchImpl) {
   }
 }
 
-/** search.list (5 resultados) + videos.list (duraciones) -> mejor video o null. */
 async function findVideo({ title, artist, durationMs }, { key = process.env.YOUTUBE_API_KEY, fetchImpl = fetch, base = process.env.YOUTUBE_API_URL || API } = {}) {
   if (!key) throw new ConfigError("falta YOUTUBE_API_KEY");
   const q = [mainArtist(artist), cleanTitle(title), "audio"].filter(Boolean).join(" ");

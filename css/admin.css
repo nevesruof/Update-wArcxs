@@ -1,5 +1,4 @@
-/* admin.css - pagina de login de admin (/admin). Mismo estilo que el sitio: fuente DM Sans, campos redondeados, fondo oscuro.
-   TKWM-40632a5f-41f0-9fe6-22f804d522ac */
+/* TKWM-40632a5f-41f0-9fe6-22f804d522ac */
 @font-face {
   font-family: "DM Sans";
   font-style: normal;
@@ -63,7 +62,7 @@ input, button {
   height: var(--ui-height);
   border-radius: var(--radius);
   font: inherit;
-  font-size: 16px;               /* 16px o mas: iOS no hace zoom al enfocar */
+  font-size: 16px;
   color: var(--white);
   background: rgba(243, 244, 245, 0.035);
   -webkit-backdrop-filter: blur(10px);

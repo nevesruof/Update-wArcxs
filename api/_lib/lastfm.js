@@ -1,16 +1,6 @@
 "use strict";
-/*
- * Cliente de Last.fm (user.getRecentTracks / user.getTopArtists) para la pestana "music".
- * Corre en Vercel (servidor): la API key nunca llega al navegador.
- *
- * Variables de entorno en Vercel (Settings -> Environment Variables, despues Redeploy):
- *   LASTFM_API_KEY   API key de https://www.last.fm/api/account/create
- *   LASTFM_USER      tu usuario de Last.fm (el de last.fm/user/<usuario>)
- *   LASTFM_API_URL   (opcional, solo para pruebas) base de la API; por defecto https://ws.audioscrobbler.com/2.0/
- */
 const DEFAULT_URL = "https://ws.audioscrobbler.com/2.0/";
 const TIMEOUT_MS = 8000;
-// Last.fm devuelve esta imagen (la estrella gris) cuando una cancion no tiene portada.
 const PLACEHOLDER = "2a96cbd8b46e442fc41c2b86b821562f";
 
 class ConfigError extends Error {}
@@ -33,7 +23,6 @@ async function lastfm(method, params) {
   }
 }
 
-/** Mejor portada disponible (extralarge > large > medium) o null si es el placeholder. */
 function pickImage(images) {
   const list = Array.isArray(images) ? images : [];
   for (const size of ["extralarge", "large", "medium", "small"]) {
@@ -43,11 +32,10 @@ function pickImage(images) {
   return null;
 }
 
-/** user.getRecentTracks -> { tracks: [...] } con el formato que espera la interfaz. */
 function toTracks(raw, limit) {
   const max = Math.max(1, Math.min(parseInt(limit, 10) || 20, 50));
   const list = raw && raw.recenttracks && raw.recenttracks.track;
-  const items = Array.isArray(list) ? list : list ? [list] : []; // con limit=1 Last.fm puede devolver un objeto
+  const items = Array.isArray(list) ? list : list ? [list] : [];
   return {
     tracks: items.slice(0, max).map((t) => ({
       name: t.name,
@@ -61,7 +49,6 @@ function toTracks(raw, limit) {
   };
 }
 
-/** Artista mas escuchado (ultimos 30 dias) + portada tomada de sus canciones recientes. */
 function toTopArtist(rawTop, recent) {
   const arr = rawTop && rawTop.topartists && rawTop.topartists.artist;
   const first = Array.isArray(arr) ? arr[0] : arr;
@@ -70,7 +57,6 @@ function toTopArtist(rawTop, recent) {
   return { artist: first.name, image: match ? match.image : null };
 }
 
-/** Envuelve una funcion de Vercel: GET, cache de CDN corta y errores sin cachear. */
 function route(build, { cache }) {
   return async function handler(req, res) {
     if (req.method && req.method !== "GET" && req.method !== "HEAD") {

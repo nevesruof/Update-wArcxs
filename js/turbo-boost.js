@@ -1,15 +1,3 @@
-/*!
- * Turbo Boost + cursor-reactive "3D" for the Skyline background (spec section 8).
- *
- * - Works only while the "Skyline" background is active (html[data-scene="neutral"]) and no side panel is open.
- * - The car never moves on the page: the cursor only drives a restrained perspective/parallax on the media
- *   element itself (never on a parent container), plus a soft specular light that slides over the bodywork.
- * - ONE requestAnimationFrame loop (delta-time based) drives cursor spring, boost timeline, particles and canvas.
- *   The loop sleeps when everything is at rest, and while the tab is hidden.
- * - prefers-reduced-motion: tiny parallax, no shake / streaks / chromatic aberration, fewer particles.
- *
- * Remove the feature: delete the two <script>/<link> tags that mention turbo-boost in index.html.
- */
 (() => {
   'use strict';
   if (window.__turboBoost) return;
@@ -19,20 +7,18 @@
   const rmq = window.matchMedia('(prefers-reduced-motion: reduce)');
   const coarseq = window.matchMedia('(hover: none), (pointer: coarse)');
 
-  // ---- Car landmarks, normalised to the video frame (x, y in 0..1) ---------------------------------------------
   const CAR = {
     box: { x0: 0.25, x1: 0.755, y0: 0.42, y1: 0.695 },
-    heads: [[0.579, 0.571, 1.0], [0.718, 0.574, 0.55]],   // x, y, weight
-    rear: [0.262, 0.60],                                  // where the particles leave the car
-    under: { x0: 0.30, x1: 0.725, y: 0.682 },             // underglow line
+    heads: [[0.579, 0.571, 1.0], [0.718, 0.574, 0.55]],
+    rear: [0.262, 0.60],
+    under: { x0: 0.30, x1: 0.725, y: 0.682 },
   };
   const COLORS = ['#22d3ee', '#a78bfa', '#ffffff', '#e879f9', '#67e8f9', '#8b5cf6'];
 
-  // ---- Tunables -----------------------------------------------------------------------------------------------
-  const BOOST_MS = 1000;           // total length (spec: 700-1200 ms)
+  const BOOST_MS = 1000;
   const MAX_PARTICLES = 220;
   const MAX_STREAKS = 18;
-  const CURSOR_IDLE_MS = 1400;     // after this the pose eases back to neutral
+  const CURSOR_IDLE_MS = 1400;
 
   const S = {
     scene: '', panel: false, media: null, active: false, uiVisible: false,
@@ -45,7 +31,6 @@
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   const ease = { out: t => 1 - Math.pow(1 - t, 3), inOut: t => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) };
 
-  // ---- DOM ----------------------------------------------------------------------------------------------------
   let fx, cv, ctx, ui, btn, live, svg, caOffR, caOffB;
 
   function build() {
@@ -87,7 +72,6 @@
     btn.addEventListener('click', () => trigger('button'));
   }
 
-  // React may rebuild <body> children; make sure our nodes stay attached.
   function ensureDom() {
     if (!fx) build();
     const b = doc.body;
@@ -98,7 +82,6 @@
     if (!svg.isConnected) b.appendChild(svg);
   }
 
-  // ---- Layout: where is the car on screen? ---------------------------------------------------------------------
   function findMedia() {
     return doc.querySelector('.home .background-video') || null;
   }
@@ -117,7 +100,7 @@
       const op = getComputedStyle(m).objectPosition.split(' ');
       const f = s => (s.endsWith('%') ? parseFloat(s) / 100 : s === 'left' || s === 'top' ? 0 : s === 'right' || s === 'bottom' ? 1 : 0.5);
       px = f(op[0]); py = f(op[1] || 'center');
-    } catch (_) { /* keep defaults */ }
+    } catch (_) { }
     const ox = (W - dw) * px, oy = (H - dh) * py;
     return { W, H, dw, dh, ox, oy, k: dh / 1080 };
   }
@@ -142,9 +125,9 @@
     if (!ui || !S.map) return;
     const bw = btn.offsetWidth || 170, bh = btn.offsetHeight || 40;
     let x, y;
-    if (S.W <= 700) {                       // phones: bottom centre
+    if (S.W <= 700) {
       x = (S.W - bw) / 2; y = S.H - bh - 28;
-    } else {                                // desktop: just under the car, centred on it
+    } else {
       x = sx((CAR.box.x0 + CAR.box.x1) / 2) - bw / 2;
       y = sy(CAR.box.y1) + 34 * S.map.k + 10;
     }
@@ -154,7 +137,6 @@
     ui.style.setProperty('--ty', Math.round(y) + 'px');
   }
 
-  // ---- Scene polling (cheap, robust against React re-renders) ---------------------------------------------------
   function poll() {
     ensureDom();
     const scene = root.dataset.scene || '';
@@ -181,17 +163,16 @@
     if (!active && S.boosting) endBoost();
   }
 
-  const BASE = 'scale(1.07)';          // slight over-scale so the perspective/parallax never reveals the edges
+  const BASE = 'scale(1.07)';
   function resetMedia(m) {
     m.style.transform = ''; m.style.filter = ''; m.style.willChange = ''; m.style.transformOrigin = '';
   }
   function primeMedia(m) { m.style.transformOrigin = '50% 62%'; m.style.transform = BASE; }
 
-  // ---- Input ----------------------------------------------------------------------------------------------------
   function onPointer(e) {
     if (!S.active || e.pointerType === 'touch') return;
     S.tx = clamp((e.clientX / window.innerWidth - 0.5) * 2, -1, 1);
-    S.ty = clamp((e.clientY / window.innerHeight - 0.5) * 2, -1, 1) * 0.5;   // vertical response is smaller
+    S.ty = clamp((e.clientY / window.innerHeight - 0.5) * 2, -1, 1) * 0.5;
     S.lastMove = performance.now();
     wake();
   }
@@ -204,12 +185,11 @@
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.defaultPrevented) return;
     if (!S.active || !S.uiVisible) return;
     const t = e.target;
-    if (isEditable(t) || isInteractive(t)) return;       // never steal Space from typing or focused controls
+    if (isEditable(t) || isInteractive(t)) return;
     e.preventDefault();
     trigger('key');
   }
 
-  // ---- Boost ----------------------------------------------------------------------------------------------------
   function trigger(source) {
     if (!S.active || S.boosting || doc.hidden) return false;
     S.boosting = true; S.t0 = performance.now(); S.burstDone = false; S.streamAcc = 0; S.streakAcc = 0;
@@ -245,7 +225,6 @@
     }
   }
 
-  // ---- Particles / streaks (pooled) ----------------------------------------------------------------------------
   const P = Array.from({ length: MAX_PARTICLES }, () => ({ on: false, x: 0, y: 0, vx: 0, vy: 0, a: 0, max: 1, s: 2, c: '#fff' }));
   const ST = Array.from({ length: MAX_STREAKS }, () => ({ on: false, x: 0, y: 0, len: 0, v: 0, a: 0, max: 1, c: '#fff' }));
   let rs = 12345;
@@ -282,7 +261,6 @@
     s.c = rnd() < 0.5 ? '#67e8f9' : rnd() < 0.5 ? '#c4b5fd' : '#f5d0fe';
   }
 
-  // ---- Main loop ------------------------------------------------------------------------------------------------
   function wake() {
     if (!S.raf && S.active && !doc.hidden) { S.last = performance.now(); S.raf = requestAnimationFrame(tick); }
   }
@@ -294,26 +272,24 @@
     S.last = now;
     const dt = clamp(dtRaw || 0.016, 0.001, 0.05);
     S.ema = S.ema * 0.92 + dt * 1000 * 0.08;
-    const low = S.perfLow ? S.ema > 22 : S.ema > 34;      // hysteresis: avoids flip-flopping
+    const low = S.perfLow ? S.ema > 22 : S.ema > 34;
     if (low !== S.perfLow) { S.perfLow = low; resize(); }
 
     const reduced = rm();
     const amp = reduced ? 0.22 : 1;
 
-    // 1) cursor / pose target
     let tx = S.tx, ty = S.ty;
     const coarse = coarseq.matches;
-    if (coarse) {                                         // touch: slow autonomous sway, no pointer needed
+    if (coarse) {
       const t = now / 1000;
       tx = Math.sin(t * 0.33) * 0.55; ty = Math.sin(t * 0.27 + 1.3) * 0.18;
-    } else if (now - S.lastMove > CURSOR_IDLE_MS) {       // ease back to neutral
+    } else if (now - S.lastMove > CURSOR_IDLE_MS) {
       const d = Math.exp(-dt / 0.85);
       S.tx *= d; S.ty *= d; tx = S.tx; ty = S.ty;
       if (Math.abs(S.tx) < 0.0008) S.tx = tx = 0;
       if (Math.abs(S.ty) < 0.0008) S.ty = ty = 0;
     }
 
-    // 2) spring (critically-damped-ish, sub-stepped, frame-rate independent)
     const K = 52, C = 13.5;
     let n = Math.ceil(dt / 0.008);
     const h = dt / n;
@@ -322,7 +298,6 @@
       S.vy += ((ty - S.y) * K - S.vy * C) * h; S.y += S.vy * h;
     }
 
-    // 3) boost timeline
     let I = 0, punch = 0, susp = 0, shakeX = 0, shakeY = 0, tb = 0;
     if (S.boosting) {
       tb = S.freezeTb != null ? S.freezeTb : (now - S.t0) / BOOST_MS;
@@ -331,14 +306,13 @@
         I = tb < rise ? ease.out(tb / rise) : tb < peak ? 1 : 1 - ease.inOut((tb - peak) / (1 - peak));
         const ts = tb * BOOST_MS / 1000;
         if (!reduced) {
-          punch = Math.exp(-ts * 5.2) * (1 - Math.exp(-ts * 42));                   // camera impulse
-          susp = 7 * Math.exp(-ts * 7) * Math.sin(ts * 22);                           // compress -> rebound -> settle
+          punch = Math.exp(-ts * 5.2) * (1 - Math.exp(-ts * 42));
+          susp = 7 * Math.exp(-ts * 7) * Math.sin(ts * 22);
           const sh = I * (S.perfLow ? 0.5 : 1);
           shakeX = (rnd() - 0.5) * 2.4 * sh; shakeY = (rnd() - 0.5) * 2.0 * sh;
         } else {
           susp = 1.5 * Math.exp(-ts * 8) * Math.sin(ts * 22);
         }
-        // emitters
         const burst = reduced ? 26 : S.perfLow ? 55 : 95;
         if (!S.burstDone) { S.burstDone = true; for (let i = 0; i < burst; i++) spawnParticle(); }
         if (tb < 0.5) {
@@ -352,7 +326,6 @@
       }
     }
 
-    // 4) apply to the media element only (never to a parent container)
     const m = S.media, k = S.map.k;
     const px = -S.x * 11 * amp + shakeX, py = -S.y * 8 * amp + susp * k + shakeY;
     const ry = -S.x * 1.7 * amp, rx = -S.y * 1.0 * amp;
@@ -364,17 +337,15 @@
       'rotateX(' + rx.toFixed(3) + 'deg) rotateY(' + ry.toFixed(3) + 'deg) scale(' + scale.toFixed(4) + ')';
     if (!reduced && !S.perfLow && S.boosting) setCA(3.4 * Math.pow(I, 1.6) * (tb < 0.75 ? 1 : 0)); else if (S.caOn) setCA(0);
 
-    // 5) canvas (specular light, headlights, neon, sweep, streaks, particles)
     draw(dt, I, tb, reduced);
     placeButton();
 
-    // keep running only while something is moving
     const moving = Math.abs(S.x - tx) > 0.0007 || Math.abs(S.vx) > 0.0007 || Math.abs(S.y - ty) > 0.0007 || Math.abs(S.vy) > 0.0007;
     if (S.boosting || moving || coarse && !reduced) S.raf = requestAnimationFrame(tick);
     else { S.dirty = true; settle(); }
   }
 
-  function settle() {                                      // fully at rest: clean canvas, neutral transform
+  function settle() {
     if (S.media) { S.media.style.transform = BASE; S.media.style.willChange = ''; }
     ctx.setTransform(S.dpr, 0, 0, S.dpr, 0, 0);
     ctx.clearRect(0, 0, S.W, S.H);
@@ -389,7 +360,6 @@
     const cx = sx((CAR.box.x0 + CAR.box.x1) / 2), cw = (CAR.box.x1 - CAR.box.x0) * m.dw;
     const top = sy(CAR.box.y0), ch = (CAR.box.y1 - CAR.box.y0) * m.dh;
 
-    // a) cursor-driven specular light gliding over the bodywork
     {
       const lx = cx + S.x * cw * 0.32, ly = top + ch * (0.34 + S.y * 0.35);
       const g = ctx.createRadialGradient(lx, ly, 0, lx, ly, cw * 0.42);
@@ -400,7 +370,6 @@
       ctx.fillStyle = g; ctx.fillRect(lx - cw * 0.45, ly - cw * 0.45, cw * 0.9, cw * 0.9);
     }
 
-    // b) neon underglow (faint at rest, intensifies on boost)
     {
       const x0 = sx(CAR.under.x0), x1 = sx(CAR.under.x1), y = sy(CAR.under.y);
       const a = 0.06 + 0.46 * I, rx = (x1 - x0) * 0.36, sq = 0.075 + 0.05 * I;
@@ -417,7 +386,6 @@
       if (I > 0.05) glow((x0 + x1) / 2, '232,121,249', a * 0.5);
     }
 
-    // c) headlights
     if (I > 0.003) {
       for (const [hx, hy, w] of CAR.heads) {
         const x = sx(hx), y = sy(hy), r = (50 + 150 * I) * k * w;
@@ -428,14 +396,12 @@
         g.addColorStop(1, 'rgba(167,139,250,0)');
         ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
       }
-      // brief screen flash at the very start
       if (tb < 0.14 && !reduced) {
         ctx.fillStyle = 'rgba(196,181,253,' + (0.10 * (1 - tb / 0.14)).toFixed(3) + ')';
         ctx.fillRect(0, 0, S.W, S.H);
       }
     }
 
-    // d) reflection sweep across the bodywork (soft elliptical mask)
     if (S.boosting && tb > 0.04 && tb < 0.82) {
       const u = ease.inOut(clamp((tb - 0.04) / 0.72, 0, 1));
       const bx = cx - cw * 0.5 + (cw + ch * 1.2) * u - ch * 0.6;
@@ -450,12 +416,11 @@
       g.addColorStop(0.5, 'rgba(255,255,255,' + a.toFixed(3) + ')'); g.addColorStop(0.65, 'rgba(232,121,249,' + (a * 0.6).toFixed(3) + ')');
       g.addColorStop(1, 'rgba(139,92,246,0)');
       ctx.fillStyle = g;
-      ctx.transform(1, 0, -0.35, 1, ch * 0.2, 0);          // slanted band
+      ctx.transform(1, 0, -0.35, 1, ch * 0.2, 0);
       ctx.fillRect(bx - bw, top - ch * 0.2, bw * 2, ch * 1.6);
       ctx.restore();
     }
 
-    // e) motion streaks
     for (const s of ST) {
       if (!s.on) continue;
       s.a += dt; if (s.a >= s.max) { s.on = false; continue; }
@@ -469,7 +434,6 @@
     }
     ctx.globalAlpha = 1;
 
-    // f) pixel particles shooting backwards from the car
     for (const p of P) {
       if (!p.on) continue;
       p.a += dt; if (p.a >= p.max) { p.on = false; continue; }
@@ -478,14 +442,13 @@
       const f = 1 - p.a / p.max;
       ctx.globalAlpha = Math.min(1, f * 1.3);
       ctx.fillStyle = p.c;
-      const q = 2;                                          // snap to a 2 px grid -> crisp "pixel" look
+      const q = 2;
       ctx.fillRect(Math.round(p.x / q) * q, Math.round(p.y / q) * q, p.s, p.s);
     }
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }
 
-  // ---- Boot -----------------------------------------------------------------------------------------------------
   function start() {
     window.addEventListener('pointermove', onPointer, { passive: true });
     window.addEventListener('keydown', onKey);

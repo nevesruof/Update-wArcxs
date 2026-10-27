@@ -1,5 +1,4 @@
 "use strict";
-// node --test tests/canary.test.js
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { isAllowedHost, check, CANON } = require("../js/canary.js");
@@ -26,12 +25,11 @@ test("check(): senal solo desde un dominio ajeno y una vez por sesion", () => {
   assert.equal(check({ hostname: "whoistake.vercel.app", pathname: "/" }, doc, nav, st), false);
   assert.equal(sent.length, 0);
   assert.equal(check({ hostname: "evil.com", pathname: "/x" }, doc, nav, st), true);
-  assert.equal(check({ hostname: "evil.com", pathname: "/x" }, doc, nav, st), false);   // ya avisado en esta sesion
+  assert.equal(check({ hostname: "evil.com", pathname: "/x" }, doc, nav, st), false);
   assert.equal(sent.length, 1);
   assert.match(sent[0], /^https:\/\/whoistake\.vercel\.app\/api\/canary\?trap=clone&host=evil\.com&path=%2Fx&ref=/);
 });
 
-// --- handler ------------------------------------------------------------------------------------------
 function call(query, headers = {}, env = {}, now = Date.now()) {
   return new Promise((resolve) => {
     const out = { headers: {}, status: 0, body: null };
@@ -76,11 +74,11 @@ test("bait: responde 404 normal y avisa; scan: 404 y solo log (sin Discord salvo
     const bait = await call({ trap: "bait", p: "/private/take-backup-2026.zip" }, { "x-forwarded-for": "2.2.2.2" }, { CANARY_WEBHOOK_URL: HOOK });
     assert.equal(bait.status, 404); assert.equal(bait.body, "Not Found"); assert.equal(f.calls.length, 1);
     const scan = await call({ trap: "scan", p: "/wp-login.php" }, { "x-forwarded-for": "3.3.3.3" }, { CANARY_WEBHOOK_URL: HOOK });
-    assert.equal(scan.status, 404); assert.equal(f.calls.length, 1);          // no se envio otro aviso
-    assert.equal(l.lines.length, 2);                                          // pero si quedo en los logs
+    assert.equal(scan.status, 404); assert.equal(f.calls.length, 1);
+    assert.equal(l.lines.length, 2);
     await call({ trap: "scan", p: "/.env" }, { "x-forwarded-for": "4.4.4.4" }, { CANARY_WEBHOOK_URL: HOOK, CANARY_ALERT_ALL: "1" });
     assert.equal(f.calls.length, 2);
-    assert.equal((await call({ trap: "loquesea" }, {}, {})).status, 404);     // trap desconocido = scan
+    assert.equal((await call({ trap: "loquesea" }, {}, {})).status, 404);
   } finally { f.restore(); l.restore(); }
 });
 
@@ -89,10 +87,10 @@ test("anti-spam: mismo origen no repite aviso en 10 min; tope de avisos por hora
   try {
     for (let i = 0; i < 5; i++) await call({ trap: "bait" }, { "x-forwarded-for": "5.5.5.5" }, env, t0 + i * 1000);
     assert.equal(f.calls.length, 1);
-    await call({ trap: "bait" }, { "x-forwarded-for": "5.5.5.5" }, env, t0 + 11 * 60e3);       // pasados 10 min vuelve a avisar
+    await call({ trap: "bait" }, { "x-forwarded-for": "5.5.5.5" }, env, t0 + 11 * 60e3);
     assert.equal(f.calls.length, 2);
     for (let i = 0; i < 60; i++) await call({ trap: "bait" }, { "x-forwarded-for": "6.6.6." + i }, env, t0 + 20 * 60e3 + i);
-    assert.equal(f.calls.length, 20);                                                           // tope: 20 por hora
+    assert.equal(f.calls.length, 20);
   } finally { f.restore(); l.restore(); }
 });
 

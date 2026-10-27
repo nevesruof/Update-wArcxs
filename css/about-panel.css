@@ -1,0 +1,100 @@
+.hero-content-panel:focus,
+.hero-content-panel:focus-visible {
+  outline: none !important;
+}
+
+.about-panel {
+  margin-right: -28px;
+  margin-left: -28px;
+  padding-right: 28px;
+  padding-left: 28px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.about-panel::-webkit-scrollbar {
+  display: none;
+}
+.about-panel > * {
+  flex-shrink: 0;
+}
+
+.panel-scroll {
+  position: absolute;
+  right: 9px;
+  z-index: 3;
+  width: 14px;
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  transition: opacity 0.2s ease;
+}
+.panel-scroll.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.panel-scroll::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: rgba(141, 207, 215, 0.12);
+}
+.panel-scroll-thumb {
+  position: absolute;
+  left: 50%;
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 4px;
+  background: rgba(141, 207, 215, 0.42);
+  cursor: grab;
+  touch-action: none;
+  transition: background 0.16s ease, width 0.16s ease, margin-left 0.16s ease;
+}
+.panel-scroll-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0 -8px;
+}
+.panel-scroll:hover .panel-scroll-thumb,
+.panel-scroll.is-dragging .panel-scroll-thumb {
+  width: 6px;
+  margin-left: -3px;
+  background: rgba(141, 207, 215, 0.7);
+}
+.panel-scroll.is-dragging .panel-scroll-thumb {
+  cursor: grabbing;
+}
+
+.bio-preview {
+  --shift: 0px;
+  max-width: calc(100vw - 48px);
+  transform: translate(calc(-50% + var(--shift)), 8px) rotate(-3deg);
+}
+.bio-link:hover .bio-preview,
+.bio-link:focus-visible .bio-preview {
+  transform: translate(calc(-50% + var(--shift))) rotate(-3deg);
+}
+.bio-preview--below {
+  top: calc(100% + 12px);
+  bottom: auto;
+  transform: translate(calc(-50% + var(--shift)), -8px) rotate(-3deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-panel {
+    scroll-behavior: auto;
+  }
+  .panel-scroll,
+  .panel-scroll-thumb {
+    transition: none;
+  }
+}

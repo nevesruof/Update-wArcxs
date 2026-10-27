@@ -1,9 +1,8 @@
-/* Pildora de musica (js/music-pill.js): arriba al centro del menu, pequena y casi transparente. */
 .np-pill{
   position:fixed;top:max(22px,env(safe-area-inset-top));left:50%;z-index:40;
   display:flex;align-items:center;gap:10px;max-width:min(300px,calc(100vw - 32px));
   padding:6px 14px 6px 6px;border-radius:16px;
-  background:rgba(14,20,28,.34);border:1px solid rgba(255,255,255,.085);   /* sin desenfoque del fondo: re-desenfocar un fondo animado en cada frame pesa mucho */
+  background:rgba(14,20,28,.34);border:1px solid rgba(255,255,255,.085);
   box-shadow:0 6px 20px rgba(0,0,0,.25);
   color:#eceff1;overflow:hidden;
   transform:translateX(-50%);
@@ -15,7 +14,6 @@
 .np-pill.is-last{opacity:.6}
 .np-pill.is-last:hover{opacity:.9}
 
-/* fina linea de progreso en el borde inferior */
 .np-pill::after{
   content:"";position:absolute;left:12px;right:12px;bottom:0;height:1px;
   background:linear-gradient(90deg,rgba(141,207,215,.85) var(--np-progress,0%),rgba(255,255,255,.07) var(--np-progress,0%));
@@ -45,7 +43,6 @@
 .np-pill-artist{font-size:10.5px;font-weight:500;color:rgba(236,239,241,.6)}
 .np-pill-artist:empty{display:none}
 
-/* ecualizador: se mueve solo mientras suena */
 .np-eq{display:flex;align-items:flex-end;gap:2px;flex:none;height:11px;margin-left:1px}
 .np-eq i{display:block;width:2px;height:3px;border-radius:1px;background:rgba(141,207,215,.85);transform-origin:bottom}
 .np-pill.is-live .np-eq i{animation:np-eq 1s ease-in-out infinite;animation-play-state:paused}
@@ -54,7 +51,6 @@
 .np-pill.is-live .np-eq i:nth-child(3){animation-delay:-.7s;animation-duration:1.15s}
 .np-pill.is-last .np-eq,.np-pill.is-muted .np-eq{display:none}
 
-/* letra: una linea con rebote bajo la pildora */
 .np-pill-lyrics{
   position:fixed;top:calc(max(22px,env(safe-area-inset-top)) + 58px);left:50%;z-index:39;transform:translateX(-50%);
   width:min(420px,calc(100vw - 32px));padding:6px 12px;text-align:center;pointer-events:none;
@@ -66,14 +62,11 @@
 .np-pill-lyrics .np-line.is-next{margin-top:4px;font-size:12px;color:rgba(255,255,255,.35)}
 .np-pill-status{margin:0;color:rgba(255,255,255,.45);font:11px ui-monospace,monospace}
 
-/* reproductor de YouTube: fuera de pantalla */
 .np-yt{position:fixed;left:-400px;top:0;width:200px;height:200px;opacity:.01;pointer-events:none;overflow:hidden}
 
-/* en el menu: solo se ve con el menu abierto (no con about me / guestbook / settings abiertos); js/menu-bg.js pone <html class="panel-open"> */
 html.panel-open .np-pill,
 html.panel-open .np-pill-lyrics{opacity:0;pointer-events:none;transform:translate(-50%,-10px)}
 
-/* paginas sin menu (Photos): esquina superior derecha, para no chocar con la barra de arriba */
 html[data-np-pos="corner"] .np-pill{left:auto;right:max(18px,env(safe-area-inset-right));transform:none;animation-name:np-pill-in-corner}
 html[data-np-pos="corner"] .np-pill-lyrics{left:auto;right:max(18px,env(safe-area-inset-right));transform:none;text-align:right}
 
@@ -91,7 +84,6 @@ html[data-np-pos="corner"] .np-pill-lyrics{left:auto;right:max(18px,env(safe-are
   .np-pill-lyrics .np-line.is-active{animation:none}
   .np-eq i{animation:none!important}
 }
-/* celular: el logo "take" y el menu van arriba y al centro; la pildora queda mas pegada al borde y mas pequena */
 @media (max-width:768px){
   .np-pill{top:max(10px,env(safe-area-inset-top));max-width:calc(100vw - 24px);padding-right:12px}
   .np-pill-title{font-size:12px}

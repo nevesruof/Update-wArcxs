@@ -1,28 +1,10 @@
 "use strict";
-/*
- * Servidor de cursores compartidos de Take (WebSocket).
- * Vercel no soporta WebSocket, asi que esto corre aparte (Render, Fly, Railway, un VPS, tu hosting de bots...).
- *
- *   npm install && npm start            (escucha en PORT, por defecto 8787, ruta /api/cursors)
- *
- * Variables de entorno:
- *   PORT             puerto (por defecto 8787)
- *   CURSOR_SECRET    el mismo valor que en Vercel (CURSOR_SECRET, o ADMIN_KEY si no pusiste CURSOR_SECRET).
- *                    Sirve para reconocerte como "take" (dueno). Sin el, todos son visitantes.
- *   ALLOWED_ORIGINS  dominios que pueden conectarse, separados por coma: "wwarcxs.vercel.app,midominio.com".
- *                    Si esta vacio acepta cualquiera (no recomendado en produccion).
- *   TRUST_PROXY=1    usar X-Forwarded-For para contar conexiones por IP (ponlo si estas detras de un proxy).
- *
- * Protocolo (lo que habla la web): el cliente manda profile / route / scene / move / click / idle / chat / reaction;
- * el servidor responde identity / cursor / click / scene / leave / speech / error.
- * El juego de burbujas y los "encuentros" no estan implementados: la web funciona igual sin ellos.
- */
 const http = require("node:http");
 const crypto = require("node:crypto");
 const { WebSocketServer } = require("ws");
 
 const PALETTE = ["#8dcfd7", "#f9a8d4", "#c4b5fd", "#86efac", "#fcd34d", "#fda4af", "#93c5fd", "#fdba74"];
-const REACTIONS = new Set(["\uD83D\uDC4B", "\u2764\uFE0F", "\uD83D\uDE02", "\uD83E\uDEE7"]); // 👋 ❤️ 😂 🫧
+const REACTIONS = new Set(["\uD83D\uDC4B", "\u2764\uFE0F", "\uD83D\uDE02", "\uD83E\uDEE7"]);
 const SCENES = /^[a-z0-9_-]{1,20}$/i;
 const CONTROL = /[\u0000-\u001f\u007f\u200b-\u200f\u202a-\u202e\u2028\u2029\u2066-\u2069\ufeff]/g;
 
@@ -43,7 +25,7 @@ function createCursorServer(opts = {}) {
   const trustProxy = opts.trustProxy !== undefined ? opts.trustProxy : env.TRUST_PROXY === "1";
   const maxPerIp = opts.maxPerIp || 6, maxTotal = opts.maxTotal || 300;
 
-  const clients = new Map();            // ws -> estado
+  const clients = new Map();
   const perIp = new Map();
   const server = http.createServer((req, res) => {
     res.writeHead(req.url === "/health" ? 200 : 404, { "Content-Type": "text/plain" });
@@ -69,7 +51,7 @@ function createCursorServer(opts = {}) {
     c.color = PALETTE[crypto.createHash("sha256").update(token).digest()[0] % PALETTE.length];
     c.owner = verifyOwnerToken(p.ownerToken, secret);
     let nick = text(p.nickname, 20).replace(/[^\p{L}\p{N} _.-]/gu, "").trim();
-    if (!c.owner && /^take$/i.test(nick)) nick = "";   // nadie mas puede llamarse como el dueno
+    if (!c.owner && /^take$/i.test(nick)) nick = "";
     c.label = c.owner ? "take" : nick || "guest-" + c.id.slice(0, 4);
   }
   function leaveRoute(c) { for (const [ws] of peers(c)) send(ws, { type: "leave", id: c.id }); }
@@ -119,7 +101,7 @@ function createCursorServer(opts = {}) {
         for (const [ws] of peers(c)) send(ws, msg);
         break;
       }
-      default: break; // "catch" y desconocidos: se ignoran
+      default: break;
     }
   }
 

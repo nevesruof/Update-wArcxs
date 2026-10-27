@@ -1,16 +1,9 @@
-/* ============================================================================
-   take-refresh.css — Renovación visual 2026 (capa aditiva)
-   No modifica reglas base: solo añade y refina. Cargar SIEMPRE después de
-   db114cc300aecac3.css y de los css/ extras. Si algo de aquí choca con el
-   diseño original, basta con quitar este archivo.
-   ============================================================================ */
-
 :root {
-  --take-ink: #04070b;          /* negro azulado profundo */
-  --take-panel: #0a1218;        /* base de paneles */
-  --take-line: rgba(141, 207, 215, .16);   /* bordes cian hielo */
+  --take-ink: #04070b;
+  --take-panel: #0a1218;
+  --take-line: rgba(141, 207, 215, .16);
   --take-line-soft: rgba(141, 207, 215, .09);
-  --take-ice: #8dcfd7;          /* acento existente del sitio */
+  --take-ice: #8dcfd7;
   --take-ice-bright: #bfe9ee;
   --take-text: #f3f4f5;
   --take-muted: #b3bec5;
@@ -18,10 +11,6 @@
   --take-ease: cubic-bezier(.22, 1, .36, 1);
 }
 
-/* ----------------------------------------------------------------------------
-   1. GRANO FÍLMICO sobre el fondo (por encima del canvas z:0, bajo el
-      contenido z:2; no toca los paneles). SVG de ruido estático, casi gratis.
-   ---------------------------------------------------------------------------- */
 body::after {
   content: "";
   position: fixed;
@@ -33,10 +22,6 @@ body::after {
   background-size: 160px 160px;
 }
 
-/* ----------------------------------------------------------------------------
-   2. SPLASH: la pantalla de entrada gana una penumbra radial en vez de negro
-      plano, y el logo respira con un halo cian muy suave.
-   ---------------------------------------------------------------------------- */
 .take-splash {
   background:
     radial-gradient(120% 90% at 50% 38%, rgba(20, 42, 52, .55) 0%, rgba(6, 10, 14, 0) 55%),
@@ -47,9 +32,6 @@ body::after {
   filter: drop-shadow(0 0 26px rgba(141, 207, 215, .28));
 }
 
-/* ----------------------------------------------------------------------------
-   3. HERO: nombre, tagline y contador
-   ---------------------------------------------------------------------------- */
 .hero-name-glitch {
   text-shadow:
     0 0 22px rgba(141, 207, 215, .22),
@@ -68,7 +50,6 @@ body::after {
   text-shadow: 0 1px 12px rgba(0, 0, 0, .6);
 }
 
-/* contador inferior derecha: separación más aireada y jerarquía */
 .hero-counter-badge { color: rgba(243, 244, 245, .72); }
 .hero-counter-sep   { color: rgba(141, 207, 215, .35); }
 .hero-counter-version {
@@ -76,10 +57,6 @@ body::after {
   text-shadow: 0 0 12px rgba(141, 207, 215, .25);
 }
 
-/* ----------------------------------------------------------------------------
-   4. MENÚ PRINCIPAL: reglas con degradado, items con lavado de luz al hover,
-      etiqueta que se desliza y barra activa con halo (antes verde plana).
-   ---------------------------------------------------------------------------- */
 .hero-menu-rule {
   background: linear-gradient(90deg,
     rgba(141, 207, 215, 0) 0%,
@@ -128,8 +105,6 @@ body::after {
   text-shadow: 0 0 18px rgba(141, 207, 215, .3);
 }
 
-/* la barra del item activo venía en verde inline desde el bundle: la pasamos
-   al cian del sitio con un halo suave a lo largo de toda la fila */
 .hero-menu-bar {
   background: linear-gradient(180deg,
     rgba(141, 207, 215, 0) 0%,
@@ -151,11 +126,6 @@ body::after {
   50%      { opacity: .95; }
 }
 
-/* ----------------------------------------------------------------------------
-   5. PANELES (about me / guestbook / settings / music): contenedor de cristal
-      oscuro. Antes el texto flotaba crudo sobre el fondo; ahora el panel tiene
-      cuerpo, borde fino cian, sombra ambiental y desenfoque de fondo.
-   ---------------------------------------------------------------------------- */
 .home-screen--panel:before {
   background:
     radial-gradient(90% 120% at 78% 30%, rgba(14, 28, 36, .72) 0%, rgba(7, 12, 17, .55) 55%, rgba(4, 7, 11, .35) 100%);
@@ -188,7 +158,6 @@ body::after {
         rgba(5, 9, 13, .88) 100%);
   }
 }
-/* filo de luz superior del panel */
 .hero-content-panel::before {
   content: "";
   position: absolute;
@@ -201,7 +170,6 @@ body::after {
   pointer-events: none;
 }
 
-/* cabecera del panel: línea divisoria con degradado en vez de trazo plano */
 .hero-panel-header {
   border-bottom: 1px solid transparent;
   border-image: linear-gradient(90deg,
@@ -212,7 +180,6 @@ body::after {
   padding-bottom: 16px;
 }
 
-/* pestañas (about me / music): subrayado que crece desde el centro */
 .panel-tabs button {
   position: relative;
   transition: color .18s ease;
@@ -237,7 +204,6 @@ body::after {
   text-shadow: 0 0 14px rgba(141, 207, 215, .3);
 }
 
-/* prosa del about: un pelín más de aire y mejor contraste sobre el cristal */
 .bio-prose { color: rgba(194, 203, 209, .82); }
 .bio-link {
   text-decoration-color: rgba(141, 207, 215, .55);
@@ -245,7 +211,6 @@ body::after {
 }
 .bio-link:hover { color: var(--take-ice-bright); text-decoration-color: var(--take-ice-bright); }
 
-/* enlaces sociales: brillo del color de marca al hover */
 .bio-socials a {
   transition: color .2s ease, transform .2s var(--take-ease), filter .2s ease;
 }
@@ -255,10 +220,8 @@ body::after {
   filter: drop-shadow(0 0 8px rgba(141, 207, 215, .5));
 }
 
-/* estado de discord: el punto online/idle/dnd respira */
 .bio-status .status-dot { box-shadow: 0 0 8px currentColor; }
 
-/* entrada del guestbook y tarjetas de música: tarjeta fina con hover */
 .guestbook-entry {
   background: rgba(243, 244, 245, .025);
   border: 1px solid rgba(243, 244, 245, .07);
@@ -288,7 +251,6 @@ body::after {
 .music-art-placeholder { background: rgba(141, 207, 215, .06); }
 .music-track small { color: var(--take-ice); }
 
-/* pie del guestbook y paginación: separación más limpia */
 .guestbook-footer { border-top-color: rgba(141, 207, 215, .12); }
 .panel-pagination button {
   border-radius: 6px;
@@ -297,7 +259,6 @@ body::after {
 }
 .panel-pagination button:hover { background: rgba(141, 207, 215, .08); color: var(--take-ice-bright); }
 
-/* botones de acción del panel (Save name, Reset, sign, send...) */
 .panel-action {
   border: 1px solid rgba(141, 207, 215, .22);
   border-radius: 8px;
@@ -313,8 +274,6 @@ body::after {
 .panel-action:active { transform: translateY(0); }
 .hero-content-panel button:disabled { opacity: .35; }
 
-/* campos de texto (nickname, guestbook, chat del cursor): fondo hundido y
-   foco con halo cian */
 .settings-panel input,
 .panel-form input,
 .panel-form textarea,
@@ -339,7 +298,6 @@ body::after {
 .panel-form textarea::placeholder,
 .cursor-chat-form input::placeholder { color: rgba(179, 190, 197, .4); }
 
-/* ajustes: tarjeta de fondo (Underwater / Skyline) con hover luminoso */
 .settings-background button {
   border-radius: 10px;
   transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
@@ -350,8 +308,6 @@ body::after {
 }
 .settings-actions .panel-action { min-width: 84px; justify-content: center; }
 
-/* Settings: Reset y Save name son botones de texto sin clase (bundle); los
-   pasamos al mismo lenguaje: Reset fantasma, Save name como acción cian */
 .settings-actions { gap: 10px; }
 .settings-actions button {
   padding: 7px 16px !important;
@@ -375,7 +331,6 @@ body::after {
   box-shadow: 0 0 18px rgba(141, 207, 215, .2);
 }
 
-/* scrollbars interiores de los paneles: finas, oscuras, con hover cian */
 .guestbook-scroll::-webkit-scrollbar,
 .music-track-list::-webkit-scrollbar,
 .hero-content-panel ::-webkit-scrollbar { width: 6px; }
@@ -389,10 +344,6 @@ body::after {
 .music-track-list::-webkit-scrollbar-thumb:hover,
 .hero-content-panel ::-webkit-scrollbar-thumb:hover { background: rgba(141, 207, 215, .3); }
 
-/* ----------------------------------------------------------------------------
-   6. INTERACCIONES DE CURSOR (chat / react / burbujas): botones del pie con
-      el mismo lenguaje del menú.
-   ---------------------------------------------------------------------------- */
 .cursor-interactions-hint button {
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 11px;
@@ -407,30 +358,22 @@ body::after {
   text-shadow: 0 0 12px rgba(141, 207, 215, .4);
 }
 
-/* ----------------------------------------------------------------------------
-   7. DETALLES GLOBALES
-   ---------------------------------------------------------------------------- */
 ::selection {
   background: rgba(141, 207, 215, .28);
   color: #fff;
 }
 
-/* foco visible coherente en todo el sitio */
 :focus-visible {
   outline: 1.5px solid rgba(141, 207, 215, .65) !important;
   outline-offset: 3px;
   border-radius: 4px;
 }
 
-/* píldora de música (now playing): borde y halo acordes con la nueva atmósfera */
 .np-pill {
   border-color: rgba(141, 207, 215, .18) !important;
   box-shadow: 0 4px 24px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .05) !important;
 }
 
-/* ----------------------------------------------------------------------------
-   8. MOVIMIENTO REDUCIDO: todo lo nuevo se apaga sin romper nada
-   ---------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .hero-menu-hint { animation: none; }
   .hero-menu-label, .hero-menu-item, .panel-action, .guestbook-entry,

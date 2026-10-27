@@ -1,19 +1,16 @@
 "use strict";
-// GET /api/yt-search -> { track, video } del video de YouTube para la cancion que suena AHORA en tu Discord/Spotify.
-// No acepta consultas del visitante: busca solo lo que el bot dice que estas escuchando, asi nadie puede gastar la cuota.
-// El resultado se guarda en el store por cancion (solo se busca una vez por cancion).
 const { fetchSnapshot, toPresence } = require("./_lib/bot");
 const { findVideo, norm, ConfigError } = require("./_lib/youtube");
 const { getStore } = require("./_lib/store");
 
-const DAILY_SEARCHES = 90; // search.list cuesta 100 de 10 000 unidades diarias: dejamos margen
+const DAILY_SEARCHES = 90;
 
 function dayKey(now = Date.now()) { return new Date(now).toISOString().slice(0, 10); }
 
 async function lookup(spotify, { store = getStore(), find = findVideo, now = Date.now } = {}) {
   const key = "take:yt:" + norm(spotify.artist) + ":" + norm(spotify.song);
   const cached = await store.get(key).catch(() => null);
-  if (cached) { try { return JSON.parse(cached); } catch (e) { /* se vuelve a buscar */ } }
+  if (cached) { try { return JSON.parse(cached); } catch (e) { } }
   const used = await store.hit("take:yt:searches:" + dayKey(now()), 86400).catch(() => 0);
   if (used > DAILY_SEARCHES) { const err = new Error("cuota diaria"); err.status = 429; throw err; }
   const durationMs = spotify.endTimestamp && spotify.startTimestamp ? spotify.endTimestamp - spotify.startTimestamp : 0;

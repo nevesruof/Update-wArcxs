@@ -1,10 +1,5 @@
-/* TKWM-40632a5f-41f0-9fe6-22f804d522ac
-   Ajustes propios de Take.
+/* TKWM-40632a5f-41f0-9fe6-22f804d522ac */
 
-   El fondo del menu es el canvas de js/menu-bg.js (filamentos de luz + motas bokeh) sobre la capa .menu-liquid.
-   (Antes: cubos 3D con particulas, y antes un fondo de ciudad futurista con three.js; ya no existen.) */
-
-/* Boton de fondo bloqueado (Settings > Background > Skyline): en gris y no se puede pulsar. */
 .settings-background button.is-locked,
 .settings-background button:disabled {
   opacity: .38;
@@ -17,48 +12,30 @@
 .settings-background button.is-locked:hover,
 .settings-background button:disabled:hover { background: transparent; border-color: #f3f4f51a; }
 
-/* --- Alineacion del menu y de los paneles ------------------------------------------------ */
-
-/* Movil: la flecha ▶ estaba dentro del flex y empujaba las etiquetas ~10px a la izquierda del centro
-   (logo, tagline y hint si estan centrados). Se saca del flujo para que la etiqueta quede centrada de verdad. */
 @media (max-width: 768px) {
   .hero-menu-item { position: relative; }
   .hero-menu-label { text-align: center; }
   .hero-menu-arrow { position: absolute; right: 16px; top: 50%; margin-top: -.6em; line-height: 1.2; }
 }
 
-/* Escritorio: las etiquetas tienen 20px de padding dentro de su caja y quedaban sangradas respecto al logo,
-   al tagline y al hint. Se corre la caja 20px a la izquierda para que el TEXTO quede en el mismo borde. */
 @media (min-width: 769px) {
   .hero-menu { margin-left: -20px; }
   .hero-menu-hint { margin-left: 0; }
   .hero-menu-stage .hero-menu-hint { padding-left: 0; }
 }
 
-/* El letter-spacing agrega espacio despues de la ultima letra y el titulo de la derecha ("about me")
-   quedaba unos px metido respecto a la linea divisoria. */
 .hero-panel-header h1 { margin-right: -.12em; }
 
-/* --- Aviso "Hardware acceleration is disabled" ---------------------------------------------------------
-   Sube al aparecer, se puede cerrar con la X y, si no, se quita solo a los pocos segundos bajando.
-   Usa la propiedad `translate` (no `transform`) para no pisar el -translate-x-1/2 que lo centra.
-   A proposito NO se apaga con "reducir movimiento": ese es justo el caso en el que sale el aviso y se quiere ver. */
 .hw-toast{animation:hw-toast-in .5s cubic-bezier(.22,1,.36,1) both}
 .hw-toast--leaving{animation:hw-toast-out .5s cubic-bezier(.55,0,.8,.3) forwards;pointer-events:none}
 @keyframes hw-toast-in{from{translate:0 calc(100% + 28px);opacity:0}to{translate:0 0;opacity:1}}
 @keyframes hw-toast-out{from{translate:0 0;opacity:1}to{translate:0 calc(100% + 28px);opacity:0}}
 
-/* --- Fondo liquido del menu principal (capa creada por js/menu-bg.js, detras de su canvas) -------------------
-   <video> en bucle (images/menu-bg.mp4/.webm, decodifica por hardware; poster estatico si el autoplay esta bloqueado).
-   El velo oscuro baja el brillo para que el logo, el menu y la pildora de musica se lean. Se ve solo con el menu abierto:
-   con about me / guestbook / settings abiertos (<html class="panel-open">, lo pone js/menu-bg.js) se desvanece y se pausa. */
 .menu-liquid{
-  position:fixed;inset:-3%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.4s ease;   /* -3%: recorta el borde del video */
+  position:fixed;inset:-3%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.4s ease;
   background:#000;overflow:hidden;contain:strict;transform:translateZ(0);
 }
 .menu-liquid video,.menu-liquid img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
-/* Velo renovado (2026): tres capas — resplandor superior, viñeta lateral e
-   inferior, y velo vertical. Da profundidad sin comerse los filamentos. */
 .menu-liquid::after{content:"";position:absolute;inset:0;background:
   radial-gradient(120% 90% at 50% 0%,rgba(96,170,190,.12) 0%,rgba(0,0,0,0) 46%),
   radial-gradient(150% 130% at 50% 42%,rgba(0,0,0,0) 38%,rgba(1,3,6,.5) 76%,rgba(0,2,4,.82) 100%),
@@ -66,10 +43,6 @@
 .menu-liquid.is-on{opacity:1}
 html.panel-open .menu-liquid.is-on{opacity:0;transition-duration:.5s}
 
-/* --- Rayos de luz (.menu-atmo): capa inyectada por js/menu-bg.js por delante
-   del vídeo y detrás del canvas de filamentos. Dos haces suaves que caen desde
-   arriba y se mecen muy despacio; aportan la profundidad de "luz de superficie"
-   del fondo. Solo CSS (transform/opacity), sin coste de dibujo por frame. --- */
 .menu-atmo{position:fixed;inset:-5%;z-index:0;pointer-events:none;overflow:hidden;opacity:0;contain:strict}
 .menu-atmo::before,.menu-atmo::after{
   content:"";position:absolute;top:-25%;height:150%;

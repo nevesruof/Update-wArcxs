@@ -1,5 +1,4 @@
 "use strict";
-// node --test tests/
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const http = require("node:http");
@@ -53,7 +52,7 @@ test("presencia: unknown / offline / bot sin datos => offline sin actividades", 
     assert.deepEqual(p.activities, []);
     assert.equal(p.spotify, null);
     assert.equal(p.listening_to_spotify, false);
-    assert.ok(p.discord_user.avatar); // el avatar se conserva aunque este offline
+    assert.ok(p.discord_user.avatar);
   }
   assert.equal(toPresence(null).discord_status, "offline");
   assert.equal(toPresence({}).discord_user.avatar, null);
@@ -76,7 +75,6 @@ test("top artist: el mas repetido, usa el primer artista y su portada mas recien
   assert.deepEqual(toTopArtist(null), {});
 });
 
-// --- handlers contra un "bot" falso ---------------------------------------------------------
 function fakeBot(handler) {
   return new Promise((resolve) => {
     const server = http.createServer(handler).listen(0, "127.0.0.1", () => resolve(server));
@@ -108,8 +106,8 @@ test("handler /api/activity: envia el token Bearer y devuelve la presencia", asy
     assert.equal(out.status, 200);
     assert.equal(out.body.discord_status, "dnd");
     assert.match(out.headers["cache-control"], /s-maxage=2/);
-    assert.equal(typeof out.body.now, "number"); // hora del servidor para sincronizar el segundo de la cancion
-    assert.equal(out.body.last_active, null); // online: no hay "last active"
+    assert.equal(typeof out.body.now, "number");
+    assert.equal(out.body.last_active, null);
     assert.equal(JSON.stringify(out.body).includes("secreto"), false);
   });
   bot.close();

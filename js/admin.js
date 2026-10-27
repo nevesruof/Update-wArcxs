@@ -1,6 +1,4 @@
-/* admin.js - login de admin: comprueba la clave en /api/admin/verify y la guarda en sessionStorage (solo esta pestana).
-   La web la usa luego para responder en el libro de visitas y para ser "take" en los cursores.
-   TKWM-40632a5f-41f0-9fe6-22f804d522ac */
+/* TKWM-40632a5f-41f0-9fe6-22f804d522ac */
 (() => {
   'use strict';
   const $ = (id) => document.getElementById(id);

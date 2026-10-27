@@ -1,17 +1,3 @@
-/*
- * Presencia de Discord compartida (about me, reproductor "now playing").
- *
- * Se carga en el <head>, antes que la app, para que:
- *  - la consulta a /api/activity empiece al abrir la pagina (no cuando abres "about me");
- *  - la foto de perfil ya este descargada (y recordada en localStorage de la visita anterior) cuando se abre about me;
- *  - todos los componentes lean el mismo dato y no hagan peticiones duplicadas.
- *
- * API: window.TakePresence = { get, subscribe, avatar, now, refresh }
- *   get()          ultima respuesta de /api/activity (o null si aun no llega)
- *   subscribe(fn)  fn(data) en cada actualizacion; devuelve la funcion para cancelar
- *   avatar()       avatar en vivo o, mientras llega, el recordado de la visita anterior
- *   now()          hora estimada del servidor en ms (para calcular el segundo exacto de la cancion)
- */
 (function () {
   "use strict";
   if (window.TakePresence) return;
@@ -21,7 +7,7 @@
   var POLL_HIDDEN_MS = 30000;
 
   var data = null;
-  var skew = 0; // hora del servidor - hora del navegador (ms)
+  var skew = 0;
   var subs = [];
   var timer = null;
   var preloaded = {};
@@ -30,12 +16,11 @@
     try { return JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (e) { return {}; }
   }
   function writeCache(obj) {
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify(obj)); } catch (e) { /* modo privado: da igual */ }
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(obj)); } catch (e) { }
   }
 
   var cache = readCache();
 
-  /** Descarga la imagen ya (y la deja en la cache del navegador) para que aparezca al instante. */
   function preload(url) {
     if (!url || preloaded[url]) return;
     preloaded[url] = true;
@@ -45,7 +30,7 @@
       link.as = "image";
       link.href = url;
       document.head.appendChild(link);
-    } catch (e) { /* sin head todavia */ }
+    } catch (e) { }
     var img = new Image();
     img.decoding = "async";
     img.src = url;
@@ -55,7 +40,7 @@
 
   function emit() {
     for (var i = 0; i < subs.length; i++) {
-      try { subs[i](data); } catch (e) { /* un suscriptor roto no frena a los demas */ }
+      try { subs[i](data); } catch (e) { }
     }
   }
 
@@ -69,7 +54,7 @@
     return fetch("/api/activity", { cache: "no-store" })
       .then(function (res) {
         if (!res.ok) throw new Error("activity " + res.status);
-        var age = Number(res.headers.get("age")) || 0; // segundos que lleva la respuesta en la CDN
+        var age = Number(res.headers.get("age")) || 0;
         return res.json().then(function (json) { return { json: json, age: age }; });
       })
       .then(function (r) {
@@ -83,15 +68,14 @@
         }
         emit();
       })
-      .catch(function () { /* se reintenta en el siguiente ciclo */ })
+      .catch(function () { })
       .then(schedule);
   }
 
   document.addEventListener("visibilitychange", function () {
-    if (!document.hidden) poll(); // al volver a la pestana: dato fresco y reloj resincronizado
+    if (!document.hidden) poll();
   });
 
-  // La foto recordada se descarga ya, antes incluso de que responda la API.
   preload(cache.avatar);
   poll();
 
