@@ -164,22 +164,8 @@ html.td-lite .td-spot { display: none; }
   .home-screen:not(.home-screen--panel) .hero-tagline { justify-content: center; }
 }
 
-.hero-menu { position: relative; counter-reset: tdm; }
-.hero-menu-item { counter-increment: tdm; }
-.hero-menu-item::before {
-  content: counter(tdm, decimal-leading-zero);
-  flex: none;
-  width: 2.4ch;
-  font: 500 10px/1 var(--td-mono);
-  letter-spacing: .08em;
-  color: rgba(var(--td-ice), .38);
-  transition: color .22s ease, transform .3s var(--td-ease);
-}
+.hero-menu { position: relative; }
 .hero-menu-label { color: rgba(255, 255, 255, .5); }
-@media (hover: hover) {
-  .hero-menu-item:hover::before { color: rgba(var(--td-ice-hi), .9); transform: translateX(2px); }
-}
-.hero-menu-item--active::before { color: rgba(var(--td-ice-hi), .9); }
 .hero-menu-label--active { color: #fff; }
 
 @media (min-width: 769px) {
@@ -192,26 +178,27 @@ html.td-lite .td-spot { display: none; }
     pointer-events: none;
   }
 }
-@media (max-width: 768px) {
-  .hero-menu-item::before { position: absolute; left: 18px; top: 50%; margin-top: -5px; }
-}
 
 .hero-menu-hint { font-size: 10px; letter-spacing: .12em; }
 
+/* solo la versión, en la esquina (el número de visitas ya no se muestra) */
+.hero-counter-badge,
+.hero-counter-sep { display: none; }
 .hero-counter-row {
-  padding: 6px 13px;
-  border: 1px solid rgba(var(--td-ice), .11);
+  padding: 5px 12px 5px 10px;
+  border: 1px solid rgba(var(--td-ice), .12);
   border-radius: 999px;
-  background: rgba(4, 8, 12, .42);
+  background: rgba(3, 7, 11, .5);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
 }
 .hero-counter-row::before {
   content: "";
-  width: 5px; height: 5px;
+  width: 4px; height: 4px;
   border-radius: 50%;
   background: rgba(var(--td-ice), .85);
-  box-shadow: 0 0 10px rgba(var(--td-ice), .7);
+  box-shadow: 0 0 9px rgba(var(--td-ice), .7);
 }
+.hero-counter-version { color: rgba(var(--td-ice-hi), .7); letter-spacing: .14em; }
 
 .cursor-interactions-hint button { letter-spacing: .04em; }
 
@@ -349,3 +336,32 @@ body { counter-reset: tdp; }
   .photo-slot:hover::before { color: rgba(var(--td-ice-hi), .8); --c: rgba(var(--td-ice-hi), .55); }
 }
 .photo-slot .absolute.bottom-0.right-0 { padding: 20px 24px; }
+
+/* ───────────── más oscuro, sin franja gris abajo, menú centrado en móvil ───────────── */
+/* --black del sitio es #19191e (gris): era lo que asomaba abajo cuando las capas fixed no llegaban al borde */
+html, body { background-color: #02060a; }
+
+.take-depth { height: 100vh; height: 100lvh; }
+.menu-liquid, .menu-atmo { bottom: -16%; }
+
+.menu-liquid::after {
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(40, 110, 135, .10) 0%, rgba(0, 0, 0, 0) 46%),
+    radial-gradient(150% 130% at 50% 42%, rgba(0, 0, 0, 0) 30%, rgba(1, 3, 7, .62) 74%, rgba(0, 2, 5, .9) 100%),
+    linear-gradient(180deg, rgba(2, 8, 15, .6) 0%, rgba(2, 6, 12, .72) 48%, rgba(1, 3, 7, .92) 100%);
+}
+.td-vignette {
+  background:
+    radial-gradient(125% 100% at 50% 40%, transparent 38%, rgba(1, 3, 6, .72) 100%),
+    linear-gradient(0deg, rgba(1, 3, 6, .7) 0%, rgba(1, 3, 6, 0) 30%);
+}
+.td-aurora i:nth-child(1) { background: radial-gradient(closest-side, rgba(22, 92, 120, .34), rgba(22, 92, 120, .11) 55%, transparent); }
+.td-aurora i:nth-child(2) { background: radial-gradient(closest-side, rgba(40, 56, 140, .30), rgba(40, 56, 140, .09) 58%, transparent); }
+
+@media (max-width: 768px) {
+  .home-screen:not(.home-screen--panel).hero-section {
+    justify-content: center;
+    padding-bottom: 9vh;
+    padding-bottom: 9svh;
+  }
+}

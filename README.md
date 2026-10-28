@@ -17,7 +17,7 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `pages/photos.html` | Galería de fotos (página estática, se sirve en `/photos`): 8 casillas vacías "About to fill up" con fondo de partículas |
 | `css/take-extras.css` | Estilo del botón Skyline bloqueado + velo renovado del fondo líquido (resplandor superior, viñeta) y rayos de luz `.menu-atmo` |
 | `css/take-refresh.css` | **Renovación visual 2026** de la home: grano fílmico, paneles de cristal oscuro, menú con hover luminoso, scrollbars/selection/focus. Capa aditiva: se carga la última y no toca reglas base |
-| `css/take-depth.css`, `js/take-depth.js` | **Renovación visual (oct 2026): profundidad y detalles.** Capa fija `.take-depth` (z-index 1, bajo el contenido) con aurora que deriva despacio, rejilla de puntos, halo que ilumina el panel abierto, viñeta, luz que sigue al cursor (solo mouse) y esquinas tipo visor. Además: menú numerado, riel lateral, borde de degradado en los paneles, entrada escalonada del contenido, casillas de Photos con esquinas y número. Se carga al final y no toca reglas base; ver sección "Capa de profundidad" |
+| `css/take-depth.css`, `js/take-depth.js` | **Renovación visual (oct 2026): profundidad y detalles.** Capa fija `.take-depth` (z-index 1, bajo el contenido) con aurora que deriva despacio, rejilla de puntos, halo que ilumina el panel abierto, viñeta, luz que sigue al cursor (solo mouse) y esquinas tipo visor. Además: riel lateral en el menú, borde de degradado en los paneles, entrada escalonada del contenido, casillas de Photos con esquinas y número. Se carga al final y no toca reglas base; ver sección "Capa de profundidad" |
 | `css/photos-refresh.css` | **Renovación visual 2026** de `/photos`: viñeta `.photos-atmo`, casillas con hover que levita y barrido de luz, píldora de navegación en cian hielo |
 | `js/menu-bg.js` | Fondo del menú: filamentos de luz (doble halo) + motas bokeh sobre el fondo líquido (Canvas 2D, sin librerías); inyecta la capa de rayos `.menu-atmo` |
 | `js/canary.js`, `robots.txt` | Trampas anti-copia (ver más abajo) |
@@ -31,7 +31,7 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `api/` | Funciones de Vercel: `/api/activity`, `/api/lastfm` (+`/top-artist`), `/api/canary`, `/api/yt-search`, y el backend nuevo: `/api/guestbook`, `/api/counter`, `/api/settings`, `/api/admin/verify`, `/api/admin/cursor-token` (lógica en `api/_lib/backend.js`) |
 | `cursors-server/` | Servidor WebSocket de los cursores compartidos (corre aparte de Vercel) |
 | `js/presence.js` | Consulta `/api/activity` desde que carga la página y la comparte (`TakePresence`); precarga la foto de perfil |
-| `js/music-pill.js`, `css/music-pill.css` | Píldora de música del menú (arriba al centro): suena sola con el primer click, en el mismo segundo que Discord (ver más abajo) |
+| `js/music-pill.js`, `css/music-pill.css` | Píldora de música (ya **no se carga en el home**; solo en Photos, esquina superior derecha). Para volver a ponerla en el home agrega `<script src="/js/music-pill.js" defer></script>` a `index.html`. Antes: píldora arriba al centro: suena sola con el primer click, en el mismo segundo que Discord (ver más abajo) |
 | `js/particles-bg.js` | Fondo de partículas conectadas de Photos (mismo estilo que el menú, más sutil) |
 | `js/photos-page.js` | Photos: aviso de hardware (X + se quita solo) y la transición de Portfolio |
 | `css/about-extras.css` | Estilos del about (previews, stack con color al pasar el mouse) |
@@ -97,6 +97,8 @@ Se añade encima del fondo existente (video líquido, filamentos y motas no camb
 - **Qué crea el JS:** un solo `div.take-depth` con aurora (3 manchas), rejilla, halo, scrim del menú, viñeta, luz del cursor y 4 esquinas. Espera a `window.__takeReady` (la app ya hidrató) y, si React vuelve a pintar el `<body>`, la capa se reinserta sola.
 - **Cursor:** el parallax y la luz solo se activan con mouse (`hover: hover` + `pointer: fine`). El loop de `requestAnimationFrame` se detiene solo cuando todo se asentó y no corre con la pestaña oculta.
 - **Rendimiento:** equipos con ≤2 núcleos o ≤2 GB de RAM reciben `html.td-lite` (sin deriva de la aurora ni luz del cursor). Con "reducir movimiento" no hay animaciones ni seguimiento del cursor.
+- **Home:** el contador de visitas ya no se muestra; solo queda la versión (`v2.5`) en una píldora en la esquina. En móvil el bloque título + menú va centrado en vertical.
+- **Fondo oscuro:** `html`/`body` usan `#02060a` (antes `--black` = `#19191e`, el gris que asomaba abajo en iPhone) y las capas fijas se extienden bajo el borde inferior.
 - **Panel abierto:** `html.panel-open` (lo pone `menu-bg.js`) apaga el scrim del menú y enciende el halo detrás del panel.
 - **Ajustes rápidos:** colores y opacidades de la aurora, la rejilla y el halo están al inicio de `css/take-depth.css`; las variables `--td-ice` / `--td-ice-hi` controlan el cian.
 - **Dominio y meta:** `og:url`, `og:image`, `twitter:image` y el canonical de `/photos` ya apuntan a `whoistake.com`; las descripciones ahora dicen "dev · anticheat · forensics" como el home. Sigue pendiente `twitter:creator` (`@Akryst_`) y los handles de redes de la sección "Pendientes".
