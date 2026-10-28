@@ -17,10 +17,12 @@ se piden con rutas absolutas (`/fonts/...`, `/_next/...`) y solo cargan desde un
 | `pages/photos.html` | Galería de fotos (página estática, se sirve en `/photos`): 8 casillas vacías "About to fill up" con fondo de partículas |
 | `css/take-extras.css` | Estilo del botón Skyline bloqueado + velo renovado del fondo líquido (resplandor superior, viñeta) y rayos de luz `.menu-atmo` |
 | `css/take-refresh.css` | **Renovación visual 2026** de la home: grano fílmico, paneles de cristal oscuro, menú con hover luminoso, scrollbars/selection/focus. Capa aditiva: se carga la última y no toca reglas base |
+| `css/take-depth.css`, `js/take-depth.js` | **Renovación visual (oct 2026): profundidad y detalles.** Capa fija `.take-depth` (z-index 1, bajo el contenido) con aurora que deriva despacio, rejilla de puntos, halo que ilumina el panel abierto, viñeta, luz que sigue al cursor (solo mouse) y esquinas tipo visor. Además: menú numerado, riel lateral, borde de degradado en los paneles, entrada escalonada del contenido, casillas de Photos con esquinas y número. Se carga al final y no toca reglas base; ver sección "Capa de profundidad" |
 | `css/photos-refresh.css` | **Renovación visual 2026** de `/photos`: viñeta `.photos-atmo`, casillas con hover que levita y barrido de luz, píldora de navegación en cian hielo |
 | `js/menu-bg.js` | Fondo del menú: filamentos de luz (doble halo) + motas bokeh sobre el fondo líquido (Canvas 2D, sin librerías); inyecta la capa de rayos `.menu-atmo` |
 | `js/canary.js`, `robots.txt` | Trampas anti-copia (ver más abajo) |
 | `css/turbo-boost.css`, `js/turbo-boost.js` | Cursor 3D y botón TURBO BOOST (solo en Skyline; inactivo mientras Skyline esté bloqueado) |
+| `opengraph-image.png`, `twitter-image.png` | Imagen al compartir el link (1200×630, mismo estilo del sitio) |
 | `images/` | Logo y fondos (`bg-fallback`, `bg-skyline`) |
 | `videos/skyline.mp4` | Fondo en video |
 | `fonts/spanish.woff` | Fuente del título `TAKE` (subconjunto de 17 KB, se precarga). `spanish.ttf` es el original completo, solo para regenerarla |
@@ -89,6 +91,15 @@ Pruebas: `node --test tests/lastfm.test.js`.
 - La píldora de música no usa `backdrop-filter` (re-desenfocar un fondo animado en cada frame pesa mucho).
 - Con "reducir movimiento" queda una imagen fija sobre fondo negro.
 - Ajustes rápidos al inicio del archivo: `FILAMENTS`, `STEPS`, `MOTES`, `COLOR`, `ALPHA`, `FPS`, `SCALE`.
+
+## Capa de profundidad (`css/take-depth.css` + `js/take-depth.js`)
+Se añade encima del fondo existente (video líquido, filamentos y motas no cambian). Todo se anima con `transform`/`opacity`.
+- **Qué crea el JS:** un solo `div.take-depth` con aurora (3 manchas), rejilla, halo, scrim del menú, viñeta, luz del cursor y 4 esquinas. Espera a `window.__takeReady` (la app ya hidrató) y, si React vuelve a pintar el `<body>`, la capa se reinserta sola.
+- **Cursor:** el parallax y la luz solo se activan con mouse (`hover: hover` + `pointer: fine`). El loop de `requestAnimationFrame` se detiene solo cuando todo se asentó y no corre con la pestaña oculta.
+- **Rendimiento:** equipos con ≤2 núcleos o ≤2 GB de RAM reciben `html.td-lite` (sin deriva de la aurora ni luz del cursor). Con "reducir movimiento" no hay animaciones ni seguimiento del cursor.
+- **Panel abierto:** `html.panel-open` (lo pone `menu-bg.js`) apaga el scrim del menú y enciende el halo detrás del panel.
+- **Ajustes rápidos:** colores y opacidades de la aurora, la rejilla y el halo están al inicio de `css/take-depth.css`; las variables `--td-ice` / `--td-ice-hi` controlan el cian.
+- **Dominio y meta:** `og:url`, `og:image`, `twitter:image` y el canonical de `/photos` ya apuntan a `whoistake.com`; las descripciones ahora dicen "dev · anticheat · forensics" como el home. Sigue pendiente `twitter:creator` (`@Akryst_`) y los handles de redes de la sección "Pendientes".
 
 ## Música de fondo
 `sfx/ambient.mp3` reemplaza al piano/ambiente anterior. Arranca al tocar la pantalla de carga (los navegadores no permiten
