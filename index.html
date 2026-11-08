@@ -507,6 +507,102 @@ body.entered .np-dock.live {
   animation: none;
 }
 
+.audio-engine {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.np-vol {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.np-vol button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #b4b4b9;
+  transition: color 0.2s ease, transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.np-vol button:hover {
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.np-vol svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.np-vol .x {
+  display: none;
+}
+
+.np-vol.silent .x {
+  display: block;
+}
+
+.np-vol.silent .w1,
+.np-vol.silent .w2 {
+  display: none;
+}
+
+.np-vol input {
+  --v: 30%;
+  flex: 1;
+  min-width: 0;
+  height: 3px;
+  margin: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #fff var(--v), rgba(255, 255, 255, 0.14) var(--v));
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.np-vol input::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgb(255 255 255 / 0);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.np-vol input:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgb(255 255 255 / 0.14);
+  transform: scale(1.1);
+}
+
+.np-vol input::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+
 .np-find {
   display: grid;
   gap: 6px;
@@ -3990,6 +4086,10 @@ button:focus-visible {
         </div>
         <button class="np-act" id="npAct" type="button" aria-label="Show lyrics" title="Lyrics"><svg class="i-lyr" viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h13"/></svg><svg class="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
       </div>
+      <div class="np-vol" id="npVol">
+        <button type="button" aria-label="Mute"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path class="w1" d="M15.5 9.5a3.5 3.5 0 0 1 0 5"/><path class="w2" d="M18.5 7a7 7 0 0 1 0 10"/><path class="x" d="m16 9 5 6m0-6-5 6"/></svg></button>
+        <input id="npVolRange" type="range" min="0" max="100" step="1" value="30" aria-label="Volume">
+      </div>
       <div class="np-find">
         <label class="np-field"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="npSearch" type="search" placeholder="Search listened songs" aria-label="Search listened songs" autocomplete="off" spellcheck="false"></label>
         <div class="np-results-wrap" id="npWrap"><div class="np-results" id="npResults" aria-label="Song search results"></div></div>
@@ -5299,7 +5399,392 @@ function avatarUrl(user) {
 
 const aura = { track: "", front: "auraA", color: "" };
 const dock = { start: 0, end: 0, timer: 0, song: null, id: "" };
-const manual = { audio: null, id: "", token: 0, seeking: false };
+const manual = { audio: null, stop: null, id: "", token: 0, seeking: false };
+
+const music = {
+  player: null,
+  ready: null,
+  host: null,
+  entered: false,
+  volume: 30,
+  muted: false,
+  source: "none",
+  videoId: "",
+  loaded: "",
+  candidates: [],
+  generation: 0,
+  key: "",
+  doneKey: "",
+  warm: "",
+  playing: false,
+  blocked: false,
+  pending: false,
+  retryAt: 0,
+  failures: 0,
+  watch: 0,
+  matches: new Map(),
+  asks: new Map(),
+  timer: 0
+};
+
+try {
+  const saved = Number(localStorage.getItem("site-global-volume"));
+  if (Number.isFinite(saved) && localStorage.getItem("site-global-volume") !== null) music.volume = Math.min(100, Math.max(0, saved));
+} catch (error) {
+  music.volume = 30;
+}
+
+function livePosition() {
+  return dock.start && dock.end > Date.now() ? Math.max(0, (Date.now() - dock.start) / 1000) : null;
+}
+
+function loadYouTube() {
+  if (window.YT && window.YT.Player) return Promise.resolve(window.YT);
+  if (music.script) return music.script;
+
+  music.script = new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error("YouTube no respondió")), 10000);
+    window.onYouTubeIframeAPIReady = () => {
+      clearTimeout(timeout);
+      resolve(window.YT);
+    };
+    const script = document.createElement("script");
+    script.src = "https://www.youtube.com/iframe_api";
+    script.onerror = () => {
+      clearTimeout(timeout);
+      reject(new Error("YouTube no disponible"));
+    };
+    document.head.append(script);
+  }).catch((error) => {
+    music.script = null;
+    throw error;
+  });
+
+  return music.script;
+}
+
+function applyLevel() {
+  if (manual.audio instanceof HTMLAudioElement) {
+    manual.audio.volume = Math.min(1, music.volume / 100);
+    manual.audio.muted = music.muted;
+  }
+  const player = music.player;
+  if (!player || typeof player.setVolume !== "function") return;
+  try {
+    if (music.muted || music.volume === 0) {
+      player.mute();
+    } else {
+      player.unMute();
+      player.setVolume(music.volume);
+    }
+  } catch (error) {
+    return;
+  }
+}
+
+function paintVolume() {
+  const silent = music.muted || music.volume === 0;
+  const box = $("npVol");
+  box.classList.toggle("silent", silent);
+  box.querySelector("button").setAttribute("aria-label", silent ? "Unmute" : "Mute");
+  $("npVolRange").value = String(music.muted ? 0 : music.volume);
+  $("npVolRange").style.setProperty("--v", `${music.muted ? 0 : music.volume}%`);
+  if (music.entered) $("sound").setAttribute("aria-pressed", String(!silent));
+}
+
+function setVolume(value) {
+  const next = Math.min(100, Math.max(0, Number(value) || 0));
+  music.volume = next;
+  music.muted = next === 0;
+  try {
+    localStorage.setItem("site-global-volume", String(next));
+  } catch (error) {
+    music.muted = next === 0;
+  }
+  applyLevel();
+  paintVolume();
+}
+
+function setMuted(muted) {
+  music.muted = muted;
+  if (!muted && music.volume === 0) music.volume = 30;
+  applyLevel();
+  paintVolume();
+}
+
+function ensurePlayer() {
+  if (music.ready) return music.ready;
+
+  music.ready = loadYouTube()
+    .then(
+      (YT) =>
+        new Promise((resolve, reject) => {
+          const host = document.createElement("div");
+          host.className = "audio-engine";
+          host.setAttribute("aria-hidden", "true");
+          const target = document.createElement("div");
+          target.id = "audioEngine";
+          host.append(target);
+          document.body.append(host);
+          music.host = host;
+
+          const timer = setTimeout(() => reject(new Error("Reproductor no disponible")), 10000);
+
+          music.player = new YT.Player("audioEngine", {
+            width: "200",
+            height: "200",
+            playerVars: { controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, modestbranding: 1, playsinline: 1, origin: location.origin, rel: 0 },
+            events: {
+              onReady: () => {
+                clearTimeout(timer);
+                applyLevel();
+                resolve(music.player);
+              },
+              onStateChange: (event) => {
+                const playing = event.data === YT.PlayerState.PLAYING;
+                music.playing = playing;
+                if (playing) {
+                  clearTimeout(music.watch);
+                  music.blocked = false;
+                  music.failures = 0;
+                }
+                if (event.data === YT.PlayerState.ENDED) musicEnded();
+              },
+              onAutoplayBlocked: () => {
+                music.blocked = true;
+              },
+              onError: () => {
+                clearTimeout(timer);
+                music.loaded = "";
+                nextCandidate();
+              }
+            }
+          });
+        })
+    )
+    .catch((error) => {
+      music.ready = null;
+      music.loaded = "";
+      if (music.player && music.player.destroy) music.player.destroy();
+      music.player = null;
+      if (music.host) music.host.remove();
+      music.host = null;
+      throw error;
+    });
+
+  return music.ready;
+}
+
+async function resolveTrack(track, artist) {
+  const key = `${track}\u0000${artist}`.toLowerCase();
+  const saved = music.matches.get(key);
+  if (saved && saved.expires > Date.now()) return saved;
+  if (music.asks.has(key)) return music.asks.get(key);
+
+  const ask = fetch(`/api/playback?${new URLSearchParams({ track, artist })}`, { signal: AbortSignal.timeout(12000) })
+    .then((response) => (response.ok ? response.json() : { videoIds: [] }))
+    .catch(() => ({ videoIds: [] }))
+    .then((body) => {
+      const ids = (Array.isArray(body.videoIds) ? body.videoIds : []).filter((id) => /^[\w-]{11}$/.test(id));
+      const match = { videoIds: ids, videoId: ids[0] || "", available: ids.length > 0, expires: Date.now() + (ids.length ? 6 * 3600000 : 60000) };
+      music.matches.set(key, match);
+      return match;
+    })
+    .finally(() => music.asks.delete(key));
+
+  music.asks.set(key, ask);
+  return ask;
+}
+
+function watchAutoplay(request) {
+  clearTimeout(music.watch);
+  music.watch = setTimeout(() => {
+    if (request === music.generation && !music.playing && music.source !== "none") music.blocked = true;
+  }, 3000);
+}
+
+async function playVideo(id, offset, source, keep) {
+  if (!music.entered) return false;
+  if (!keep) music.candidates = [];
+  const request = ++music.generation;
+  music.blocked = false;
+
+  try {
+    const player = await ensurePlayer();
+    if (request !== music.generation) return false;
+
+    const live = source === "spotify" ? livePosition() : null;
+    const start = Math.max(0, live === null ? offset : live);
+    music.source = source;
+    music.videoId = id;
+    applyLevel();
+
+    if (music.loaded === id) {
+      player.seekTo(start, true);
+      player.playVideo();
+    } else {
+      player.loadVideoById({ videoId: id, startSeconds: start });
+    }
+
+    music.loaded = id;
+    watchAutoplay(request);
+    return true;
+  } catch (error) {
+    if (request === music.generation) nextCandidate();
+    return false;
+  }
+}
+
+function playMatch(match, offset, source) {
+  music.candidates = match.videoIds.slice(1).map((id) => ({ id, offset, source }));
+  return playVideo(match.videoId, offset, source, true);
+}
+
+function nextCandidate() {
+  const next = music.candidates.shift();
+  if (next) {
+    playVideo(next.id, next.offset, next.source, true);
+    return;
+  }
+
+  const wasManual = music.source === "manual";
+  music.generation += 1;
+  clearTimeout(music.watch);
+  music.source = "none";
+  music.playing = false;
+  music.loaded = "";
+  music.retryAt = Date.now() + [3000, 10000, 30000][Math.min(music.failures++, 2)];
+  music.key = "";
+
+  if (wasManual) {
+    findNote("Couldn't play that song.");
+    stopManual();
+  }
+}
+
+function musicStop() {
+  music.generation += 1;
+  music.candidates = [];
+  music.key = "";
+  music.blocked = false;
+  clearTimeout(music.watch);
+  music.source = "none";
+  music.playing = false;
+  try {
+    if (music.player && music.player.pauseVideo) music.player.pauseVideo();
+  } catch (error) {
+    music.loaded = "";
+  }
+}
+
+function musicEnded() {
+  if (music.source === "manual") {
+    stopManual();
+    return;
+  }
+  if (music.source === "spotify") {
+    music.doneKey = `${dock.song ? dock.song.id : ""}|${dock.start}`;
+    musicStop();
+  }
+}
+
+function retryBlocked() {
+  if (!music.player || music.source === "none") return;
+  if (music.playing && !music.blocked) return;
+  try {
+    applyLevel();
+    if (music.source === "spotify") {
+      const live = livePosition();
+      if (live !== null) music.player.seekTo(live, true);
+    }
+    music.player.playVideo();
+    watchAutoplay(music.generation);
+  } catch (error) {
+    music.blocked = true;
+  }
+}
+
+function syncSpotify() {
+  const song = dock.song;
+  const live = Boolean(song && dock.start && dock.end > Date.now());
+
+  if (live && music.warm !== song.id) {
+    music.warm = song.id;
+    resolveTrack(song.title, song.artist).catch(() => {});
+  }
+  if (!live) music.warm = "";
+
+  if (music.source === "manual") return;
+
+  if (!live) {
+    if (music.source === "spotify" || music.key) musicStop();
+    return;
+  }
+
+  if (!music.entered || music.pending) return;
+
+  if (music.key === song.id && music.source === "spotify") {
+    if (music.playing && music.player) {
+      try {
+        const wanted = livePosition();
+        const length = music.player.getDuration() || 0;
+        if (wanted !== null && (!length || wanted < length - 1) && Math.abs(music.player.getCurrentTime() - wanted) > 1.5) music.player.seekTo(wanted, true);
+      } catch (error) {
+        return;
+      }
+    }
+    return;
+  }
+
+  if (music.key && music.key !== song.id) musicStop();
+  if (music.doneKey === `${song.id}|${dock.start}`) return;
+  if (Date.now() < music.retryAt) return;
+
+  const id = song.id;
+  music.key = id;
+  music.pending = true;
+
+  resolveTrack(song.title, song.artist)
+    .then((match) => {
+      if (music.key !== id || music.source === "manual") return false;
+      return match.available ? playMatch(match, livePosition() || 0, "spotify") : false;
+    })
+    .catch(() => false)
+    .then((started) => {
+      music.pending = false;
+      if (!started && music.key === id && music.source !== "spotify") {
+        music.key = "";
+        music.retryAt = Date.now() + [3000, 10000, 30000][Math.min(music.failures++, 2)];
+      }
+      syncSpotify();
+    });
+}
+
+function startMusic() {
+  if (music.entered) return;
+  music.entered = true;
+  paintVolume();
+  ensurePlayer().catch(() => {});
+  music.timer = setInterval(syncSpotify, 1000);
+  ["pointerup", "touchend", "click", "keydown"].forEach((type) => document.addEventListener(type, retryBlocked, { passive: true }));
+  document.addEventListener("visibilitychange", () => {
+    retryBlocked();
+    syncSpotify();
+  });
+  window.addEventListener("online", () => {
+    music.retryAt = 0;
+    syncSpotify();
+  });
+  syncSpotify();
+}
+
+function setupVolume() {
+  const range = $("npVolRange");
+  range.addEventListener("input", () => setVolume(range.value));
+  $("npVol").querySelector("button").addEventListener("click", () => setMuted(!(music.muted || music.volume === 0)));
+  paintVolume();
+}
+
 
 function hashColor(text) {
   let hash = 0;
@@ -5579,6 +6064,7 @@ function paintSpotify(data) {
       tickDock();
     }
     paintAura(null);
+    syncSpotify();
     return;
   }
 
@@ -5593,6 +6079,7 @@ function paintSpotify(data) {
   dock.song = song;
   dock.start = (track.timestamps && track.timestamps.start) || 0;
   dock.end = (track.timestamps && track.timestamps.end) || 0;
+  syncSpotify();
   if (!manual.audio) {
     paintDockRow(song);
     $("npAct").disabled = false;
@@ -5692,11 +6179,8 @@ function markPlaying() {
 
 function stopManual() {
   manual.token += 1;
-  if (manual.audio) {
-    manual.audio.pause();
-    manual.audio.removeAttribute("src");
-    manual.audio.load();
-  }
+  if (manual.stop) manual.stop();
+  manual.stop = null;
   manual.audio = null;
   manual.id = "";
   $("npCard").classList.remove("manual");
@@ -5709,6 +6193,7 @@ function stopManual() {
   dock.timer = dock.song ? setInterval(() => !document.hidden && tickDock(), 1000) : 0;
   tickDock();
   markPlaying();
+  syncSpotify();
 }
 
 function findNote(text) {
@@ -5722,6 +6207,27 @@ function findNote(text) {
   setTimeout(() => note.remove(), 2600);
 }
 
+function beginManual(song, audio, stop) {
+  if (manual.stop) manual.stop();
+  manual.audio = audio;
+  manual.stop = stop;
+  manual.id = song.id;
+  $("npCard").classList.add("manual");
+  $("npAct").disabled = false;
+  $("npAct").setAttribute("aria-label", "Stop playback and return to Spotify");
+  $("npAct").title = "Stop playback and return to Spotify";
+  paintDockRow({ id: `manual:${song.id}`, title: song.name, artist: song.artist, art: song.image });
+  clearInterval(dock.timer);
+  dock.timer = setInterval(() => !document.hidden && tickDock(), 250);
+  tickDock();
+  markPlaying();
+}
+
+function settleItem(item) {
+  finder.busy = "";
+  if (item) item.classList.remove("busy");
+}
+
 async function toggleSong(song) {
   if (manual.id === song.id) {
     stopManual();
@@ -5733,6 +6239,56 @@ async function toggleSong(song) {
   const item = [...document.querySelectorAll(".np-find-item")].find((node) => node.dataset.id === song.id);
   if (item) item.classList.add("busy");
 
+  if (music.entered) {
+    let match = null;
+    try {
+      match = await resolveTrack(song.name, song.artist.split(",")[0].trim());
+    } catch (error) {
+      match = null;
+    }
+
+    if (token !== manual.token) return;
+
+    if (match && match.available) {
+      const started = await playMatch(match, 0, "manual");
+      if (token !== manual.token) return;
+      settleItem(item);
+
+      if (started && music.source === "manual") {
+        const adapter = {
+          get currentTime() {
+            try {
+              return music.player.getCurrentTime() || 0;
+            } catch (error) {
+              return 0;
+            }
+          },
+          set currentTime(value) {
+            try {
+              music.player.seekTo(value, true);
+            } catch (error) {
+              return;
+            }
+          },
+          get duration() {
+            try {
+              return music.player.getDuration() || 0;
+            } catch (error) {
+              return 0;
+            }
+          }
+        };
+        beginManual(song, adapter, musicStop);
+        return;
+      }
+
+      if (started) {
+        findNote("Couldn't play that song.");
+        return;
+      }
+    }
+  }
+
   let url = "";
   try {
     url = await previewFor(song);
@@ -5741,8 +6297,7 @@ async function toggleSong(song) {
   }
 
   if (token !== manual.token) return;
-  finder.busy = "";
-  if (item) item.classList.remove("busy");
+  settleItem(item);
 
   if (!url) {
     findNote("No preview available for that song.");
@@ -5750,7 +6305,8 @@ async function toggleSong(song) {
   }
 
   const audio = new Audio(url);
-  audio.volume = 0.7;
+  audio.volume = Math.min(1, music.volume / 100);
+  audio.muted = music.muted;
   audio.addEventListener("ended", () => {
     if (manual.audio === audio) stopManual();
   });
@@ -5767,18 +6323,14 @@ async function toggleSong(song) {
     return;
   }
 
-  if (manual.audio) manual.audio.pause();
-  manual.audio = audio;
-  manual.id = song.id;
-  $("npCard").classList.add("manual");
-  $("npAct").disabled = false;
-  $("npAct").setAttribute("aria-label", "Stop playback and return to Spotify");
-  $("npAct").title = "Stop playback and return to Spotify";
-  paintDockRow({ id: `manual:${song.id}`, title: song.name, artist: song.artist, art: song.image });
-  clearInterval(dock.timer);
-  dock.timer = setInterval(() => !document.hidden && tickDock(), 250);
-  tickDock();
-  markPlaying();
+  musicStop();
+  music.source = "manual";
+  beginManual(song, audio, () => {
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+    music.source = "none";
+  });
 }
 
 function renderFinder(query) {
@@ -5869,6 +6421,8 @@ function setupDock() {
   seek.addEventListener("pointerup", release);
   seek.addEventListener("pointercancel", release);
   seek.addEventListener("blur", release);
+
+  setupVolume();
 
   box.hidden = false;
   requestAnimationFrame(() => box.classList.add("live"));
@@ -6854,6 +7408,7 @@ function setupSound() {
 
   const toggle = async (turnOn) => {
     button.setAttribute("aria-pressed", String(turnOn));
+    setMuted(!turnOn);
     if (!profile.audio) return;
 
     try {
@@ -6870,6 +7425,7 @@ function setupSound() {
   button.addEventListener("click", () => toggle(button.getAttribute("aria-pressed") !== "true"));
 
   return () => {
+    startMusic();
     if (profile.audio) toggle(true);
   };
 }
