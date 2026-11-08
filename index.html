@@ -9146,7 +9146,7 @@ function setupEscape() {
 
     const layers = [
       ["keys", () => toggleLayer($("keys"), false)],
-      ["letter", () => toggleLayer($("letter"), false)],
+      ["letter", () => setLetterOpen(false)],
       ["share", () => toggleLayer($("share"), false)],
       ["lyr", () => setLyrOpen(false)],
       ["shotOverlay", () => toggleLayer($("shotOverlay"), false)],
@@ -9831,6 +9831,21 @@ async function openShare() {
   }
 }
 
+function setLetterOpen(open) {
+  const layer = $("letter");
+  const image = $("letterGif");
+  const source = profile.letter && profile.letter.gif;
+  if (open === layer.classList.contains("open")) return;
+
+  if (open) {
+    if (source && /^(https:|assets\/)/i.test(source)) image.src = source;
+  } else {
+    image.removeAttribute("src");
+  }
+
+  toggleLayer(layer, open);
+}
+
 function setupLetter() {
   const layer = $("letter");
   const data = profile.letter;
@@ -9842,22 +9857,15 @@ function setupLetter() {
   $("letterTo").textContent = data.to;
   $("letterSign").textContent = data.sign;
   $("letterBody").innerHTML = data.lines.map((line, index) => `<p style="--n:${index}">${esc(line)}</p>`).join("");
-
-  const image = $("letterGif");
   $("letterGifBox").hidden = !(data.gif && /^(https:|assets\/)/i.test(data.gif));
-  image.addEventListener("error", () => {
+  $("letterGif").addEventListener("error", () => {
     $("letterGifBox").hidden = true;
   });
 
-  const open = () => {
-    if (!image.getAttribute("src") && data.gif && /^(https:|assets\/)/i.test(data.gif)) image.src = data.gif;
-    toggleLayer(layer, true);
-  };
-
-  $("letterBtn").addEventListener("click", open);
-  $("letterClose").addEventListener("click", () => toggleLayer(layer, false));
+  $("letterBtn").addEventListener("click", () => setLetterOpen(true));
+  $("letterClose").addEventListener("click", () => setLetterOpen(false));
   layer.addEventListener("click", (event) => {
-    if (event.target === layer) toggleLayer(layer, false);
+    if (event.target === layer) setLetterOpen(false);
   });
 }
 
