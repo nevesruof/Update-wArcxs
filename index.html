@@ -22,6 +22,11 @@
   --label: #848484;
   --line: rgba(255, 255, 255, 0.1);
   --green: #3fb950;
+  --fog: 150 154 163;
+  --h1: #0e4429;
+  --h2: #006d32;
+  --h3: #26a641;
+  --h4: #39d353;
   --sans: "Geist", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --pixel: "Pixelify Sans", "Press Start 2P", monospace;
@@ -185,9 +190,9 @@ img {
 
 .backdrop.fallback {
   background:
-    radial-gradient(60vw 50vh at 20% 10%, rgba(150, 154, 163, 0.35), transparent 70%),
-    radial-gradient(50vw 60vh at 85% 40%, rgba(120, 124, 133, 0.25), transparent 70%),
-    radial-gradient(60vw 40vh at 40% 100%, rgba(150, 154, 163, 0.28), transparent 70%),
+    radial-gradient(60vw 50vh at 20% 10%, rgb(var(--fog) / 0.35), transparent 70%),
+    radial-gradient(50vw 60vh at 85% 40%, rgb(var(--fog) / 0.25), transparent 70%),
+    radial-gradient(60vw 40vh at 40% 100%, rgb(var(--fog) / 0.28), transparent 70%),
     var(--bg);
 }
 
@@ -964,6 +969,171 @@ a.change:hover {
 
 @keyframes pulse {
   50% { opacity: 0.55; }
+}
+
+html[data-theme="azul"] { --fog: 88 124 200; --green: #58a6ff; --h1: #0c2d5a; --h2: #1558a8; --h3: #2f81f7; --h4: #79b8ff; }
+html[data-theme="rojo"] { --fog: 200 90 96; --green: #ff6369; --h1: #5a1218; --h2: #9b1c24; --h3: #e5484d; --h4: #ff8a8f; }
+html[data-theme="violeta"] { --fog: 150 110 220; --green: #a78bfa; --h1: #2e1a5c; --h2: #5b34b0; --h3: #8b5cf6; --h4: #c4a8ff; }
+html[data-theme="verde"] { --fog: 80 190 130; --green: #3fb950; }
+html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; --h2: #8a5a0b; --h3: #e0a030; --h4: #ffc857; }
+
+::selection {
+  background: rgb(var(--fog) / 0.35);
+  color: #fff;
+}
+
+.sound.theme {
+  top: 72px;
+}
+
+.sound.theme i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: conic-gradient(from 210deg, rgb(var(--fog)), rgb(var(--fog) / 0.35), rgb(var(--fog)));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28), 0 0 12px rgb(var(--fog) / 0.45);
+  transition: transform 0.25s ease;
+}
+
+.sound.theme:hover i {
+  transform: rotate(90deg) scale(1.08);
+}
+
+.flash {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 60;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(10, 10, 11, 0.9);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--soft);
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.flash.on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.keys {
+  position: fixed;
+  inset: 0;
+  z-index: 46;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.keys.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.keys-card {
+  width: min(360px, 100%);
+  padding: 20px 22px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(12, 12, 14, 0.96);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  transform: translateY(8px) scale(0.985);
+  transition: transform 0.25s ease;
+}
+
+.keys.open .keys-card {
+  transform: none;
+}
+
+.keys-card h3 {
+  margin-bottom: 14px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--label);
+}
+
+.keys-card div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.84rem;
+  color: var(--soft);
+}
+
+.keys-card div:first-of-type {
+  border-top: 0;
+}
+
+.keys-card kbd {
+  min-width: 24px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  text-align: center;
+  color: var(--text);
+}
+
+.credit .hint {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .credit .hint {
+    display: inline;
+  }
+}
+
+.intro.quick p {
+  display: none;
+}
+
+.played img.tile {
+  object-fit: cover;
+}
+
+.played a {
+  color: inherit;
+}
+
+.played a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+}
+
+.played .live-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  vertical-align: middle;
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .sound {
@@ -2377,10 +2547,10 @@ a.social:hover b {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 10px rgba(255, 255, 255, 0.08);
 }
 
-.heat .l1 { background: #0e4429; }
-.heat .l2 { background: #006d32; }
-.heat .l3 { background: #26a641; }
-.heat .l4 { background: #39d353; }
+.heat .l1 { background: var(--h1); }
+.heat .l2 { background: var(--h2); }
+.heat .l3 { background: var(--h3); }
+.heat .l4 { background: var(--h4); }
 .heat .void { background: transparent; box-shadow: none; }
 
 .legend {
@@ -2402,10 +2572,10 @@ a.social:hover b {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.045);
 }
 
-.legend i.l1 { background: #0e4429; }
-.legend i.l2 { background: #006d32; }
-.legend i.l3 { background: #26a641; }
-.legend i.l4 { background: #39d353; }
+.legend i.l1 { background: var(--h1); }
+.legend i.l2 { background: var(--h2); }
+.legend i.l3 { background: var(--h3); }
+.legend i.l4 { background: var(--h4); }
 
 .legend span:first-child {
   margin-right: 2px;
@@ -3965,6 +4135,24 @@ button:focus-visible {
   </svg>
 </button>
 
+<button class="sound theme" id="theme" type="button" aria-label="Cambiar tema"><i></i></button>
+
+<div class="flash" id="flash" role="status" aria-live="polite"></div>
+
+<div class="keys" id="keys" aria-hidden="true">
+  <div class="keys-card" role="dialog" aria-label="Atajos de teclado">
+    <h3>atajos</h3>
+    <div><span>Silenciar / activar sonido</span><kbd>M</kbd></div>
+    <div><span>Abrir o cerrar el reproductor</span><kbd>P</kbd></div>
+    <div><span>Buscar canción</span><kbd>/</kbd></div>
+    <div><span>Cambiar tema</span><kbd>T</kbd></div>
+    <div><span>Abrir stats.fm</span><kbd>S</kbd></div>
+    <div><span>Volver arriba</span><kbd>G</kbd></div>
+    <div><span>Cerrar lo que esté abierto</span><kbd>Esc</kbd></div>
+    <div><span>Ver esta ayuda</span><kbd>?</kbd></div>
+  </div>
+</div>
+
 <aside class="toast" id="toast" hidden>
   <button class="close" id="toastClose" type="button" aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
   <b>Reduced effects enabled</b>
@@ -4068,7 +4256,7 @@ button:focus-visible {
         </div>
         <div class="played" id="played" hidden>
           <div class="tile" id="playedIcon">R</div>
-          <div><small>last played</small><b id="playedName"></b></div>
+          <div><small>last played</small><b><span id="playedName"></span><i class="live-dot" id="playedLive" hidden title="jugando ahora"></i></b></div>
         </div>
       </div>
       <div class="figure" id="figure">
@@ -4082,7 +4270,7 @@ button:focus-visible {
     </div>
   </section>
 
-  <p class="credit rise" style="--i:8">diseño inspirado en <a href="https://plxne.com/" target="_blank" rel="noopener">plxne.com</a> · créditos a plxne</p>
+  <p class="credit rise" style="--i:8">diseño inspirado en <a href="https://plxne.com/" target="_blank" rel="noopener">plxne.com</a> · créditos a plxne<span class="hint"> · pulsa <b>?</b> para ver los atajos</span></p>
 
 </main>
 
@@ -4235,6 +4423,7 @@ const profile = {
   handle: "singledeve",
   nameStyle: { font_id: 8, effect_id: 4, colors: [16777215] },
   intro: true,
+  introRepeatHours: 12,
   introLogo: window.INTRO_LOGO || "",
   avatar: "",
   avatarDecoration: "",
@@ -4287,7 +4476,7 @@ const profile = {
   },
   lastPlayed: "",
   audio: "",
-  viewsKey: ""
+  viewsKey: "singledeve-profile-take"
 };
 
 const icons = {
@@ -4446,7 +4635,7 @@ function timeAgo(days) {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
-const backdropState = { software: false, scale: 0.5, full: false, paused: false };
+const backdropState = { software: false, scale: 0.5, full: false, paused: false, tint: null, mid: null };
 
 function startBackdrop() {
   const canvas = $("bgCanvas");
@@ -4471,6 +4660,7 @@ precision mediump float;
 #endif
 uniform vec2 uRes;
 uniform float uTime;
+uniform vec3 uMid;
 float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
 float noise(vec2 p){
   vec2 i=floor(p);vec2 f=fract(p);f=f*f*(3.0-2.0*f);
@@ -4493,7 +4683,7 @@ void main(){
   float band=smoothstep(0.35,0.7,r.x)*0.35;
   float v=clamp(light*0.9+band,0.0,1.0);
   vec3 dark=vec3(0.012,0.016,0.02);
-  vec3 mid=vec3(0.42,0.43,0.47);
+  vec3 mid=uMid;
   vec3 col=mix(dark,mid,pow(v,1.7));
   float vig=smoothstep(1.3,0.3,length(uv-0.5)*1.4);
   col*=0.5+0.5*vig;
@@ -4528,6 +4718,10 @@ void main(){
 
   const resolution = gl.getUniformLocation(program, "uRes");
   const clock = gl.getUniformLocation(program, "uTime");
+  const tint = gl.getUniformLocation(program, "uMid");
+  const setTint = (mid) => gl.uniform3f(tint, mid[0], mid[1], mid[2]);
+  backdropState.tint = setTint;
+  setTint(backdropState.mid || [0.42, 0.43, 0.47]);
 
   const resize = () => {
     canvas.width = Math.max(2, Math.floor(window.innerWidth * backdropState.scale));
@@ -4635,7 +4829,15 @@ function runIntro(onEnter) {
   const ramp = " .:ilrsxf29A5HM#8@";
   const cellW = 7;
   const cellH = 12;
-  const reveal = 900;
+  const returning = (() => {
+    try {
+      const at = Number(localStorage.getItem("intro-at"));
+      return Boolean(at) && Date.now() - at < (profile.introRepeatHours || 12) * 3600000 && !/[?&]intro\b/.test(location.search);
+    } catch (error) {
+      return false;
+    }
+  })();
+  const reveal = returning ? 380 : 900;
   const levels = 32;
   const shades = Array.from({ length: levels }, (_, i) => {
     const v = i / (levels - 1);
@@ -4778,6 +4980,11 @@ function runIntro(onEnter) {
     entered = true;
     stop = true;
     backdropState.paused = false;
+    try {
+      localStorage.setItem("intro-at", String(Date.now()));
+    } catch (error) {
+      stop = true;
+    }
     intro.classList.add("leaving");
     onEnter();
     setTimeout(() => intro.remove(), 560);
@@ -4785,6 +4992,11 @@ function runIntro(onEnter) {
 
   intro.addEventListener("click", enter);
   window.addEventListener("keydown", enter, { once: true });
+
+  if (returning) {
+    intro.classList.add("quick");
+    setTimeout(enter, 1250);
+  }
 }
 
 function renderHead() {
@@ -5641,11 +5853,59 @@ function setupFigureTilt() {
   }, { passive: true });
 }
 
-function showLastPlayed(name) {
+const played = { name: "", icon: "", timer: 0 };
+
+function showLastPlayed(name, icon, url, live) {
   if (!name) return;
-  $("playedName").textContent = name;
-  $("playedIcon").textContent = name.charAt(0).toUpperCase();
+
+  const label = $("playedName");
+  const tile = $("playedIcon");
+  const link = url && /^https:\/\//i.test(url) ? url : "";
+
+  if (name !== played.name || (icon && icon !== played.icon)) {
+    label.replaceChildren();
+    if (link) {
+      const anchor = document.createElement("a");
+      anchor.href = link;
+      anchor.target = "_blank";
+      anchor.rel = "noopener";
+      anchor.textContent = name;
+      label.appendChild(anchor);
+    } else {
+      label.textContent = name;
+    }
+
+    if (icon && /^https:/i.test(icon)) {
+      const image = new Image();
+      image.className = "tile";
+      image.alt = "";
+      image.decoding = "async";
+      image.src = icon;
+      image.onerror = () => {
+        image.replaceWith(Object.assign(document.createElement("div"), { className: "tile", id: "playedIcon", textContent: name.charAt(0).toUpperCase() }));
+      };
+      image.id = "playedIcon";
+      tile.replaceWith(image);
+    } else if (name !== played.name || !icon) {
+      const plain = Object.assign(document.createElement("div"), { className: "tile", id: "playedIcon", textContent: name.charAt(0).toUpperCase() });
+      tile.replaceWith(plain);
+    }
+
+    played.name = name;
+    played.icon = icon || "";
+  }
+
+  $("playedLive").hidden = !live;
   $("played").hidden = false;
+}
+
+async function loadLastPlayed() {
+  try {
+    const game = await api("/api/last-played");
+    if (game && game.name) showLastPlayed(game.name, game.iconUrl, game.url, game.live);
+  } catch (error) {
+    return;
+  }
 }
 
 function avatarUrl(user) {
@@ -6632,13 +6892,22 @@ function setupDock() {
   const box = $("npDock");
   const input = $("npSearch");
 
-  $("npTab").addEventListener("click", () => {
-    const open = box.classList.toggle("is-open");
+  const setOpen = (open) => {
+    box.classList.toggle("is-open", open);
     $("npTab").setAttribute("aria-expanded", String(open));
     $("npTab").setAttribute("aria-label", open ? "Collapse now playing" : "Expand now playing");
     box.classList.remove("ping");
     if (open) loadFinder();
-  });
+  };
+
+  dock.setOpen = setOpen;
+  dock.isOpen = () => box.classList.contains("is-open");
+
+  $("npTab").addEventListener("click", () => setOpen(!dock.isOpen()));
+
+  document.addEventListener("pointerdown", (event) => {
+    if (dock.isOpen() && !box.contains(event.target)) setOpen(false);
+  }, { passive: true });
 
   input.addEventListener("focus", loadFinder);
   input.addEventListener("input", async () => {
@@ -6882,7 +7151,12 @@ function paintDiscord(data) {
   renderFeed();
   if (liveEntry) prefetchGames([liveEntry.key]);
 
-  if (game && game.name === "Roblox") showLastPlayed(game.details || game.state || "Roblox");
+  if (game && game.name === "Roblox") {
+    const title = game.details || game.state || "Roblox";
+    if (!played.name) showLastPlayed(title, "", "", true);
+    clearTimeout(played.timer);
+    played.timer = setTimeout(loadLastPlayed, 1200);
+  }
 }
 
 async function loadDiscord() {
@@ -7648,6 +7922,7 @@ function setupEscape() {
     if (event.key !== "Escape") return;
 
     const layers = [
+      ["keys", () => toggleLayer($("keys"), false)],
       ["shotOverlay", () => toggleLayer($("shotOverlay"), false)],
       ["gameOverlay", closeGame],
       ["gridOverlay", () => toggleLayer($("gridOverlay"), false)],
@@ -7655,7 +7930,104 @@ function setupEscape() {
     ];
 
     const top = layers.find(([id]) => $(id).classList.contains("open"));
-    if (top) top[1]();
+    if (top) {
+      top[1]();
+      return;
+    }
+
+    if (dock.isOpen && dock.isOpen()) dock.setOpen(false);
+  });
+}
+
+const flashState = { timer: 0 };
+
+function flash(text) {
+  const bubble = $("flash");
+  bubble.textContent = text;
+  bubble.classList.add("on");
+  clearTimeout(flashState.timer);
+  flashState.timer = setTimeout(() => bubble.classList.remove("on"), 1400);
+}
+
+const themes = [
+  { id: "mono", name: "mono", mid: [0.42, 0.43, 0.47] },
+  { id: "azul", name: "azul", mid: [0.22, 0.34, 0.62] },
+  { id: "rojo", name: "rojo", mid: [0.56, 0.2, 0.23] },
+  { id: "violeta", name: "violeta", mid: [0.38, 0.26, 0.64] },
+  { id: "verde", name: "verde", mid: [0.17, 0.45, 0.31] },
+  { id: "ambar", name: "ámbar", mid: [0.56, 0.39, 0.16] }
+];
+
+function applyTheme(id, notify) {
+  const theme = themes.find((item) => item.id === id) || themes[0];
+  document.documentElement.dataset.theme = theme.id;
+  if (backdropState.tint) backdropState.tint(theme.mid);
+  backdropState.mid = theme.mid;
+  try {
+    localStorage.setItem("theme", theme.id);
+  } catch (error) {
+    return;
+  } finally {
+    if (notify) flash(`tema · ${theme.name}`);
+  }
+}
+
+function cycleTheme() {
+  const current = themes.findIndex((item) => item.id === document.documentElement.dataset.theme);
+  applyTheme(themes[(current + 1) % themes.length].id, true);
+}
+
+function savedTheme() {
+  try {
+    return localStorage.getItem("theme") || "mono";
+  } catch (error) {
+    return "mono";
+  }
+}
+
+function setupShortcuts() {
+  $("theme").addEventListener("click", cycleTheme);
+
+  const keys = $("keys");
+  keys.addEventListener("click", (event) => {
+    if (event.target === keys) toggleLayer(keys, false);
+  });
+
+  const typing = (target) =>
+    target && (target.isContentEditable || /^(input|textarea|select)$/i.test(target.tagName));
+
+  window.addEventListener("keydown", (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey || event.repeat || typing(event.target)) return;
+    if (!document.body.classList.contains("entered")) return;
+
+    const key = event.key.toLowerCase();
+
+    if (key === "?" || (key === "/" && event.shiftKey)) {
+      event.preventDefault();
+      toggleLayer(keys, !keys.classList.contains("open"));
+      return;
+    }
+
+    if (keys.classList.contains("open")) return;
+
+    if (key === "m") {
+      const silent = music.muted || music.volume === 0;
+      setMuted(!silent);
+      flash(silent ? "sonido activado" : "sonido silenciado");
+    } else if (key === "p") {
+      dock.setOpen(!dock.isOpen());
+    } else if (key === "/") {
+      event.preventDefault();
+      dock.setOpen(true);
+      $("npSearch").focus();
+    } else if (key === "t") {
+      cycleTheme();
+    } else if (key === "s") {
+      const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay"].some((id) => $(id).classList.contains("open"));
+      if (!busy) $("openStats").click();
+    } else if (key === "g") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   });
 }
 
@@ -7690,6 +8062,7 @@ function setupSound() {
 }
 
 function init() {
+  applyTheme(savedTheme(), false);
   startBackdrop();
   renderHead();
   renderSocials();
@@ -7700,6 +8073,10 @@ function init() {
   loadChangelog();
   renderFeed();
   showLastPlayed(profile.lastPlayed);
+  loadLastPlayed();
+  setInterval(() => {
+    if (!document.hidden) loadLastPlayed();
+  }, 90000);
   setupPlaysHover();
   setupHeatTips();
   setupFigureTilt();
@@ -7707,6 +8084,7 @@ function init() {
   setupStats();
   setupGame();
   setupEscape();
+  setupShortcuts();
   const armToast = setupToast();
 
   $("feed").addEventListener("scroll", syncFeedMask, { passive: true });
