@@ -102,7 +102,6 @@ html::-webkit-scrollbar {
   }
 }
 
-
 .rail {
   position: fixed;
   top: 6px;
@@ -1103,60 +1102,8 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   transform: translate(-50%, 0);
 }
 
-
-.np-line {
-  max-height: 0;
-  margin: 0;
-  overflow: hidden;
-  opacity: 0;
-  text-align: center;
-  font-size: 0.76rem;
-  line-height: 1.35;
-  color: #d9d9de;
-  transition: max-height 0.35s ease, opacity 0.35s ease, margin 0.35s ease;
-}
-
-.np-line.on {
-  max-height: 44px;
-  margin: 0 4px 2px;
-  opacity: 1;
-}
-
-.np-line.swap {
-  animation: lineIn 0.4s ease both;
-}
-
-@keyframes lineIn {
-  from { opacity: 0; transform: translateY(4px); }
-}
-
 .avatar-box {
-  cursor: pointer;
   border-radius: 50%;
-}
-
-.avatar-box:focus-visible {
-  outline: 1.5px solid rgba(255, 255, 255, 0.4);
-  outline-offset: 3px;
-}
-
-.now {
-  position: fixed;
-  inset: 0;
-  z-index: 47;
-  display: grid;
-  place-items: center;
-  padding: 28px 22px;
-  background: #050506;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.35s ease;
-  overflow-y: auto;
-}
-
-.now.open {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .now-bg {
@@ -1164,7 +1111,7 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   inset: -12%;
   background-size: cover;
   background-position: center;
-  filter: blur(70px) saturate(1.3) brightness(0.42);
+  filter: blur(48px) saturate(1.3) brightness(0.42);
   opacity: 0;
   transform: scale(1.1);
   transition: opacity 0.9s ease;
@@ -1203,177 +1150,6 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   stroke: currentColor;
   stroke-width: 1.8;
   stroke-linecap: round;
-}
-
-.now-stage {
-  position: relative;
-  z-index: 1;
-  width: min(940px, 100%);
-  display: grid;
-  gap: 38px;
-}
-
-.now-main {
-  display: grid;
-  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
-  align-items: center;
-  gap: 52px;
-}
-
-.now-cover {
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: 18px;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, #2a2a30, #121215);
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
-}
-
-.now-cover img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.now-cover svg {
-  width: 38%;
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.35);
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.now.playing .now-cover {
-  animation: coverIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes coverIn {
-  from { opacity: 0; transform: scale(0.96); }
-}
-
-.now-text {
-  min-width: 0;
-}
-
-.now-text small {
-  display: block;
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.now-text h2 {
-  margin-top: 12px;
-  font-size: clamp(1.7rem, 4.4vw, 2.7rem);
-  font-weight: 650;
-  line-height: 1.08;
-  letter-spacing: -0.02em;
-  color: #fff;
-  overflow-wrap: anywhere;
-}
-
-.now-text > p {
-  margin-top: 8px;
-  font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.now-bar {
-  position: relative;
-  height: 3px;
-  margin-top: 26px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, 0.14);
-  overflow: hidden;
-}
-
-.now-bar i {
-  position: absolute;
-  inset: 0;
-  background: #fff;
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 0.3s linear;
-}
-
-.now-time {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.now-lyrics {
-  min-height: 118px;
-  margin-top: 26px;
-  display: grid;
-  align-content: start;
-  gap: 8px;
-}
-
-.now-lyrics p {
-  min-height: 1.3em;
-  font-size: 0.98rem;
-  line-height: 1.3;
-  color: rgba(255, 255, 255, 0.32);
-  transition: color 0.3s;
-}
-
-.now-lyrics #nowCur {
-  font-size: 1.32rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-.now-lyrics #nowCur.swap {
-  animation: lineIn 0.45s ease both;
-}
-
-.now-hint {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 18px;
-  text-align: center;
-  font-family: var(--mono);
-  font-size: 0.64rem;
-  letter-spacing: 0.14em;
-  color: rgba(255, 255, 255, 0.3);
-  pointer-events: none;
-}
-
-@media (max-width: 760px) {
-  .now {
-    place-items: start center;
-    padding-top: 74px;
-  }
-
-  .now-main {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 26px;
-  }
-
-  .now-cover {
-    width: min(70vw, 300px);
-    margin: 0 auto;
-  }
-
-  .now-text {
-    text-align: center;
-  }
-
-  .now-hint {
-    display: none;
-  }
 }
 
 .week {
@@ -1878,9 +1654,7 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   place-items: center;
   border-radius: 9px;
   border: 1px solid var(--line);
-  background: rgba(10, 10, 11, 0.55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(12, 12, 13, 0.8);
   color: var(--soft);
   transition: background 0.2s, border-color 0.2s;
 }
@@ -1909,9 +1683,7 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   place-items: center;
   border-radius: 9px;
   border: 1px solid var(--line);
-  background: rgba(10, 10, 11, 0.55);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: rgba(12, 12, 13, 0.8);
   color: var(--soft);
   transition: background 0.2s, border-color 0.2s;
 }
@@ -2466,6 +2238,48 @@ body.entered .np-top.live {
   pointer-events: none;
 }
 
+.np-lyr-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #d4d4d8;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.np-lyr-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgb(var(--ac, 200 200 200) / 0.6);
+  color: #fff;
+  transform: scale(1.08);
+}
+
+.np-lyr-btn:active {
+  transform: scale(0.93);
+}
+
+.np-lyr-btn:focus-visible {
+  outline: 1.5px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.np-lyr-btn svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .np-row {
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
@@ -2490,6 +2304,7 @@ body.entered .np-top.live {
 
 .np-top-text {
   min-width: 0;
+  padding-right: 34px;
 }
 
 .np-top-text b {
@@ -2538,45 +2353,6 @@ body.entered .np-top.live {
   transition: transform 1s linear;
 }
 
-.np-panel {
-  position: relative;
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.np-win:has(.np-lyric .line) .np-panel {
-  grid-template-rows: 1fr;
-}
-
-.np-panel > div {
-  min-height: 0;
-  overflow: hidden;
-}
-
-.np-panel > div > .np-lyric {
-  position: relative;
-  margin: 0 14px 14px 24px;
-  padding: 2px 0 2px 14px;
-}
-
-.np-lyric::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 2px;
-  bottom: 2px;
-  width: 2px;
-  border-radius: 2px;
-  background: linear-gradient(rgb(var(--ac, 220 220 220)), rgb(var(--ac, 220 220 220) / 0.1));
-  animation: edgePulse 2.4s ease-in-out infinite;
-}
-
-@keyframes edgePulse {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 1; }
-}
-
 .eq {
   display: inline-flex;
   align-items: flex-end;
@@ -2601,76 +2377,6 @@ body.entered .np-top.live {
 @keyframes eqBar {
   0%, 100% { transform: scaleY(0.25); }
   50% { transform: scaleY(1); }
-}
-
-.np-lyric {
-  display: grid;
-  min-height: 1.35em;
-  font-size: 1.02rem;
-  font-weight: 600;
-  line-height: 1.35;
-  color: #fff;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7);
-}
-
-.np-lyric .line {
-  position: relative;
-  grid-area: 1 / 1;
-  animation: lineIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.np-lyric .line.out {
-  animation: lineOut 0.4s ease forwards;
-}
-
-.np-lyric .w {
-  display: inline-block;
-  color: rgba(255, 255, 255, 0.3);
-  transition: color 0.25s ease, text-shadow 0.4s ease;
-}
-
-.np-lyric .w.lit {
-  color: #fff;
-  text-shadow: 0 0 16px rgb(var(--ac, 255 255 255) / 0.75);
-  animation: hop 0.6s cubic-bezier(0.3, 1.7, 0.5, 1);
-}
-
-.np-lyric .gap {
-  display: inline-flex;
-  gap: 5px;
-  padding-top: 0.5em;
-}
-
-.np-lyric .gap s {
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.55);
-  animation: breathe 1.4s ease-in-out infinite;
-}
-
-.np-lyric .gap s:nth-child(2) { animation-delay: 0.18s; }
-.np-lyric .gap s:nth-child(3) { animation-delay: 0.36s; }
-
-@keyframes hop {
-  0% { transform: translateY(0) scale(1); }
-  35% { transform: translateY(-6px) scale(1.12); }
-  100% { transform: translateY(0) scale(1); }
-}
-
-@keyframes lineIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-}
-
-@keyframes lineOut {
-  to {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
 }
 
 @keyframes breathe {
@@ -4018,7 +3724,6 @@ a.social:hover b {
   }
 }
 
-
 .clock .caps {
   margin-top: 4px;
   font-size: 9.5px;
@@ -4940,8 +4645,6 @@ a.rank-card:hover .rank-art img {
 
   .np-card {
     background: radial-gradient(120% 120% at 0% 0%, rgba(255, 255, 255, 0.05), transparent 60%), rgba(10, 10, 11, 0.985);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
   }
 
   .game-id {
@@ -4995,25 +4698,6 @@ button:focus-visible {
 
 <div class="flash" id="flash" role="status" aria-live="polite"></div>
 
-<div class="now" id="now" aria-hidden="true" role="dialog" aria-label="Live view">
-  <div class="now-bg" id="nowBg"></div>
-  <button class="now-close" id="nowClose" type="button" aria-label="Close live view"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
-  <div class="now-stage">
-    <div class="now-main" id="nowMain">
-      <div class="now-cover"><img id="nowArt" alt="" hidden><svg id="nowNote" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
-      <div class="now-text">
-        <small id="nowKind">nothing playing</small>
-        <h2 id="nowTitle">—</h2>
-        <p id="nowArtist"></p>
-        <div class="now-bar"><i id="nowFill"></i></div>
-        <div class="now-time"><span id="nowNow">0:00</span><span id="nowLen">0:00</span></div>
-        <div class="now-lyrics" id="nowLyrics"><p id="nowPrev"></p><p id="nowCur"></p><p id="nowNext"></p></div>
-      </div>
-    </div>
-  </div>
-  <p class="now-hint">esc to close</p>
-</div>
-
 <div class="lyr" id="lyr" aria-hidden="true" role="dialog" aria-label="Lyrics">
   <div class="now-bg" id="lyrBg"></div>
   <button class="now-close" id="lyrClose" type="button" aria-label="Close lyrics"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
@@ -5048,7 +4732,6 @@ button:focus-visible {
     <div><span>Share as image</span><kbd>C</kbd></div>
     <div><span>Open stats.fm</span><kbd>S</kbd></div>
     <div><span>Next / previous in the playlist</span><kbd>N / B</kbd></div>
-    <div><span>Live view (what I listen to and play)</span><kbd>F</kbd></div>
     <div><span>Back to top</span><kbd>G</kbd></div>
     <div><span>Close whatever is open</span><kbd>Esc</kbd></div>
     <div><span>Show this help</span><kbd>?</kbd></div>
@@ -5065,7 +4748,7 @@ button:focus-visible {
 <main class="page">
 
   <header class="head rise" style="--i:0">
-    <div class="avatar-box" id="avatarBox" role="button" tabindex="0" aria-label="Open live view" title="live view">
+    <div class="avatar-box" id="avatarBox">
       <div class="initial" id="initial">t</div>
       <img class="pic" id="avatar" alt="" hidden>
       <img class="decor" id="decor" alt="" hidden>
@@ -5093,6 +4776,7 @@ button:focus-visible {
     <div class="label"><span>current activity</span><span class="np-live"><i></i>listening on spotify</span></div>
     <div class="np-top" id="npTop" aria-label="Now playing">
       <div class="np-win">
+        <button class="np-lyr-btn" id="topLyr" type="button" aria-label="Open lyrics" title="Lyrics"><svg viewBox="0 0 24 24"><path d="m11 7.6-5.99 8.19a1 1 0 0 0 .1 1.3l.82.82a1 1 0 0 0 1.31.09L15.1 12"/><path d="M16.5 21.17c-1-.67-2.13-1.17-3.5-1.17-2.06 0-3.93 2.36-6 2-2.07-.36-2.78-3.37-1.5-4.5"/><circle cx="16" cy="7" r="5"/></svg></button>
         <div class="np-row">
           <img class="np-art" id="topArt" alt="">
           <div class="np-body">
@@ -5103,7 +4787,6 @@ button:focus-visible {
             <div class="np-prog"><i id="topFill"></i></div>
           </div>
         </div>
-        <div class="np-panel"><div><p class="np-lyric" id="npLyric"></p></div></div>
       </div>
     </div>
   </section>
@@ -5311,9 +4994,8 @@ button:focus-visible {
           <div class="np-bar"><i id="npFill"></i><input class="np-seek" id="npSeek" type="range" min="0" max="1000" step="1" value="0" aria-label="Seek"></div>
           <div class="np-time"><span id="npNow">0:00</span><span id="npLen">0:00</span></div>
         </div>
-        <button class="np-act" id="npAct" type="button" aria-label="Show lyrics" title="Lyrics"><svg class="i-lyr" viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h13"/></svg><svg class="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+        <button class="np-act" id="npAct" type="button" aria-label="Show lyrics" title="Lyrics"><svg class="i-lyr" viewBox="0 0 24 24"><path d="m11 7.6-5.99 8.19a1 1 0 0 0 .1 1.3l.82.82a1 1 0 0 0 1.31.09L15.1 12"/><path d="M16.5 21.17c-1-.67-2.13-1.17-3.5-1.17-2.06 0-3.93 2.36-6 2-2.07-.36-2.78-3.37-1.5-4.5"/><circle cx="16" cy="7" r="5"/></svg><svg class="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
       </div>
-      <p class="np-line" id="npLine" aria-live="off"></p>
       <div class="np-vol" id="npVol">
         <button type="button" aria-label="Mute"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path class="w1" d="M15.5 9.5a3.5 3.5 0 0 1 0 5"/><path class="w2" d="M18.5 7a7 7 0 0 1 0 10"/><path class="x" d="m16 9 5 6m0-6-5 6"/></svg></button>
         <input id="npVolRange" type="range" min="0" max="100" step="1" value="30" aria-label="Volume">
@@ -5567,7 +5249,7 @@ function startBackdrop() {
   const debug = gl.getExtension("WEBGL_debug_renderer_info");
   const renderer = debug ? String(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)) : "";
   backdropState.software = /swiftshader|llvmpipe|softpipe|software|basic render/i.test(renderer);
-  backdropState.scale = backdropState.software ? 0.34 : 0.55;
+  backdropState.scale = backdropState.software ? 0.3 : 0.4;
 
   const vertex = "attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}";
   const fragment = `
@@ -5587,7 +5269,7 @@ float noise(vec2 p){
 }
 float fbm(vec2 p){
   float v=0.0;float a=0.5;
-  for(int i=0;i<4;i++){v+=a*noise(p);p=p*2.02+vec2(17.3,9.1);a*=0.5;}
+  for(int i=0;i<3;i++){v+=a*noise(p);p=p*2.02+vec2(17.3,9.1);a*=0.5;}
   return v;
 }
 void main(){
@@ -5652,7 +5334,7 @@ void main(){
   backdropState.resize = resize;
 
   const started = performance.now();
-  const gap = window.matchMedia("(pointer: coarse)").matches ? 50 : 33;
+  const gap = window.matchMedia("(pointer: coarse)").matches ? 66 : 45;
   let last = 0;
 
   const frame = (now) => {
@@ -6641,7 +6323,7 @@ async function mountAvatar3d(userId, ready) {
     const object = await buildAvatar(THREE, loaderModule.OBJLoader, model);
 
     const renderer = new THREE.WebGLRenderer({ canvas, context: gl, alpha: true, antialias: true, powerPreference: "low-power" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     const scene = new THREE.Scene();
@@ -6689,6 +6371,8 @@ async function mountAvatar3d(userId, ready) {
         motion.running = false;
         return;
       }
+      requestAnimationFrame(frame);
+      if (now - motion.last < 32 || document.body.classList.contains("locked")) return;
       const delta = Math.min(0.05, (now - motion.last) / 1000 || 0.016);
       motion.last = now;
       if (!motion.drag) {
@@ -6698,7 +6382,6 @@ async function mountAvatar3d(userId, ready) {
       }
       pivot.rotation.y = motion.yaw;
       renderer.render(scene, camera);
-      requestAnimationFrame(frame);
     };
 
     const start = () => {
@@ -7225,7 +6908,6 @@ function setupVolume() {
   paintVolume();
 }
 
-
 function hashColor(text) {
   let hash = 0;
   for (const char of text) hash = (hash * 31 + char.charCodeAt(0)) % 360;
@@ -7326,7 +7008,7 @@ function tickDock() {
   $("npFill").style.transform = `scaleX(${dock.song ? ratio : 0})`;
 }
 
-const lyrics = { id: "", lines: [], cache: new Map(), index: -2, lit: -1, timer: 0 };
+const lyrics = { cache: new Map() };
 
 function parseLrc(text) {
   const rows = [];
@@ -7360,67 +7042,6 @@ async function fetchLyrics(song, seconds) {
     return hit ? parseLrc(hit.syncedLyrics) : [];
   } catch (error) {
     return [];
-  }
-}
-
-function showLine(row) {
-  const box = $("npLyric");
-  box.querySelectorAll(".line:not(.out)").forEach((old) => {
-    old.classList.add("out");
-    setTimeout(() => old.remove(), 420);
-  });
-  if (row === null) return;
-
-  const line = document.createElement("span");
-  line.className = "line";
-
-  if (!row.text) {
-    line.innerHTML = '<span class="gap"><s></s><s></s><s></s></span>';
-  } else {
-    line.innerHTML = row.text
-      .split(/\s+/)
-      .map((word) => `<span class="w">${esc(word)}</span>`)
-      .join(" ");
-  }
-
-  box.appendChild(line);
-  lyrics.words = [...line.querySelectorAll(".w")];
-  lyrics.weights = lyrics.words.map((el) => el.textContent.length + 1);
-  lyrics.total = lyrics.weights.reduce((sum, n) => sum + n, 0);
-  lyrics.lit = -1;
-}
-
-function tickLyrics() {
-  const rows = lyrics.lines;
-  if (!rows.length || !dock.start) return;
-
-  const elapsed = Date.now() - dock.start + 180;
-  let index = -1;
-  for (let i = 0; i < rows.length; i += 1) {
-    if (rows[i].at <= elapsed) index = i;
-    else break;
-  }
-
-  if (index !== lyrics.index) {
-    lyrics.index = index;
-    showLine(index === -1 ? { text: "" } : rows[index]);
-  }
-
-  if (index === -1 || !lyrics.words || !lyrics.words.length) return;
-
-  const next = rows[index + 1];
-  const span = Math.max(1200, Math.min(6500, (next ? next.at : rows[index].at + 5000) - rows[index].at));
-  const progress = Math.min(1, (elapsed - rows[index].at) / (span * 0.82));
-  let before = 0;
-  let count = 0;
-  for (let i = 0; i < lyrics.words.length; i += 1) {
-    if (before / lyrics.total <= progress) count = i + 1;
-    before += lyrics.weights[i];
-  }
-
-  while (lyrics.lit < count - 1) {
-    lyrics.lit += 1;
-    lyrics.words[lyrics.lit].classList.add("lit");
   }
 }
 
@@ -7464,31 +7085,8 @@ function feedSource() {
   return null;
 }
 
-function setLine(element, text) {
-  if (!element || element.dataset.t === text) return;
-  element.dataset.t = text;
-  element.textContent = text;
-  element.classList.remove("swap");
-  void element.offsetWidth;
-  if (text) element.classList.add("swap");
-}
-
 function paintLines() {
-  const rows = feed.rows;
-  const index = feed.index;
-  const text = (row) => (row ? row.text || "♪" : "");
-  const current = index >= 0 && rows[index] ? rows[index].text : "";
-
-  setLine($("npLine"), current);
-  $("npLine").classList.toggle("on", Boolean(current));
-
   if ($("lyr").classList.contains("open")) paintLyr();
-
-  if ($("now").classList.contains("open")) {
-    setLine($("nowCur"), index >= 0 ? text(rows[index]) : "");
-    $("nowPrev").textContent = index > 0 ? text(rows[index - 1]) : "";
-    $("nowNext").textContent = rows[index + 1] ? text(rows[index + 1]) : "";
-  }
 }
 
 async function stepFeed() {
@@ -7525,23 +7123,6 @@ async function stepFeed() {
     feed.index = index;
     paintLines();
   }
-}
-
-async function loadLyricsFor(song, seconds) {
-  if (lyrics.id === song.id) return;
-  lyrics.id = song.id;
-  lyrics.lines = [];
-  lyrics.index = -2;
-  lyrics.words = [];
-  showLine(null);
-
-  const rows = await lyricsFor(song.id, song, seconds);
-
-  if (lyrics.id !== song.id) return;
-  lyrics.lines = rows;
-  clearInterval(lyrics.timer);
-  if (rows.length) lyrics.timer = setInterval(() => !document.hidden && tickLyrics(), 140);
-  tickLyrics();
 }
 
 function paintDockRow(song) {
@@ -7591,9 +7172,6 @@ function paintSpotify(data) {
     setTimeout(() => {
       if (!$("npTop").classList.contains("live")) $("npBlock").hidden = true;
     }, 800);
-    clearInterval(lyrics.timer);
-    lyrics.id = "";
-    lyrics.lines = [];
     dock.song = null;
     dock.start = 0;
     dock.end = 0;
@@ -7634,8 +7212,6 @@ function paintSpotify(data) {
   if (song.art) $("topArt").src = song.art;
   $("npBlock").hidden = false;
   requestAnimationFrame(() => $("npTop").classList.add("live"));
-  const seconds = dock.end && dock.start ? (dock.end - dock.start) / 1000 : 0;
-  loadLyricsFor(song, seconds);
 }
 
 function fold(text) {
@@ -8068,7 +7644,6 @@ function setupDock() {
       return;
     }
     setLyrOpen(true);
-    stepFeed();
   });
 
   const seek = $("npSeek");
@@ -8729,7 +8304,7 @@ async function loadStats(force) {
 }
 
 function syncLock() {
-  const open = document.querySelector(".overlay.open, .grid-overlay.open, .game-overlay.open, .now.open, .lyr.open");
+  const open = document.querySelector(".overlay.open, .grid-overlay.open, .game-overlay.open, .lyr.open");
   document.body.classList.toggle("locked", Boolean(open));
 }
 
@@ -9168,7 +8743,6 @@ function setupEscape() {
       ["keys", () => toggleLayer($("keys"), false)],
       ["share", () => toggleLayer($("share"), false)],
       ["lyr", () => setLyrOpen(false)],
-      ["now", () => setNowOpen(false)],
       ["shotOverlay", () => toggleLayer($("shotOverlay"), false)],
       ["gameOverlay", closeGame],
       ["gridOverlay", () => toggleLayer($("gridOverlay"), false)],
@@ -9455,93 +9029,6 @@ function setupPeek() {
   window.addEventListener("scroll", hide, { passive: true });
 }
 
-const nowState = { timer: 0, art: "", title: "" };
-
-function elapsedText(ms) {
-  const minutes = Math.max(0, Math.floor(ms / 60000));
-  if (minutes < 1) return "just started";
-  const hours = Math.floor(minutes / 60);
-  return hours ? `${hours}h ${minutes % 60}m` : `${minutes}m`;
-}
-
-function paintNow() {
-  const manualSong = manual.audio && manual.song;
-  const spotify = !manual.audio && dock.song;
-  let title = "";
-  let artist = "";
-  let art = "";
-  let ratio = 0;
-  let current = 0;
-  let length = 0;
-  let kind = "nothing playing";
-
-  if (manualSong) {
-    title = manual.song.name;
-    artist = manual.song.artist;
-    art = manual.song.image || "";
-    length = manual.audio.duration || 30;
-    current = manual.audio.currentTime || 0;
-    ratio = length ? current / length : 0;
-    kind = "playing from the page";
-  } else if (spotify) {
-    title = dock.song.title;
-    artist = dock.song.artist;
-    art = dock.song.art || "";
-    length = dock.end && dock.start ? (dock.end - dock.start) / 1000 : 0;
-    current = Math.max(0, Math.min(length || Infinity, (Date.now() - dock.start) / 1000));
-    ratio = length ? current / length : 0;
-    kind = "listening on spotify";
-  }
-
-  const main = $("nowMain");
-  main.classList.toggle("idle", !title);
-
-  if (nowState.title !== title) {
-    nowState.title = title;
-    $("nowTitle").textContent = title || "Nothing playing";
-    $("nowArtist").textContent = title ? artist : "Not listening right now";
-    $("nowKind").textContent = kind;
-    $("now").classList.toggle("playing", Boolean(title));
-  }
-
-  if (nowState.art !== art) {
-    nowState.art = art;
-    const image = $("nowArt");
-    if (art) {
-      image.src = art;
-      image.hidden = false;
-      $("nowNote").style.display = "none";
-      $("nowBg").style.backgroundImage = `url("${art.replace(/"/g, "%22")}")`;
-      $("nowBg").classList.add("on");
-    } else {
-      image.hidden = true;
-      image.removeAttribute("src");
-      $("nowNote").style.display = "";
-      $("nowBg").classList.remove("on");
-    }
-  }
-
-  $("nowFill").style.transform = `scaleX(${Math.max(0, Math.min(1, ratio))})`;
-  $("nowNow").textContent = title ? fmtClock(current) : "";
-  $("nowLen").textContent = title && length ? fmtClock(length) : "";
-  $("nowLyrics").style.visibility = feed.rows.length && title ? "visible" : "hidden";
-}
-
-function setNowOpen(open) {
-  const layer = $("now");
-  if (open === layer.classList.contains("open")) return;
-  toggleLayer(layer, open);
-  clearInterval(nowState.timer);
-  if (open) {
-    nowState.title = "\u0000";
-    nowState.art = "\u0000";
-    paintNow();
-    paintLines();
-    nowState.timer = setInterval(() => !document.hidden && paintNow(), 250);
-    $("nowClose").focus({ preventScroll: true });
-  }
-}
-
 const lyrState = { key: "", art: "", title: "", index: -2 };
 
 function paintLyr() {
@@ -9608,28 +9095,22 @@ function setLyrOpen(open) {
   const layer = $("lyr");
   if (open === layer.classList.contains("open")) return;
   toggleLayer(layer, open);
+  clearInterval(feed.timer);
+  feed.timer = 0;
   if (open) {
     lyrState.key = "";
     lyrState.title = "\u0000";
     lyrState.art = "\u0000";
     paintLyr();
+    stepFeed();
+    feed.timer = setInterval(() => !document.hidden && stepFeed(), 250);
     $("lyrClose").focus({ preventScroll: true });
   }
 }
 
-function setupNow() {
+function setupLyrics() {
   $("lyrClose").addEventListener("click", () => setLyrOpen(false));
-  const box = $("avatarBox");
-  box.addEventListener("click", () => setNowOpen(true));
-  box.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setNowOpen(true);
-    }
-  });
-  $("nowClose").addEventListener("click", () => setNowOpen(false));
-  clearInterval(feed.timer);
-  feed.timer = setInterval(() => !document.hidden && stepFeed(), 250);
+  $("topLyr").addEventListener("click", () => setLyrOpen(true));
 }
 
 const shareState = { blob: null, url: "", busy: false };
@@ -9923,7 +9404,7 @@ async function drawCard() {
 
 async function openShare() {
   if (shareState.busy) return;
-  const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "now", "keys", "lyr"].some((id) => $(id).classList.contains("open"));
+  const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "keys", "lyr"].some((id) => $(id).classList.contains("open"));
   if (busy) return;
 
   shareState.busy = true;
@@ -10024,7 +9505,6 @@ function setupShortcuts() {
     const key = event.key.toLowerCase();
 
     if ($("lyr").classList.contains("open") && !["m", "t"].includes(key)) return;
-    if ($("now").classList.contains("open") && !["f", "m", "t"].includes(key)) return;
     if ($("share").classList.contains("open")) return;
 
     if (key === "?" || (key === "/" && event.shiftKey)) {
@@ -10048,7 +9528,7 @@ function setupShortcuts() {
     } else if (key === "t") {
       cycleTheme();
     } else if (key === "s") {
-      const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "now", "share", "lyr"].some((id) => $(id).classList.contains("open"));
+      const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "share", "lyr"].some((id) => $(id).classList.contains("open"));
       if (!busy) $("openStats").click();
     } else if (key === "n" && queue.active) {
       queueStep(1);
@@ -10059,8 +9539,6 @@ function setupShortcuts() {
       else flash("nothing playing");
     } else if (key === "c") {
       openShare();
-    } else if (key === "f") {
-      setNowOpen(!$("now").classList.contains("open"));
     } else if (key === "g") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -10123,7 +9601,7 @@ function init() {
   setupEscape();
   setupShortcuts();
   setupTools();
-  setupNow();
+  setupLyrics();
   setupPeek();
   setupShare();
   const armToast = setupToast();
