@@ -4935,89 +4935,99 @@ async function loadGithub() {
   }
 }
 
-async function loadRoblox() {
-  const username = profile.roblox;
-  if (!username) return;
+function paintRoblox(info) {
+  $("rbName").textContent = info.displayName || profile.roblox;
+  $("rbUser").textContent = info.username ? `@${info.username}` : "";
 
-  $("rbName").textContent = username;
+  const show = (id, number) => {
+    $(id).textContent = number === null || number === undefined ? "—" : number.toLocaleString("en-US");
+  };
 
-  try {
-    const lookup = await fetch("https://users.roproxy.com/v1/usernames/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ usernames: [username], excludeBannedUsers: false })
-    });
-    const user = (await lookup.json()).data[0];
-    if (!user) return;
+  show("rbFriends", info.friends);
+  show("rbFollowing", info.following);
+  show("rbFollowers", info.followers);
+  $("rbRap").textContent = info.rap === null || info.rap === undefined ? "—" : `${info.rap.toLocaleString("en-US")} R$`;
 
-    $("rbName").textContent = user.displayName;
-    $("rbUser").textContent = `@${user.name}`;
+  if (info.userId) mountAvatar3d(info.userId, info.model);
 
-    const count = async (kind) => {
-      try {
-        const res = await fetch(`https://friends.roproxy.com/v1/users/${user.id}/${kind}/count`);
-        return (await res.json()).count;
-      } catch (error) {
-        return null;
-      }
+  if (info.avatarUrl) {
+    $("rbFigure").src = info.avatarUrl;
+    $("rbFigure").onload = () => {
+      $("rbFigure").hidden = false;
+      $("rbGhost").hidden = true;
     };
-
-    const figure = async () => {
-      try {
-        const res = await fetch(`https://thumbnails.roproxy.com/v1/users/avatar?userIds=${user.id}&size=420x420&format=Png&isCircular=false`);
-        return (await res.json()).data[0].imageUrl;
-      } catch (error) {
-        return "";
-      }
-    };
-
-    const rap = async () => {
-      let cursor = "";
-      let sum = 0;
-      try {
-        for (let page = 0; page < 6; page += 1) {
-          const res = await fetch(`https://inventory.roproxy.com/v1/users/${user.id}/assets/collectibles?limit=100&sortOrder=Asc${cursor ? `&cursor=${cursor}` : ""}`);
-          const body = await res.json();
-          if (!body.data) return null;
-          sum += body.data.reduce((total, item) => total + (item.recentAveragePrice || 0), 0);
-          if (!body.nextPageCursor) break;
-          cursor = body.nextPageCursor;
-        }
-        return sum;
-      } catch (error) {
-        return null;
-      }
-    };
-
-    const [friends, following, followers, image, value] = await Promise.all([
-      count("friends"),
-      count("followings"),
-      count("followers"),
-      figure(),
-      rap()
-    ]);
-
-    const show = (id, number) => {
-      $(id).textContent = number === null || number === undefined ? "—" : number.toLocaleString("en-US");
-    };
-
-    show("rbFriends", friends);
-    show("rbFollowing", following);
-    show("rbFollowers", followers);
-    $("rbRap").textContent = value === null ? "—" : `${value.toLocaleString("en-US")} R$`;
-
-    mountAvatar3d(user.id);
-
-    if (image) {
-      $("rbFigure").src = image;
-      $("rbFigure").onload = () => {
-        $("rbFigure").hidden = false;
-        $("rbGhost").hidden = true;
-      };
-    }
-  } catch (error) {
-    return;
   }
+}
+
+async function loadRobloxDirect() {
+  const lookup = await fetch("https://users.roproxy.com/v1/usernames/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ usernames: [profile.roblox], excludeBannedUsers: false })
+  });
+  const user = (await lookup.json()).data[0];
+  if (!user) return null;
+
+  const count = async (kind) => {
+    try {
+      const res = await fetch(`https://friends.roproxy.com/v1/users/${user.id}/${kind}/count`);
+      return (await res.json()).count;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const figure = async () => {
+    try {
+      const res = await fetch(`https://thumbnails.roproxy.com/v1/users/avatar?userIds=${user.id}&size=420x420&format=Png&isCircular=false`);
+      return (await res.json()).data[0].imageUrl;
+    } catch (error) {
+      return "";
+    }
+  };
+
+  const rap = async () => {
+    let cursor = "";
+    let sum = 0;
+    try {
+      for (let page = 0; page < 6; page += 1) {
+        const res = await fetch(`https://inventory.roproxy.com/v1/users/${user.id}/assets/collectibles?limit=100&sortOrder=Asc${cursor ? `&cursor=${cursor}` : ""}`);
+        const body = await res.json();
+        if (!body.data) return null;
+        sum += body.data.reduce((total, item) => total + (item.recentAveragePrice || 0), 0);
+        if (!body.nextPageCursor) break;
+        cursor = body.nextPageCursor;
+      }
+      return sum;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const [friends, following, followers, avatarUrl, value] = await Promise.all([count("friends"), count("followings"), count("followers"), figure(), rap()]);
+  return { userId: user.id, username: user.name, displayName: user.displayName, friends, following, followers, rap: value, avatarUrl, model: null };
+}
+
+async function loadRoblox() {
+  if (!profile.roblox) return;
+  $("rbName").textContent = profile.roblox;
+
+  let info = null;
+  try {
+    info = await api("/api/roblox");
+  } catch (error) {
+    info = null;
+  }
+
+  if (!info || !info.userId) {
+    try {
+      info = await loadRobloxDirect();
+    } catch (error) {
+      info = null;
+    }
+  }
+
+  if (info) paintRoblox(info);
 }
 
 const three = { loading: null };
@@ -5133,7 +5143,7 @@ async function buildAvatar(THREE, OBJLoader, model) {
   return object;
 }
 
-async function mountAvatar3d(userId) {
+async function mountAvatar3d(userId, ready) {
   const stage = $("figure");
   const canvas = document.createElement("canvas");
   canvas.className = "figure-3d";
@@ -5141,7 +5151,7 @@ async function mountAvatar3d(userId) {
   if (!gl) return;
 
   try {
-    const [model, [THREE, loaderModule]] = await Promise.all([fetchAvatarModel(userId), loadThree()]);
+    const [model, [THREE, loaderModule]] = await Promise.all([ready && ready.obj ? ready : fetchAvatarModel(userId), loadThree()]);
     const object = await buildAvatar(THREE, loaderModule.OBJLoader, model);
 
     const renderer = new THREE.WebGLRenderer({ canvas, context: gl, alpha: true, antialias: true, powerPreference: "low-power" });
