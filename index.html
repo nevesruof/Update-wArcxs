@@ -41,11 +41,47 @@
 html {
   background: var(--bg);
   scrollbar-width: none;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html::-webkit-scrollbar {
   display: none;
 }
+
+*::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+}
+
 
 .rail {
   position: fixed;
@@ -127,6 +163,10 @@ img {
   overflow: hidden;
   background: var(--bg);
   pointer-events: none;
+}
+
+.backdrop {
+  contain: strict;
 }
 
 .backdrop canvas {
@@ -820,10 +860,12 @@ body.entered .np-dock.live {
 
 .changes {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 2px;
 }
 
 .change {
+  min-width: 0;
   display: flex;
   align-items: baseline;
   gap: 12px;
@@ -2641,8 +2683,6 @@ a.social:hover b {
   opacity: 0;
   transform: translateY(26px) scale(0.965);
   transition: transform 0.26s cubic-bezier(0.4, 0, 1, 1), opacity 0.2s ease;
-  scrollbar-width: thin;
-  scrollbar-color: #2a2a2d transparent;
 }
 
 .overlay.open .panel {
@@ -3436,8 +3476,6 @@ a.rank-card:hover .rank-art img {
   padding-right: 2px;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  scrollbar-width: thin;
-  scrollbar-color: #303030 transparent;
 }
 
 .game-overlay {
@@ -3480,14 +3518,25 @@ a.rank-card:hover .rank-art img {
   transform: none;
 }
 
+.game-hero {
+  position: relative;
+  display: grid;
+  margin: -64px -24px 0;
+  padding: 64px 24px 28px;
+  isolation: isolate;
+}
+
 .game-banner {
   position: absolute;
-  inset: 0 0 auto 0;
-  height: 280px;
+  inset: 0;
+  z-index: -1;
   overflow: hidden;
+  contain: paint;
 }
 
 .game-banner img {
+  position: relative;
+  z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -3500,10 +3549,11 @@ a.rank-card:hover .rank-art img {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
 }
 
 .game-banner::before {
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.25), rgba(8, 8, 10, 0.55), rgba(10, 10, 12, 1));
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.25), rgba(8, 8, 10, 0.62) 55%, rgba(10, 10, 12, 1));
 }
 
 .game-banner::after {
@@ -3845,6 +3895,32 @@ a.rank-card:hover .rank-art img {
 }
 
 @media (max-width: 560px) {
+  .np-tab {
+    width: 18px;
+  }
+
+  .np-tab svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .entry .text .peek {
+    font-size: 0;
+    letter-spacing: 0;
+    padding: 4px 2px 4px 6px;
+  }
+
+  .entry .text .peek::after {
+    content: "\2197";
+    font-size: 13px;
+  }
+
+  .np-card {
+    background: radial-gradient(120% 120% at 0% 0%, rgba(255, 255, 255, 0.05), transparent 60%), rgba(10, 10, 11, 0.985);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+
   .game-id {
     flex-direction: column;
   }
@@ -4294,13 +4370,22 @@ function setupRail() {
     hide = setTimeout(() => rail.classList.remove("awake"), 1000);
   };
 
+  let queued = 0;
+  const schedule = () => {
+    if (queued) return;
+    queued = requestAnimationFrame(() => {
+      queued = 0;
+      update();
+    });
+  };
+
   window.addEventListener("scroll", () => {
-    update();
+    schedule();
     wake();
   }, { passive: true });
-  window.addEventListener("resize", update);
-  new ResizeObserver(update).observe(document.body);
-  new MutationObserver(update).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  window.addEventListener("resize", schedule, { passive: true });
+  new ResizeObserver(schedule).observe(document.body);
+  new MutationObserver(schedule).observe(document.body, { attributes: true, attributeFilter: ["class"] });
 
   thumb.addEventListener("pointerdown", (event) => {
     event.preventDefault();
@@ -4349,7 +4434,7 @@ function watchMark() {
 }
 
 function initialTile(name, icon) {
-  if (icon) return `<img class="tile" src="${esc(icon)}" alt="">`;
+  if (icon) return `<img class="tile" src="${esc(icon)}" alt="" loading="lazy" decoding="async">`;
   const hue = [...name].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 360;
   return `<div class="tile" style="background:linear-gradient(135deg,hsl(${hue} 14% 34%),hsl(${hue} 16% 16%))">${esc(name.charAt(0).toUpperCase())}</div>`;
 }
@@ -4455,12 +4540,13 @@ void main(){
   backdropState.resize = resize;
 
   const started = performance.now();
+  const gap = window.matchMedia("(pointer: coarse)").matches ? 50 : 33;
   let last = 0;
 
   const frame = (now) => {
     requestAnimationFrame(frame);
     if (backdropState.paused || document.body.classList.contains("locked") || document.hidden) return;
-    if (now - last < 33) return;
+    if (now - last < gap) return;
     last = now;
     gl.uniform2f(resolution, canvas.width, canvas.height);
     gl.uniform1f(clock, (now - started) / 1000 + 12);
@@ -5529,12 +5615,30 @@ function setupFigureTilt() {
   const figure = $("figure");
   const image = $("rbFigure");
 
-  window.addEventListener("mousemove", (event) => {
+  let visible = false;
+  let point = null;
+  let queued = 0;
+
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver((entries) => {
+      visible = entries[0].isIntersecting;
+    }).observe(figure);
+  }
+
+  const apply = () => {
+    queued = 0;
+    if (!point) return;
     const rect = figure.getBoundingClientRect();
-    const dx = (event.clientX - (rect.left + rect.width / 2)) / window.innerWidth;
-    const dy = (event.clientY - (rect.top + rect.height / 2)) / window.innerHeight;
+    const dx = (point.x - (rect.left + rect.width / 2)) / window.innerWidth;
+    const dy = (point.y - (rect.top + rect.height / 2)) / window.innerHeight;
     image.style.transform = `rotateY(${dx * 38}deg) rotateX(${-dy * 14}deg)`;
-  });
+  };
+
+  window.addEventListener("mousemove", (event) => {
+    if (!visible || queued) return;
+    point = { x: event.clientX, y: event.clientY };
+    queued = requestAnimationFrame(apply);
+  }, { passive: true });
 }
 
 function showLastPlayed(name) {
@@ -7447,9 +7551,10 @@ function gameMarkup(game, label, note) {
     : "";
 
   return `
-    <div class="game-banner" id="gameBanner"><img id="gameBannerImg" alt=""></div>
     <button class="game-close" id="gameClose" type="button" aria-label="Close game details">${gameIcons.close}</button>
     <div class="game-body">
+      <div class="game-hero">
+      <div class="game-banner" id="gameBanner"><img id="gameBannerImg" alt=""></div>
       <div class="game-top">
         <div class="game-id">
           <img class="game-cover" id="gameCover" alt="${esc(game.name)}">
@@ -7461,6 +7566,7 @@ function gameMarkup(game, label, note) {
           </div>
         </div>
         ${links.length ? `<div class="game-links">${links.map((site) => `<a href="${esc(site.url)}" target="_blank" rel="noopener noreferrer">${arrowIcon}<span>${esc(site.label)}</span></a>`).join("")}</div>` : ""}
+      </div>
       </div>
       <div class="game-grid">
         <div class="game-main">
