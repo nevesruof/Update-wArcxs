@@ -1018,9 +1018,20 @@ body.entered .rise {
 
 .avatar-box .decor {
   position: absolute;
-  inset: 0;
-  width: 72px;
-  height: 72px;
+  inset: -7px;
+  z-index: 2;
+  width: 86px;
+  height: 86px;
+  max-width: none;
+  pointer-events: none;
+  animation: decorIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes decorIn {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
 }
 
 .presence {
@@ -5664,6 +5675,76 @@ async function loadChangelog() {
   $("changeBlock").hidden = false;
 }
 
+const decor = { asset: "", token: 0, timer: 0 };
+
+function apngDuration(buffer) {
+  const view = new DataView(buffer);
+  const tag = (at) => String.fromCharCode(view.getUint8(at), view.getUint8(at + 1), view.getUint8(at + 2), view.getUint8(at + 3));
+  let offset = 8;
+  let total = 0;
+  let frames = 0;
+
+  while (offset + 12 <= buffer.byteLength) {
+    const size = view.getUint32(offset);
+    const kind = tag(offset + 4);
+    if (kind === "acTL") frames = view.getUint32(offset + 8);
+    if (kind === "fcTL") {
+      const num = view.getUint16(offset + 8 + 20);
+      const den = view.getUint16(offset + 8 + 22) || 100;
+      total += (num / den) * 1000;
+    }
+    if (kind === "IEND") break;
+    offset += size + 12;
+  }
+
+  return frames > 1 ? total : 0;
+}
+
+async function setDecoration(data) {
+  const img = $("decor");
+  const asset = data && /^[\w-]+$/.test(data.asset || "") ? data.asset : "";
+
+  if (!asset) {
+    decor.asset = "";
+    decor.token += 1;
+    img.hidden = true;
+    return;
+  }
+
+  if (asset === decor.asset) return;
+  decor.asset = asset;
+  const token = ++decor.token;
+  clearTimeout(decor.timer);
+
+  const base = `https://cdn.discordapp.com/avatar-decoration-presets/${asset}.png`;
+  const still = `${base}?size=240&passthrough=false`;
+  const moving = `${base}?size=240&passthrough=true`;
+  const preload = new Image();
+  preload.src = still;
+
+  let source = moving;
+  let length = 5000;
+
+  try {
+    const response = await fetch(moving);
+    const bytes = await response.arrayBuffer();
+    length = apngDuration(bytes) || length;
+    source = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
+  } catch (error) {
+    source = moving;
+  }
+
+  if (token !== decor.token) return;
+
+  img.src = source;
+  img.hidden = false;
+  decor.timer = setTimeout(() => {
+    if (token !== decor.token) return;
+    img.src = still;
+    if (source.startsWith("blob:")) setTimeout(() => URL.revokeObjectURL(source), 1000);
+  }, Math.min(Math.max(length, 1200), 12000) + 150);
+}
+
 function paintDiscord(data) {
   const status = ["online", "idle", "dnd"].includes(data.discord_status) ? data.discord_status : "offline";
   $("presence").dataset.status = status;
@@ -5675,6 +5756,7 @@ function paintDiscord(data) {
   setNames(user.display_name || user.global_name || user.username, user.username);
   if (user.display_name_styles) applyNameStyle(user.display_name_styles);
   if (!profile.avatar && user.id && user.avatar) setAvatar(avatarUrl(user));
+  if (!profile.avatarDecoration) setDecoration(user.avatar_decoration_data);
 
   const game = (data.activities || []).find((activity) => activity.type === 0);
   const image = game && game.assets && game.assets.large_image;
