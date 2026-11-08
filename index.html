@@ -140,7 +140,7 @@ img {
   font-size: 11px;
   letter-spacing: 0.24em;
   text-indent: 0.24em;
-  color: #fff;
+  color: #8c8c8c;
   text-shadow: 0 0 10px #000;
   animation: pulse 2.6s ease-in-out infinite;
 }
@@ -151,11 +151,11 @@ img {
   width: 150px;
   height: 1px;
   margin: 10px auto 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9) 22%, rgba(255, 255, 255, 0.9) 78%, transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38) 22%, rgba(255, 255, 255, 0.38) 78%, transparent);
 }
 
 @keyframes pulse {
-  50% { opacity: 0.55; }
+  50% { opacity: 0.5; }
 }
 
 .sound {
@@ -604,20 +604,6 @@ body.entered .rise {
   font-size: 0.8rem;
   color: var(--muted);
   line-height: 1.2;
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.tag svg {
-  width: 14px;
-  height: 14px;
-  fill: #ff4d5e;
 }
 
 .bio {
@@ -2367,10 +2353,6 @@ a.rank-card:hover .rank-art img {
       <div class="sub">
         <button class="handle" id="handle" type="button">take</button>
         <span class="copied" id="copiedUser" hidden>Copied!</span>
-        <span class="tag" id="tag">
-          <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.4-9.3C1.4 8.5 3.3 5 6.6 5c2 0 3.6 1.1 5.4 3 1.8-1.9 3.4-3 5.4-3 3.3 0 5.2 3.5 4 6.7C19.5 16.4 12 21 12 21Z"/></svg>
-          <span id="tagText">FM</span>
-        </span>
       </div>
     </div>
   </header>
@@ -2562,7 +2544,6 @@ const profile = {
   name: "Take",
   handle: "singledeve",
   nameStyle: { font_id: 8, effect_id: 4, colors: [16777215] },
-  clanTag: "FM",
   intro: true,
   introLogo: window.INTRO_LOGO || "",
   avatar: "",
@@ -2774,77 +2755,45 @@ function setupToast() {
   });
 }
 
-function drawSkull() {
-  const art = document.createElement("canvas");
-  art.width = 256;
-  art.height = 256;
-  const c = art.getContext("2d");
-
-  c.fillStyle = "#fff";
-  c.beginPath();
-  c.ellipse(128, 108, 78, 82, 0, 0, Math.PI * 2);
-  c.fill();
-
-  c.beginPath();
-  c.roundRect(88, 160, 80, 62, 14);
-  c.fill();
-
-  c.globalCompositeOperation = "destination-out";
-
-  c.beginPath();
-  c.ellipse(98, 118, 23, 27, 0.15, 0, Math.PI * 2);
-  c.fill();
-  c.beginPath();
-  c.ellipse(158, 118, 23, 27, -0.15, 0, Math.PI * 2);
-  c.fill();
-
-  c.beginPath();
-  c.moveTo(128, 142);
-  c.lineTo(116, 168);
-  c.lineTo(140, 168);
-  c.closePath();
-  c.fill();
-
-  c.lineWidth = 5;
-  c.lineCap = "round";
-  c.strokeStyle = "#000";
-  [108, 128, 148].forEach((x) => {
-    c.beginPath();
-    c.moveTo(x, 190);
-    c.lineTo(x, 222);
-    c.stroke();
-  });
-
-  return art;
-}
-
 function loadLogo(url, done) {
   const image = new Image();
 
   image.onload = () => {
+    const w = image.width;
+    const h = image.height;
     const art = document.createElement("canvas");
-    art.width = image.width;
-    art.height = image.height;
+    art.width = w;
+    art.height = h;
     const c = art.getContext("2d", { willReadFrequently: true });
     c.drawImage(image, 0, 0);
 
+    let data;
     try {
-      const pixels = c.getImageData(0, 0, art.width, art.height);
-      const data = pixels.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const luma = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114) / 255;
-        const strength = (data[i + 3] / 255) * (0.35 + 0.65 * luma);
-        data[i] = 255;
-        data[i + 1] = 255;
-        data[i + 2] = 255;
-        data[i + 3] = Math.round(strength * 255);
-      }
-      c.putImageData(pixels, 0, 0);
+      data = c.getImageData(0, 0, w, h).data;
     } catch (error) {
       return;
     }
 
-    done(art);
+    let minX = w;
+    let minY = h;
+    let maxX = 0;
+    let maxY = 0;
+    for (let y = 0; y < h; y += 1) {
+      for (let x = 0; x < w; x += 1) {
+        if (data[(y * w + x) * 4 + 3] > 26) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    const cropped = document.createElement("canvas");
+    cropped.width = maxX - minX + 1;
+    cropped.height = maxY - minY + 1;
+    cropped.getContext("2d").drawImage(art, minX, minY, cropped.width, cropped.height, 0, 0, cropped.width, cropped.height);
+    done(cropped);
   };
 
   image.src = url;
@@ -2862,32 +2811,98 @@ function runIntro(onEnter) {
   const canvas = $("ascii");
   const ctx = canvas.getContext("2d");
   const ramp = " .:ilrsxf29A5HM#8@";
-  const cellW = 7;
-  const cellH = 12;
+  const small = Math.min(window.innerWidth, window.innerHeight) < 620;
+  const cellW = small ? 5 : 7;
+  const cellH = small ? 9 : 12;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
   const mask = document.createElement("canvas");
   const maskCtx = mask.getContext("2d", { willReadFrequently: true });
   let cols = 0;
   let rows = 0;
   let maskData = null;
   let stop = false;
-  let logo = drawSkull();
+  let logo = null;
+  let shownAt = 0;
+  let carLayer = null;
+  let carBox = null;
+
+  const paintCar = () => {
+    const fineW = small ? 3.6 : 6;
+    const fineH = fineW * 1.8;
+    const gridCols = Math.floor(carBox.w / fineW);
+    const gridRows = Math.floor(carBox.h / fineH);
+
+    const probe = document.createElement("canvas");
+    probe.width = gridCols;
+    probe.height = gridRows;
+    const probeCtx = probe.getContext("2d", { willReadFrequently: true });
+    probeCtx.imageSmoothingQuality = "high";
+    probeCtx.drawImage(logo, 0, 0, gridCols, gridRows);
+    const px = probeCtx.getImageData(0, 0, gridCols, gridRows).data;
+
+    const base = new Float32Array(gridCols * gridRows);
+    for (let i = 0; i < base.length; i += 1) base[i] = px[i * 4 + 3] / 255;
+
+    carLayer = document.createElement("canvas");
+    carLayer.width = Math.round(carBox.w * dpr);
+    carLayer.height = Math.round(carBox.h * dpr);
+    const layer = carLayer.getContext("2d");
+    layer.setTransform(dpr, 0, 0, dpr, 0, 0);
+    layer.font = `${fineH * 0.95}px "Geist Mono", monospace`;
+    layer.textBaseline = "top";
+
+    const reach = 2;
+    for (let y = 0; y < gridRows; y += 1) {
+      for (let x = 0; x < gridCols; x += 1) {
+        const here = base[y * gridCols + x];
+        if (here < 0.06) continue;
+        let sum = 0;
+        let count = 0;
+        for (let dy = -reach; dy <= reach; dy += 1) {
+          for (let dx = -reach; dx <= reach; dx += 1) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx < 0 || ny < 0 || nx >= gridCols || ny >= gridRows) continue;
+            sum += base[ny * gridCols + nx];
+            count += 1;
+          }
+        }
+        const sharp = Math.max(0, Math.min(1, here + (here - sum / count) * 3.2));
+        const value = Math.pow(sharp, 1.9);
+        if (value < 0.05) continue;
+        const char = ramp[Math.min(ramp.length - 1, Math.floor(value * ramp.length))];
+        const shade = Math.round(26 + value * 205);
+        layer.fillStyle = `rgb(${shade},${shade},${Math.min(255, shade + 3)})`;
+        layer.fillText(char, x * fineW, y * fineH);
+      }
+    }
+  };
 
   const build = () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    cols = Math.ceil(canvas.width / cellW);
-    rows = Math.ceil(canvas.height / cellH);
+    canvas.width = Math.round(window.innerWidth * dpr);
+    canvas.height = Math.round(window.innerHeight * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cols = Math.ceil(window.innerWidth / cellW);
+    rows = Math.ceil(window.innerHeight / cellH);
     mask.width = cols;
     mask.height = rows;
     maskCtx.clearRect(0, 0, cols, rows);
-    const ratio = (logo.width / logo.height) * (cellH / cellW);
-    let height = rows * 0.62;
-    let width = height * ratio;
-    if (width > cols * 0.8) {
-      width = cols * 0.8;
-      height = width / ratio;
+    carLayer = null;
+
+    if (logo) {
+      const aspect = logo.width / logo.height;
+      let w = window.innerWidth * (small ? 0.94 : 0.78);
+      let h = w / aspect;
+      const limit = window.innerHeight * 0.5;
+      if (h > limit) {
+        h = limit;
+        w = h * aspect;
+      }
+      carBox = { x: (window.innerWidth - w) / 2, y: window.innerHeight * 0.48 - h / 2, w, h };
+      maskCtx.drawImage(logo, carBox.x / cellW, carBox.y / cellH, carBox.w / cellW, carBox.h / cellH);
+      paintCar();
     }
-    maskCtx.drawImage(logo, cols / 2 - width / 2, rows / 2 - height / 2, width, height);
+
     maskData = maskCtx.getImageData(0, 0, cols, rows).data;
     ctx.font = `${cellH - 1}px "Geist Mono", monospace`;
     ctx.textBaseline = "top";
@@ -2899,6 +2914,7 @@ function runIntro(onEnter) {
   if (profile.introLogo) {
     loadLogo(profile.introLogo, (art) => {
       logo = art;
+      shownAt = performance.now();
       build();
     });
   }
@@ -2908,11 +2924,13 @@ function runIntro(onEnter) {
     setTimeout(() => requestAnimationFrame(draw), 40);
 
     const t = now / 1000;
+    const reveal = shownAt ? Math.min(1, (now - shownAt) / 900) : 0;
     ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
     for (let y = 0; y < rows; y += 1) {
       for (let x = 0; x < cols; x += 1) {
+        if ((maskData[(y * cols + x) * 4 + 3] / 255) * reveal > 0.08) continue;
         const nx = x / cols;
         const ny = y / rows;
         const wave =
@@ -2920,10 +2938,8 @@ function runIntro(onEnter) {
           Math.sin(y * 0.11 - t * 1.2) * 0.5 +
           Math.sin((x + y) * 0.045 + t * 0.6) * 0.5 +
           Math.sin(Math.hypot(x - cols / 2, (y - rows / 2) * 1.8) * 0.12 - t * 1.4) * 0.5;
-        const text = maskData[(y * cols + x) * 4 + 3] / 255;
         const edge = Math.max(0, 1 - Math.hypot(nx - 0.5, (ny - 0.5) * 1.1) * 1.5);
-        let value = 0.15 + wave * 0.06 + text * 0.85 + edge * 0.06;
-        value = Math.max(0, Math.min(1, value));
+        const value = Math.max(0, Math.min(1, 0.15 + wave * 0.06 + edge * 0.06));
         if (value < 0.12) continue;
 
         const char = ramp[Math.min(ramp.length - 1, Math.floor(value * ramp.length))];
@@ -2931,6 +2947,12 @@ function runIntro(onEnter) {
         ctx.fillStyle = `rgb(${shade},${shade},${Math.min(255, shade + 4)})`;
         ctx.fillText(char, x * cellW, y * cellH);
       }
+    }
+
+    if (carLayer) {
+      ctx.globalAlpha = reveal;
+      ctx.drawImage(carLayer, carBox.x, carBox.y, carBox.w, carBox.h);
+      ctx.globalAlpha = 1;
     }
   };
 
@@ -2956,12 +2978,6 @@ function renderHead() {
   setNames(profile.name, profile.handle);
   applyNameStyle(profile.nameStyle);
   $("bio").textContent = profile.bio;
-
-  if (profile.clanTag) {
-    $("tagText").textContent = profile.clanTag;
-  } else {
-    $("tag").hidden = true;
-  }
 
   if (profile.avatar) setAvatar(profile.avatar);
 
