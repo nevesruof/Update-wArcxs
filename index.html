@@ -654,6 +654,73 @@ body.entered .np-dock.live {
   min-width: 0;
 }
 
+.np-queue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.np-queue button {
+  display: grid;
+  place-items: center;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #b4b4ba;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.np-queue button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.np-queue svg {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+}
+
+.np-q-main {
+  flex: 1;
+  min-width: 0;
+  grid-auto-flow: column;
+  justify-content: start;
+  gap: 8px;
+  padding: 0 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.np-q-main span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.np-q-ico {
+  width: 30px;
+  flex: none;
+}
+
+.np-queue:not(.live) .np-q-nav {
+  display: none;
+}
+
+.np-queue.live .np-q-main {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.np-queue button[aria-pressed="true"] {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .np-field {
   display: flex;
   align-items: center;
@@ -4147,6 +4214,7 @@ button:focus-visible {
     <div><span>Buscar canción</span><kbd>/</kbd></div>
     <div><span>Cambiar tema</span><kbd>T</kbd></div>
     <div><span>Abrir stats.fm</span><kbd>S</kbd></div>
+    <div><span>Siguiente / anterior en la playlist</span><kbd>N / B</kbd></div>
     <div><span>Volver arriba</span><kbd>G</kbd></div>
     <div><span>Cerrar lo que esté abierto</span><kbd>Esc</kbd></div>
     <div><span>Ver esta ayuda</span><kbd>?</kbd></div>
@@ -4408,6 +4476,12 @@ button:focus-visible {
         <input id="npVolRange" type="range" min="0" max="100" step="1" value="30" aria-label="Volume">
       </div>
       <div class="np-find">
+        <div class="np-queue" id="npQueue">
+          <button class="np-q-main" id="npQMain" type="button"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg><span id="npQLabel">Play top songs</span></button>
+          <button class="np-q-ico np-q-nav" id="npQPrev" type="button" aria-label="Previous song"><svg viewBox="0 0 24 24"><path d="M6 5.5h2.4v13H6zM20 5.5v13L9.5 12z"/></svg></button>
+          <button class="np-q-ico np-q-nav" id="npQNext" type="button" aria-label="Next song"><svg viewBox="0 0 24 24"><path d="M15.6 5.5H18v13h-2.4zM4 5.5v13L14.5 12z"/></svg></button>
+          <button class="np-q-ico" id="npQShuffle" type="button" aria-pressed="false" aria-label="Shuffle"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><path d="M3 7h3.2c1.5 0 2.9.8 3.7 2.1l2.2 3.8c.8 1.3 2.2 2.1 3.7 2.1H21M3 17h3.2c1.5 0 2.9-.8 3.7-2.1M14.3 8.1c.8-1.3 2.2-2.1 3.7-2.1H21m-3 -2 3 2-3 2m0 8 3 2-3 2"/></svg></button>
+        </div>
         <label class="np-field"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="npSearch" type="search" placeholder="Search listened songs" aria-label="Search listened songs" autocomplete="off" spellcheck="false"></label>
         <div class="np-results-wrap" id="npWrap"><div class="np-results" id="npResults" aria-label="Song search results"></div></div>
       </div>
@@ -6174,7 +6248,8 @@ function nextCandidate() {
 
   if (wasManual) {
     findNote("Couldn't play that song.");
-    stopManual();
+    if (queue.active && manual.id) playQueueAt(queue.index + 1);
+    else stopManual(queue.active);
   }
 }
 
@@ -6195,7 +6270,7 @@ function musicStop() {
 
 function musicEnded() {
   if (music.source === "manual") {
-    stopManual();
+    manualEnded();
     return;
   }
   if (music.source === "spotify") {
@@ -6652,9 +6727,11 @@ function loadFinder() {
       const album = track.albums && track.albums[0];
       const artist = (track.artists || []).map((item) => item.name).join(", ");
       const id = fold(`${track.name} ${artist}`);
-      if (map.has(id)) return;
+      if (map.has(id)) return map.get(id);
       map.set(id, { id, name: track.name, artist, image: /^https:/i.test((album && album.image) || "") ? album.image : "" });
+      return map.get(id);
     };
+    const ranked = [];
 
     if (profile.statsfmId) {
       const [top, recent] = await Promise.all([
@@ -6662,9 +6739,13 @@ function loadFinder() {
         statsRequest("/streams/recent", { limit: 50 }).catch(() => null)
       ]);
       ((recent && recent.items) || []).forEach((item) => add(item.track));
-      ((top && top.items) || []).forEach((item) => add(item.track));
+      ((top && top.items) || []).forEach((item) => {
+        const song = add(item.track);
+        if (song && !ranked.includes(song)) ranked.push(song);
+      });
     }
 
+    finder.top = ranked;
     finder.songs = [...map.values()];
     return finder.songs;
   })();
@@ -6693,7 +6774,12 @@ function markPlaying() {
   });
 }
 
-function stopManual() {
+function stopManual(keepQueue) {
+  if (!keepQueue && queue.active) {
+    queue.active = false;
+    queue.run += 1;
+    paintQueue();
+  }
   manual.token += 1;
   if (manual.stop) manual.stop();
   manual.stop = null;
@@ -6824,7 +6910,7 @@ async function toggleSong(song) {
   audio.volume = Math.min(1, music.volume / 100);
   audio.muted = music.muted;
   audio.addEventListener("ended", () => {
-    if (manual.audio === audio) stopManual();
+    if (manual.audio === audio) manualEnded();
   });
 
   try {
@@ -6888,7 +6974,101 @@ function renderFinder(query) {
     .join("");
 }
 
+const queue = { songs: [], index: -1, active: false, shuffle: false, misses: 0, run: 0 };
+
+function paintQueue() {
+  const box = $("npQueue");
+  box.classList.toggle("live", queue.active);
+  $("npQLabel").textContent = queue.active ? `Top songs · ${queue.index + 1}/${queue.songs.length}` : "Play top songs";
+  $("npQMain").setAttribute("aria-label", queue.active ? "Stop playlist" : "Play top songs");
+  $("npQShuffle").setAttribute("aria-pressed", String(queue.shuffle));
+}
+
+function queueOrder(skip) {
+  const pool = (finder.top && finder.top.length ? finder.top : finder.songs || []).filter((song) => !skip || song.id !== skip.id).slice(0, 30);
+  if (queue.shuffle) {
+    for (let i = pool.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+  }
+  return pool;
+}
+
+async function playQueueAt(position) {
+  if (!queue.active || !queue.songs.length) return;
+
+  const run = ++queue.run;
+  const total = queue.songs.length;
+  queue.index = ((position % total) + total) % total;
+  const song = queue.songs[queue.index];
+  paintQueue();
+
+  await toggleSong(song);
+  if (run !== queue.run || !queue.active) return;
+
+  if (manual.id === song.id) {
+    queue.misses = 0;
+    return;
+  }
+
+  queue.misses += 1;
+  if (queue.misses >= 4) {
+    queue.active = false;
+    paintQueue();
+    stopManual();
+    return;
+  }
+  playQueueAt(queue.index + 1);
+}
+
+async function startQueue() {
+  await loadFinder();
+  const songs = queueOrder();
+  if (!songs.length) {
+    findNote("No songs to play yet.");
+    return;
+  }
+  queue.songs = songs;
+  queue.active = true;
+  queue.misses = 0;
+  playQueueAt(0);
+}
+
+function stopQueue() {
+  queue.active = false;
+  queue.run += 1;
+  paintQueue();
+  stopManual();
+}
+
+function manualEnded() {
+  if (queue.active) playQueueAt(queue.index + 1);
+  else stopManual();
+}
+
+function queueStep(direction) {
+  if (queue.active) playQueueAt(queue.index + direction);
+}
+
+function setupQueue() {
+  $("npQMain").addEventListener("click", () => (queue.active ? stopQueue() : startQueue()));
+  $("npQNext").addEventListener("click", () => queueStep(1));
+  $("npQPrev").addEventListener("click", () => queueStep(-1));
+  $("npQShuffle").addEventListener("click", () => {
+    queue.shuffle = !queue.shuffle;
+    if (queue.active) {
+      const current = queue.songs[queue.index];
+      queue.songs = [current, ...queueOrder(current)];
+      queue.index = 0;
+    }
+    paintQueue();
+  });
+  paintQueue();
+}
+
 function setupDock() {
+  setupQueue();
   const box = $("npDock");
   const input = $("npSearch");
 
@@ -6918,7 +7098,14 @@ function setupDock() {
   $("npResults").addEventListener("click", (event) => {
     const item = event.target.closest(".np-find-item");
     const song = item && finder.rows && finder.rows.get(item.dataset.id);
-    if (song) toggleSong(song);
+    if (song) {
+      if (queue.active && song.id !== manual.id) {
+        queue.active = false;
+        queue.run += 1;
+        paintQueue();
+      }
+      toggleSong(song);
+    }
   });
 
   $("npAct").addEventListener("click", () => {
@@ -8025,6 +8212,10 @@ function setupShortcuts() {
     } else if (key === "s") {
       const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay"].some((id) => $(id).classList.contains("open"));
       if (!busy) $("openStats").click();
+    } else if (key === "n" && queue.active) {
+      queueStep(1);
+    } else if (key === "b" && queue.active) {
+      queueStep(-1);
     } else if (key === "g") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
