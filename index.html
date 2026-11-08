@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1628,6 +1628,130 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
 
 .sound.share-btn {
   top: 116px;
+}
+
+.lyr {
+  position: fixed;
+  inset: 0;
+  z-index: 47;
+  background: #050506;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.lyr.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lyr-wrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(820px, 100%);
+  height: 100%;
+  margin: 0 auto;
+  padding: 26px 24px 0;
+}
+
+.lyr-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 52px;
+}
+
+.lyr-cover {
+  width: 54px;
+  height: 54px;
+  flex: none;
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2a2a30, #121215);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.lyr-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lyr-head b,
+.lyr-head span {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.lyr-head b {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.lyr-head span {
+  margin-top: 2px;
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.lyr-scroll {
+  flex: 1;
+  min-height: 0;
+  margin-top: 18px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(transparent, #000 12%, #000 84%, transparent);
+  mask-image: linear-gradient(transparent, #000 12%, #000 84%, transparent);
+}
+
+.lyr-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.lyr-list {
+  padding: 34vh 0 40vh;
+}
+
+.lyr-list p {
+  padding: 8px 4px;
+  font-size: clamp(1.45rem, 3.6vw, 2.2rem);
+  font-weight: 650;
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.26);
+  transform-origin: left center;
+  transition: color 0.35s ease, transform 0.35s ease;
+}
+
+.lyr-list p.past {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.lyr-list p.on {
+  color: #fff;
+  transform: scale(1.03);
+}
+
+.lyr-list p.gap {
+  min-height: 1.2em;
+}
+
+.lyr-list p.note {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 760px) {
+  .lyr-wrap {
+    padding: 20px 18px 0;
+  }
 }
 
 .share-card {
@@ -4779,7 +4903,7 @@ button:focus-visible {
   <p>click to enter</p>
 </div>
 
-<button class="sound" id="sound" type="button" aria-pressed="false" aria-label="Sonido">
+<button class="sound" id="sound" type="button" aria-pressed="false" aria-label="Sound">
   <svg viewBox="0 0 24 24">
     <path d="M11 5 6 9H3v6h3l5 4V5Z"/>
     <path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>
@@ -4787,9 +4911,9 @@ button:focus-visible {
   </svg>
 </button>
 
-<button class="sound theme" id="theme" type="button" aria-label="Cambiar tema"><i></i></button>
+<button class="sound theme" id="theme" type="button" aria-label="Change theme"><i></i></button>
 
-<button class="sound share-btn" id="shareBtn" type="button" aria-label="Compartir como imagen" title="compartir como imagen"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="m4 17 5-4.5 3.5 3 3-2.5 4.5 4"/></svg></button>
+<button class="sound share-btn" id="shareBtn" type="button" aria-label="Share as image" title="share as image"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="m4 17 5-4.5 3.5 3 3-2.5 4.5 4"/></svg></button>
 
 <div class="flash" id="flash" role="status" aria-live="polite"></div>
 
@@ -4813,39 +4937,51 @@ button:focus-visible {
       <div><small>playing now</small><b id="nowGameName"></b><span id="nowGameInfo"></span></div>
     </div>
   </div>
-  <p class="now-hint">esc para volver</p>
+  <p class="now-hint">esc to close</p>
+</div>
+
+<div class="lyr" id="lyr" aria-hidden="true" role="dialog" aria-label="Lyrics">
+  <div class="now-bg" id="lyrBg"></div>
+  <button class="now-close" id="lyrClose" type="button" aria-label="Close lyrics"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  <div class="lyr-wrap">
+    <header class="lyr-head">
+      <div class="lyr-cover"><img id="lyrArt" alt="" hidden></div>
+      <div><b id="lyrTitle"></b><span id="lyrArtist"></span></div>
+    </header>
+    <div class="lyr-scroll" id="lyrScroll"><div class="lyr-list" id="lyrList"></div></div>
+  </div>
 </div>
 
 <div class="keys" id="share" aria-hidden="true">
-  <div class="share-card" role="dialog" aria-label="Tarjeta para compartir">
-    <img id="shareImg" alt="Tarjeta de perfil">
+  <div class="share-card" role="dialog" aria-label="Share card">
+    <img id="shareImg" alt="Profile card">
     <div class="share-actions">
-      <button type="button" id="shareSave">Descargar PNG</button>
-      <button type="button" id="shareSend" hidden>Compartir</button>
-      <button type="button" id="shareCopy" hidden>Copiar</button>
+      <button type="button" id="shareSave">Download PNG</button>
+      <button type="button" id="shareSend" hidden>Share</button>
+      <button type="button" id="shareCopy" hidden>Copy</button>
     </div>
   </div>
 </div>
 
 <div class="keys" id="keys" aria-hidden="true">
-  <div class="keys-card" role="dialog" aria-label="Atajos de teclado">
-    <h3>atajos</h3>
-    <div><span>Silenciar / activar sonido</span><kbd>M</kbd></div>
-    <div><span>Abrir o cerrar el reproductor</span><kbd>P</kbd></div>
-    <div><span>Buscar canción</span><kbd>/</kbd></div>
-    <div><span>Cambiar tema</span><kbd>T</kbd></div>
-    <div><span>Compartir como imagen</span><kbd>C</kbd></div>
-    <div><span>Abrir stats.fm</span><kbd>S</kbd></div>
-    <div><span>Siguiente / anterior en la playlist</span><kbd>N / B</kbd></div>
-    <div><span>Vista en vivo (lo que escucho y juego)</span><kbd>F</kbd></div>
-    <div><span>Volver arriba</span><kbd>G</kbd></div>
-    <div><span>Cerrar lo que esté abierto</span><kbd>Esc</kbd></div>
-    <div><span>Ver esta ayuda</span><kbd>?</kbd></div>
+  <div class="keys-card" role="dialog" aria-label="Keyboard shortcuts">
+    <h3>shortcuts</h3>
+    <div><span>Mute / unmute sound</span><kbd>M</kbd></div>
+    <div><span>Open or close the player</span><kbd>P</kbd></div>
+    <div><span>Search a song</span><kbd>/</kbd></div>
+    <div><span>Change theme</span><kbd>T</kbd></div>
+    <div><span>Share as image</span><kbd>C</kbd></div>
+    <div><span>Open stats.fm</span><kbd>S</kbd></div>
+    <div><span>Next / previous in the playlist</span><kbd>N / B</kbd></div>
+    <div><span>Live view (what I listen to and play)</span><kbd>F</kbd></div>
+    <div><span>Back to top</span><kbd>G</kbd></div>
+    <div><span>Close whatever is open</span><kbd>Esc</kbd></div>
+    <div><span>Show this help</span><kbd>?</kbd></div>
   </div>
 </div>
 
 <aside class="toast" id="toast" hidden>
-  <button class="close" id="toastClose" type="button" aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  <button class="close" id="toastClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
   <b>Reduced effects enabled</b>
   Your browser appears to be using software rendering, so some heavier visuals were reduced. Enabling hardware acceleration should restore the full effect.
   <button class="link" id="toastFull" type="button">Click here to enable full experience <em>(!)</em></button>
@@ -4953,7 +5089,7 @@ button:focus-visible {
         </div>
         <div class="played" id="played" hidden>
           <div class="tile" id="playedIcon">R</div>
-          <div><small>last played</small><b><span id="playedName"></span><i class="live-dot" id="playedLive" hidden title="jugando ahora"></i></b></div>
+          <div><small>last played</small><b><span id="playedName"></span><i class="live-dot" id="playedLive" hidden title="playing now"></i></b></div>
         </div>
       </div>
       <div class="figure" id="figure">
@@ -4967,7 +5103,7 @@ button:focus-visible {
     </div>
   </section>
 
-  <p class="credit rise" style="--i:9">diseño inspirado en <a href="https://plxne.com/" target="_blank" rel="noopener">plxne.com</a> · créditos a plxne<span class="hint"> · pulsa <b>?</b> para ver los atajos</span></p>
+  <p class="credit rise" style="--i:9"><span class="hint">press <b>?</b> to see the shortcuts</span></p>
 
 </main>
 
@@ -4976,7 +5112,7 @@ button:focus-visible {
 <div class="tip" id="tip"><b></b><span></span><em>open on github</em><i class="arrow"></i></div>
 
 <div class="overlay" id="overlay" aria-hidden="true">
-  <div class="panel" role="dialog" aria-label="Estadísticas de música">
+  <div class="panel" role="dialog" aria-label="Music stats">
     <div class="s-head">
       <img class="cover" id="sAvatar" alt="" hidden>
       <div class="cover" id="sCover">t</div>
@@ -4993,7 +5129,7 @@ button:focus-visible {
           <button type="button" data-range="lifetime">lifetime</button>
         </div>
         <button class="sq" id="sRefresh" type="button" aria-label="Actualizar"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.5-4M4 4v4h4M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4"/></svg></button>
-        <button class="sq" id="sClose" type="button" aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+        <button class="sq" id="sClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
       </div>
     </div>
 
@@ -5021,7 +5157,7 @@ button:focus-visible {
       <div class="clock-head">
         <div>
           <h3>LISTENING CLOCK</h3>
-          <p id="clockSub">sin datos todavía</p>
+          <p id="clockSub">no data yet</p>
         </div>
         <div class="peak"><div class="caps">peak</div><b id="peak">—</b></div>
       </div>
@@ -5072,7 +5208,7 @@ button:focus-visible {
         <h3 id="gridTitle"></h3>
         <p id="gridDesc"></p>
       </div>
-      <button class="sq" id="gridClose" type="button" aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+      <button class="sq" id="gridClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
     </header>
     <div class="grid-body" id="gridBody"></div>
   </div>
@@ -5160,8 +5296,8 @@ const profile = {
     mark: true
   },
   activity: [
-    { name: "Minecraft", detail: "Probando módulos", daysAgo: 2, icon: "", trending: true },
-    { name: "Roblox", detail: "Roblox: jugando con amigos", daysAgo: 4, icon: "" },
+    { name: "Minecraft", detail: "Testing modules", daysAgo: 2, icon: "", trending: true },
+    { name: "Roblox", detail: "Roblox: playing with friends", daysAgo: 4, icon: "" },
     { name: "Visual Studio Code", detail: "Idling", daysAgo: 5, icon: "" },
     { name: "Valorant", detail: "Competitive", daysAgo: 12, icon: "" },
     { name: "Minecraft", detail: "", daysAgo: 20, icon: "" }
@@ -6065,7 +6201,7 @@ async function statsRequest(path, params, force) {
 }
 
 async function loadPlays() {
-  renderPlays(Array.from({ length: 20 }, () => ({ title: "tu canción aquí" })));
+  renderPlays(Array.from({ length: 20 }, () => ({ title: "your song here" })));
 
   if (!profile.statsfmId) return;
 
@@ -6667,7 +6803,7 @@ function loadYouTube() {
   if (music.script) return music.script;
 
   music.script = new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error("YouTube no respondió")), 10000);
+    const timeout = setTimeout(() => reject(new Error("YouTube did not respond")), 10000);
     window.onYouTubeIframeAPIReady = () => {
       clearTimeout(timeout);
       resolve(window.YT);
@@ -7267,6 +7403,8 @@ function paintLines() {
   setLine($("npLine"), current);
   $("npLine").classList.toggle("on", Boolean(current));
 
+  if ($("lyr").classList.contains("open")) paintLyr();
+
   if ($("now").classList.contains("open")) {
     setLine($("nowCur"), index >= 0 ? text(rows[index]) : "");
     $("nowPrev").textContent = index > 0 ? text(rows[index - 1]) : "";
@@ -7848,8 +7986,8 @@ function setupDock() {
       stopManual();
       return;
     }
-    const block = $("npBlock");
-    if (!block.hidden) block.scrollIntoView({ behavior: "smooth", block: "center" });
+    setLyrOpen(true);
+    stepFeed();
   });
 
   const seek = $("npSeek");
@@ -8299,7 +8437,7 @@ function renderRank() {
 
   if (!items.length) {
     row.innerHTML = "";
-    empty.textContent = statsState.error || (profile.statsfmId ? "stats.fm no devolvió datos para este periodo." : "agrega tu usuario de stats.fm en la configuración");
+    empty.textContent = statsState.error || (profile.statsfmId ? "stats.fm returned no data for this period." : "add your stats.fm username in the settings");
     empty.hidden = false;
     return;
   }
@@ -8363,7 +8501,7 @@ function resetStats() {
   $("sTopArtist").textContent = "";
   $("sTopCover").hidden = true;
   $("sTopEmpty").hidden = false;
-  $("clockSub").textContent = "sin datos todavía";
+  $("clockSub").textContent = "no data yet";
   $("weekdays").innerHTML = "";
   drawClock($("clockStreams"), Array(24).fill(0));
   drawClock($("clockMinutes"), Array(24).fill(0));
@@ -8388,7 +8526,7 @@ function paintStatsHead(info) {
     link.textContent = `@${name} on stats.fm`;
   } else {
     link.removeAttribute("href");
-    link.textContent = "agrega tu usuario de stats.fm en la configuración";
+    link.textContent = "add your stats.fm username in the settings";
   }
 }
 
@@ -8425,7 +8563,7 @@ async function loadStats(force) {
   paintStatsHead(info);
 
   if (!tracks && !artists && !totals) {
-    statsState.error = "stats.fm no está compartiendo datos ahora.";
+    statsState.error = "stats.fm is not sharing data right now.";
     renderRank();
     return;
   }
@@ -8480,7 +8618,7 @@ async function loadStats(force) {
 }
 
 function syncLock() {
-  const open = document.querySelector(".overlay.open, .grid-overlay.open, .game-overlay.open, .now.open");
+  const open = document.querySelector(".overlay.open, .grid-overlay.open, .game-overlay.open, .now.open, .lyr.open");
   document.body.classList.toggle("locked", Boolean(open));
 }
 
@@ -8912,6 +9050,7 @@ function setupEscape() {
     const layers = [
       ["keys", () => toggleLayer($("keys"), false)],
       ["share", () => toggleLayer($("share"), false)],
+      ["lyr", () => setLyrOpen(false)],
       ["now", () => setNowOpen(false)],
       ["shotOverlay", () => toggleLayer($("shotOverlay"), false)],
       ["gameOverlay", closeGame],
@@ -8951,7 +9090,7 @@ const themes = [
   { id: "rojo", name: "rojo", mid: [0.56, 0.2, 0.23] },
   { id: "violeta", name: "violeta", mid: [0.38, 0.26, 0.64] },
   { id: "verde", name: "verde", mid: [0.17, 0.45, 0.31] },
-  { id: "ambar", name: "ámbar", mid: [0.56, 0.39, 0.16] }
+  { id: "ambar", name: "amber", mid: [0.56, 0.39, 0.16] }
 ];
 
 function applyTheme(id, notify) {
@@ -8964,7 +9103,7 @@ function applyTheme(id, notify) {
   } catch (error) {
     return;
   } finally {
-    if (notify) flash(`tema · ${theme.name}`);
+    if (notify) flash(`theme · ${theme.name}`);
   }
 }
 
@@ -9191,7 +9330,83 @@ function setNowOpen(open) {
   }
 }
 
+const lyrState = { key: "", art: "", title: "", index: -2 };
+
+function paintLyr() {
+  const manualSong = manual.audio && manual.song;
+  const spotify = !manual.audio && dock.song;
+  const title = manualSong ? manual.song.name : spotify ? dock.song.title : "";
+  const artist = manualSong ? manual.song.artist : spotify ? dock.song.artist : "";
+  const art = manualSong ? manual.song.image || "" : spotify ? dock.song.art || "" : "";
+  const list = $("lyrList");
+
+  if (lyrState.title !== title) {
+    lyrState.title = title;
+    $("lyrTitle").textContent = title || "Nothing playing";
+    $("lyrArtist").textContent = title ? artist : "";
+  }
+
+  if (lyrState.art !== art) {
+    lyrState.art = art;
+    const image = $("lyrArt");
+    if (art) {
+      image.src = art;
+      image.hidden = false;
+      $("lyrBg").style.backgroundImage = `url("${art.replace(/"/g, "%22")}")`;
+      $("lyrBg").classList.add("on");
+    } else {
+      image.hidden = true;
+      image.removeAttribute("src");
+      $("lyrBg").classList.remove("on");
+    }
+  }
+
+  const rows = feed.rows;
+  const signature = `${feed.key}|${rows.length}|${title}`;
+  if (lyrState.key !== signature) {
+    lyrState.key = signature;
+    lyrState.index = -2;
+    if (!title) {
+      list.innerHTML = '<p class="note">Nothing playing right now.</p>';
+    } else if (!rows.length) {
+      list.innerHTML = `<p class="note">${feed.key ? "No synced lyrics for this song." : "Loading lyrics…"}</p>`;
+    } else {
+      list.innerHTML = rows.map((row, i) => `<p data-i="${i}"${row.text ? "" : ' class="gap"'}>${row.text ? esc(row.text) : "♪"}</p>`).join("");
+    }
+  }
+
+  if (!rows.length || feed.index === lyrState.index) return;
+  const previous = lyrState.index;
+  lyrState.index = feed.index;
+
+  list.querySelectorAll("p").forEach((line, i) => {
+    line.classList.toggle("on", i === feed.index);
+    line.classList.toggle("past", i < feed.index);
+  });
+
+  const current = list.children[feed.index];
+  if (current) {
+    const box = $("lyrScroll");
+    const target = current.offsetTop - box.clientHeight * 0.38 + current.offsetHeight / 2;
+    box.scrollTo({ top: Math.max(0, target), behavior: previous === -2 ? "auto" : "smooth" });
+  }
+}
+
+function setLyrOpen(open) {
+  const layer = $("lyr");
+  if (open === layer.classList.contains("open")) return;
+  toggleLayer(layer, open);
+  if (open) {
+    lyrState.key = "";
+    lyrState.title = "\u0000";
+    lyrState.art = "\u0000";
+    paintLyr();
+    $("lyrClose").focus({ preventScroll: true });
+  }
+}
+
 function setupNow() {
+  $("lyrClose").addEventListener("click", () => setLyrOpen(false));
   const box = $("avatarBox");
   box.addEventListener("click", () => setNowOpen(true));
   box.addEventListener("keydown", (event) => {
@@ -9291,8 +9506,20 @@ async function drawCard() {
         ? { kind: "most played song", title: finder.top[0].name, artist: finder.top[0].artist, art: finder.top[0].image, ratio: 0 }
         : { kind: "not listening right now", title: "Nothing playing", artist: "", art: "", ratio: 0 };
 
+  const roblox = liveState.game && String(liveState.game.name).toLowerCase() === "roblox";
+  const game = liveState.game
+    ? {
+        label: "playing now",
+        name: roblox && played.name ? played.name : liveState.game.name,
+        detail: roblox && played.name ? "Roblox" : liveState.game.detail,
+        icon: (roblox && played.icon) || liveState.game.icon
+      }
+    : played.name
+      ? { label: "last played · roblox", name: played.name, detail: "", icon: played.icon }
+      : null;
+
   const avatarUrl = $("avatar").hidden ? "" : $("avatar").currentSrc || $("avatar").src;
-  const [avatar, cover] = await Promise.all([loadPicture(avatarUrl), loadPicture(track.art)]);
+  const [avatar, cover, gameIcon] = await Promise.all([loadPicture(avatarUrl), loadPicture(track.art), loadPicture(game && game.icon)]);
 
   ctx.fillStyle = "#050506";
   ctx.fillRect(0, 0, W, H);
@@ -9428,66 +9655,78 @@ async function drawCard() {
     ctx.fill();
   }
 
-  const game = liveState.game
-    ? { label: "playing now", name: liveState.game.name, detail: liveState.game.detail }
-    : played.name
-      ? { label: "last played · roblox", name: played.name, detail: "" }
-      : null;
-
   if (game) {
     const gy = cardY + cardH + 36;
-    roundPath(ctx, left, gy, inner, 132, 28);
+    const gh = 156;
+    roundPath(ctx, left, gy, inner, gh, 28);
     ctx.fillStyle = "rgba(255,255,255,0.05)";
     ctx.fill();
     ctx.strokeStyle = "rgba(255,255,255,0.12)";
     ctx.lineWidth = 2;
     ctx.stroke();
+
+    const box = 108;
+    const bx = left + 24;
+    const by = gy + (gh - box) / 2;
+    ctx.save();
+    roundPath(ctx, bx, by, box, box, 22);
+    ctx.clip();
+    if (gameIcon) {
+      ctx.drawImage(gameIcon, bx, by, box, box);
+    } else {
+      const fill = ctx.createLinearGradient(bx, by, bx + box, by + box);
+      fill.addColorStop(0, "#4a4a52");
+      fill.addColorStop(1, "#202024");
+      ctx.fillStyle = fill;
+      ctx.fillRect(bx, by, box, box);
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      ctx.font = `600 46px ${sans}`;
+      ctx.textAlign = "center";
+      ctx.fillText(game.name.charAt(0).toUpperCase(), bx + box / 2, by + box / 2 + 16);
+      ctx.textAlign = "left";
+    }
+    ctx.restore();
+
+    const gx = bx + box + 28;
+    const gw = left + inner - gx - 30;
     ctx.fillStyle = "rgba(255,255,255,0.5)";
     ctx.font = `400 24px ${mono}`;
-    ctx.fillText(game.label.toUpperCase(), left + 36, gy + 54);
+    ctx.fillText(game.label.toUpperCase(), gx, gy + 54);
     ctx.fillStyle = "#fff";
     ctx.font = `600 40px ${sans}`;
-    ctx.fillText(fitText(ctx, game.name, inner - 72), left + 36, gy + 104);
+    ctx.fillText(fitText(ctx, game.name, gw), gx, gy + 100);
     if (game.detail) {
       ctx.fillStyle = "rgba(255,255,255,0.5)";
-      ctx.font = `400 26px ${sans}`;
-      ctx.textAlign = "right";
-      ctx.fillText(fitText(ctx, game.detail, inner * 0.4), left + inner - 36, gy + 104);
-      ctx.textAlign = "left";
+      ctx.font = `400 24px ${sans}`;
+      ctx.fillText(fitText(ctx, game.detail, gw), gx, gy + 134);
     }
   }
 
   ctx.fillStyle = "rgba(255,255,255,0.72)";
   ctx.font = `500 30px ${mono}`;
-  ctx.fillText(location.host || "perfil", left, H - 96);
-  ctx.fillStyle = "rgba(255,255,255,0.32)";
-  ctx.font = `400 22px ${mono}`;
-  ctx.fillText("diseño inspirado en plxne.com · créditos a plxne", left, H - 58);
-  ctx.textAlign = "right";
-  ctx.fillText(`tema ${(document.documentElement.dataset.theme || "mono")}`, left + inner, H - 58);
-  ctx.textAlign = "left";
+  ctx.fillText(location.host || "profile", left, H - 84);
 
   return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), "image/png"));
 }
 
 async function openShare() {
   if (shareState.busy) return;
-  const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "now", "keys"].some((id) => $(id).classList.contains("open"));
+  const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "now", "keys", "lyr"].some((id) => $(id).classList.contains("open"));
   if (busy) return;
 
   shareState.busy = true;
-  flash("generando tarjeta…", 1800);
+  flash("creating card…", 1800);
 
   try {
     const blob = await drawCard();
-    if (!blob) throw new Error("sin imagen");
+    if (!blob) throw new Error("no image");
     if (shareState.url) URL.revokeObjectURL(shareState.url);
     shareState.blob = blob;
     shareState.url = URL.createObjectURL(blob);
     $("shareImg").src = shareState.url;
     toggleLayer($("share"), true);
   } catch (error) {
-    flash("no se pudo crear la tarjeta");
+    flash("could not create the card");
   } finally {
     shareState.busy = false;
   }
@@ -9529,8 +9768,8 @@ function setupShare() {
       if (!shareState.blob) return;
       navigator.clipboard
         .write([new ClipboardItem({ "image/png": shareState.blob })])
-        .then(() => flash("imagen copiada"))
-        .catch(() => flash("no se pudo copiar"));
+        .then(() => flash("image copied"))
+        .catch(() => flash("could not copy"));
     });
   }
 }
@@ -9552,6 +9791,7 @@ function setupShortcuts() {
 
     const key = event.key.toLowerCase();
 
+    if ($("lyr").classList.contains("open") && !["m", "t"].includes(key)) return;
     if ($("now").classList.contains("open") && !["f", "m", "t"].includes(key)) return;
     if ($("share").classList.contains("open")) return;
 
@@ -9566,7 +9806,7 @@ function setupShortcuts() {
     if (key === "m") {
       const silent = music.muted || music.volume === 0;
       setMuted(!silent);
-      flash(silent ? "sonido activado" : "sonido silenciado");
+      flash(silent ? "sound on" : "sound off");
     } else if (key === "p") {
       dock.setOpen(!dock.isOpen());
     } else if (key === "/") {
@@ -9576,7 +9816,7 @@ function setupShortcuts() {
     } else if (key === "t") {
       cycleTheme();
     } else if (key === "s") {
-      const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "now", "share"].some((id) => $(id).classList.contains("open"));
+      const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "now", "share", "lyr"].some((id) => $(id).classList.contains("open"));
       if (!busy) $("openStats").click();
     } else if (key === "n" && queue.active) {
       queueStep(1);
