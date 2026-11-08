@@ -200,53 +200,177 @@ img {
 
 body.entered .np-dock.live {
   opacity: 1;
-  pointer-events: none;
 }
 
 .np-dock > * {
   pointer-events: auto;
 }
 
+.np-tab {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  min-height: 56px;
+  border: 0;
+  border-radius: 0 9px 9px 0;
+  background: transparent;
+  color: #fff;
+  transition: opacity 0.2s ease, background 0.25s ease;
+}
+
+.np-tab::before {
+  content: "";
+  position: absolute;
+  inset: 4px 0 4px -6px;
+  border-radius: 0 9px 9px 0;
+  background: radial-gradient(closest-side at 0 50%, rgb(var(--ac, 255 255 255) / 0.28), transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.np-dock:not(.is-open).ping .np-tab::before {
+  animation: tabPing 1.4s ease-out;
+}
+
+.np-tab:hover {
+  opacity: 0.85;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.np-tab svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.np-dock:not(.is-open) .np-tab svg {
+  animation: nudge 4.2s ease-in-out 1.5s infinite;
+}
+
+.np-dock.is-open .np-tab svg {
+  transform: rotate(180deg);
+}
+
+@keyframes nudge {
+  0%, 82%, 100% { transform: translateX(0); }
+  88% { transform: translateX(3px); }
+  94% { transform: translateX(-1px); }
+}
+
+@keyframes tabPing {
+  0% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
 .np-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   width: 0;
-  max-width: 0;
-  padding: 0;
   overflow: hidden;
   opacity: 0;
   border: 0 solid rgba(255, 255, 255, 0.1);
-  border-left-width: 0;
-  background: rgba(10, 10, 11, 0.92);
+  border-radius: 0 12px 12px 0;
+  background:
+    radial-gradient(circle at top right, rgb(var(--ac, 120 120 120) / 0.14), transparent 60%),
+    rgba(10, 10, 11, 0.94);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5), 0 0 34px rgb(var(--ac, 120 120 120) / 0.14);
-  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, padding 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, border-width 0.45s ease;
 }
 
 .np-dock.is-open .np-card {
-  width: min(100vw - 3.5rem, 330px);
-  max-width: min(100vw - 3.5rem, 330px);
-  padding: 9px 12px 9px 9px;
+  width: min(100vw - 3.5rem, 372px);
   opacity: 1;
-  border-width: 1px 0 1px 0;
+  border-width: 1px;
 }
 
-.np-card img {
-  flex: none;
-  width: 46px;
-  height: 46px;
-  border-radius: 6px;
-  object-fit: cover;
+.np-inner {
+  display: grid;
+  gap: 10px;
+  width: min(100vw - 3.5rem, 372px);
+  padding: 10px;
+}
+
+.np-dock.is-open .np-inner > * {
+  animation: dockIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.np-dock.is-open .np-inner > :nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+@keyframes dockIn {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+    filter: blur(4px);
+  }
+}
+
+.dk-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.dk-art {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 7px;
+  overflow: hidden;
   background: #1b1b1e;
+  box-shadow: 0 6px 20px rgb(var(--ac, 120 120 120) / 0.3);
+}
+
+.dk-art img,
+.dk-art svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dk-art svg {
+  padding: 12px;
+  fill: none;
+  stroke: #6b6b70;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dk-art img[hidden] {
+  display: none;
+}
+
+.dk-row.swap .dk-art {
+  animation: artSwap 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dk-row.swap .np-meta {
+  animation: metaSwap 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes artSwap {
+  from { transform: rotateY(90deg) scale(0.85); opacity: 0; }
+}
+
+@keyframes metaSwap {
+  from { transform: translateY(8px); opacity: 0; filter: blur(3px); }
 }
 
 .np-meta {
   min-width: 0;
-  flex: 1;
 }
 
 .np-meta b,
-.np-meta span {
+.np-meta > span {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -256,65 +380,284 @@ body.entered .np-dock.live {
 .np-meta b {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #e6e6e6;
+  color: #ededed;
 }
 
-.np-meta span {
+.np-meta > span {
   margin-top: 1px;
   font-size: 0.74rem;
   color: #8f8f94;
 }
 
 .np-bar {
+  position: relative;
   height: 3px;
-  margin-top: 8px;
+  margin-top: 9px;
   border-radius: 99px;
   background: rgba(255, 255, 255, 0.1);
-  overflow: hidden;
 }
 
 .np-bar i {
-  display: block;
-  height: 100%;
-  width: 100%;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
   border-radius: inherit;
-  background: rgba(255, 255, 255, 0.86);
+  background: linear-gradient(90deg, rgb(var(--ac, 220 220 220) / 0.45), #fff);
   transform-origin: left;
   transform: scaleX(0);
+  transition: transform 0.9s linear;
 }
 
-.np-tab {
+.np-bar i::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -40%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+  animation: barGlint 3.2s ease-in-out infinite;
+}
+
+@keyframes barGlint {
+  to { left: 120%; }
+}
+
+.np-seek {
+  position: absolute;
+  inset: -7px 0;
+  width: 100%;
+  height: 17px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+.np-card.manual .np-seek {
+  pointer-events: auto;
+}
+
+.np-card.manual .np-bar i {
+  transition-duration: 0.25s;
+}
+
+.np-time {
+  display: none;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: #77777c;
+}
+
+.np-card.manual .np-time {
+  display: flex;
+}
+
+.np-act {
   display: grid;
   place-items: center;
-  width: 22px;
-  min-height: 54px;
-  border-radius: 0 9px 9px 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-left: 0;
-  background: rgba(10, 10, 11, 0.9);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: transparent;
   color: #fff;
-  box-shadow: 0 0 22px rgb(var(--ac, 120 120 120) / 0.2);
-  transition: opacity 0.2s ease, background 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1), opacity 0.2s ease;
 }
 
-.np-tab:hover {
-  opacity: 0.85;
-  background: rgba(24, 24, 26, 0.95);
+.np-act:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.28);
+  transform: scale(1.08);
 }
 
-.np-tab svg {
+.np-act:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.np-act:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.np-act svg,
+.np-find-item .np-go svg,
+.np-field svg {
   width: 15px;
   height: 15px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.6;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.np-dock.is-open .np-tab svg {
-  transform: rotate(180deg);
+.np-act .i-stop,
+.np-card.manual .np-act .i-lyr {
+  display: none;
+}
+
+.np-card.manual .np-act .i-stop {
+  display: block;
+  fill: currentColor;
+}
+
+.np-card.idle .np-bar i::after,
+.np-card.idle .eq s {
+  animation: none;
+}
+
+.np-find {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.np-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #8f8f94;
+  transition: border-color 0.2s ease, box-shadow 0.25s ease, color 0.2s ease;
+}
+
+.np-field:focus-within {
+  color: #fff;
+  border-color: rgb(var(--ac, 255 255 255) / 0.55);
+  box-shadow: 0 0 0 3px rgb(var(--ac, 255 255 255) / 0.12);
+}
+
+.np-field input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.78rem;
+  color: #ededed;
+}
+
+.np-field input::placeholder {
+  color: #6f6f74;
+}
+
+.np-field input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.np-results {
+  display: grid;
+  gap: 3px;
+  max-height: 184px;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+
+.np-find-item {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 5px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  animation: findIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+  transition: background 0.18s ease;
+}
+
+.np-find-item:hover,
+.np-find-item.on {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+@keyframes findIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    filter: blur(5px);
+  }
+}
+
+.np-find-item .np-thumb {
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.np-find-item .np-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.np-find-item strong,
+.np-find-item small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.np-find-item strong {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #ededed;
+}
+
+.np-find-item small {
+  font-size: 0.67rem;
+  color: #8f8f94;
+}
+
+.np-find-item .np-go {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #cfcfd2;
+  transition: background 0.2s ease, transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.np-find-item:hover .np-go {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.np-find-item .np-go .i-pause,
+.np-find-item.on .np-go .i-play {
+  display: none;
+}
+
+.np-find-item.on .np-go .i-pause {
+  display: block;
+}
+
+.np-find-item.busy .np-go {
+  animation: breathe 0.9s ease-in-out infinite;
+}
+
+.np-empty {
+  margin: 0;
+  padding: 6px 4px;
+  font-size: 0.72rem;
+  color: #77777c;
+  animation: findIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .changes {
@@ -751,23 +1094,74 @@ body.entered .rise {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.hour {
+  --tick: #4ade80;
+}
+
 .clk {
-  width: 13px;
-  height: 13px;
+  width: 17px;
+  height: 17px;
+  flex: none;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
   stroke-linecap: round;
+  overflow: visible;
 }
 
-.clk circle {
-  stroke-opacity: 0.55;
+.clk .face {
+  fill: rgba(255, 255, 255, 0.05);
+  stroke: currentColor;
+  stroke-opacity: 0.4;
+  stroke-width: 1.3;
+  transition: stroke-opacity 0.25s ease, fill 0.25s ease;
 }
 
-.clk line {
+.hour:hover .clk .face {
+  stroke-opacity: 0.75;
+  fill: rgba(255, 255, 255, 0.1);
+}
+
+.clk .ticks {
+  stroke-width: 1.4;
+  stroke-opacity: 0.5;
+}
+
+.clk .orbit {
+  transform-origin: 12px 12px;
+  transform-box: view-box;
+  animation: clkOrbit 60s linear infinite;
+}
+
+.clk .sec {
+  fill: var(--tick);
+  stroke: none;
+  filter: drop-shadow(0 0 2px var(--tick));
+}
+
+.clk .hh {
+  stroke-width: 2.3;
+}
+
+.clk .mm {
+  stroke: #fff;
+  stroke-width: 1.7;
+}
+
+.clk .pin {
+  fill: #0b0b0c;
+  stroke: currentColor;
+  stroke-width: 1.2;
+}
+
+.clk .hh,
+.clk .mm {
   transform-origin: 12px 12px;
   transform-box: view-box;
   transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes clkOrbit {
+  to { transform: rotate(360deg); }
 }
 
 .np-block {
@@ -2289,32 +2683,6 @@ a.social:hover b {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .rise {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-
-  .figure img {
-    animation: none;
-  }
-
-  .intro p {
-    animation: none;
-  }
-
-  .mark .tri-a,
-  .mark .tri-b {
-    clip-path: none;
-    animation: none;
-  }
-
-  .mark.on::after {
-    animation: none;
-    opacity: 0;
-  }
-}
 .s-title a {
   display: block;
   margin-top: 3px;
@@ -3148,29 +3516,6 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .aura-layer,
-  .change,
-  .np-lyric::after,
-  .eq s,
-  .np-lyric .w.lit,
-  .np-lyric .gap s {
-    animation: none !important;
-  }
-
-  .panel,
-  .panel > *,
-  .grid-panel,
-  .rank-card,
-  .rank-row,
-  .s-stat,
-  .weekday i,
-  .clock svg {
-    animation: none !important;
-    transition-duration: 0.01s !important;
-    transition-delay: 0s !important;
-  }
-}
 </style>
 </head>
 <body>
@@ -3217,7 +3562,7 @@ button:focus-visible {
       <div class="name-row">
         <h1 id="name"><span id="nameText">take</span></h1>
         <div class="devices" id="devices"></div>
-        <span class="hour" id="hour" hidden><svg class="clk" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line class="hh" x1="12" y1="12" x2="12" y2="7.2"/><line class="mm" x1="12" y1="12" x2="12" y2="4.6"/></svg><b id="hourText"></b></span>
+        <span class="hour" id="hour" hidden><svg class="clk" viewBox="0 0 24 24" aria-hidden="true"><circle class="face" cx="12" cy="12" r="10.4"/><path class="ticks" d="M12 3.6v1.4M20.4 12H19M12 20.4V19M3.6 12H5"/><g class="orbit"><circle class="sec" cx="12" cy="1.6" r="1.35"/></g><line class="hh" x1="12" y1="12" x2="12" y2="8.2"/><line class="mm" x1="12" y1="12" x2="12" y2="5.4"/><circle class="pin" cx="12" cy="12" r="1.5"/></svg><b id="hourText"></b></span>
         <span class="copied" id="copiedId" hidden>Copied ID!</span>
       </div>
       <div class="sub">
@@ -3433,15 +3778,25 @@ button:focus-visible {
 <audio id="ambient" loop preload="none"></audio>
 
 <aside class="np-dock" id="npDock" aria-label="Spotify" hidden>
-  <div class="np-card" id="npCard">
-    <img id="npArt" alt="">
-    <div class="np-meta">
-      <b id="npTitle"></b>
-      <span id="npArtist"></span>
-      <div class="np-bar"><i id="npFill"></i></div>
+  <button class="np-tab" id="npTab" type="button" aria-expanded="false" aria-label="Expand now playing"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+  <div class="np-card idle" id="npCard">
+    <div class="np-inner">
+      <div class="dk-row" id="npRow">
+        <div class="dk-art"><svg viewBox="0 0 24 24" id="npNote"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><img id="npArt" alt="" hidden></div>
+        <div class="np-meta">
+          <b id="npTitle">Nothing playing</b>
+          <span id="npArtist">Not listening right now</span>
+          <div class="np-bar"><i id="npFill"></i><input class="np-seek" id="npSeek" type="range" min="0" max="1000" step="1" value="0" aria-label="Seek"></div>
+          <div class="np-time"><span id="npNow">0:00</span><span id="npLen">0:00</span></div>
+        </div>
+        <button class="np-act" id="npAct" type="button" aria-label="Show lyrics" title="Lyrics"><svg class="i-lyr" viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h13"/></svg><svg class="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+      </div>
+      <div class="np-find">
+        <label class="np-field"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="npSearch" type="search" placeholder="Search listened songs" aria-label="Search listened songs" autocomplete="off" spellcheck="false"></label>
+        <div class="np-results" id="npResults" aria-label="Song search results"></div>
+      </div>
     </div>
   </div>
-  <button class="np-tab" id="npTab" type="button" aria-expanded="false" aria-label="Now playing"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
 </aside>
 
 <div class="rail" id="rail" aria-hidden="true"><i id="railThumb"></i></div>
@@ -3736,7 +4091,6 @@ void main(){
   window.addEventListener("resize", resize);
   backdropState.resize = resize;
 
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const started = performance.now();
   let last = 0;
 
@@ -3746,7 +4100,7 @@ void main(){
     if (now - last < 33) return;
     last = now;
     gl.uniform2f(resolution, canvas.width, canvas.height);
-    gl.uniform1f(clock, reduced ? 12 : (now - started) / 1000 + 12);
+    gl.uniform1f(clock, (now - started) / 1000 + 12);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 
@@ -4438,7 +4792,8 @@ function avatarUrl(user) {
 }
 
 const aura = { track: "", front: "auraA", color: "" };
-const dock = { start: 0, end: 0, timer: 0 };
+const dock = { start: 0, end: 0, timer: 0, song: null, id: "" };
+const manual = { audio: null, id: "", token: 0, seeking: false };
 
 function hashColor(text) {
   let hash = 0;
@@ -4517,13 +4872,27 @@ function paintAura(song) {
   });
 }
 
+function fmtClock(seconds) {
+  const total = Math.max(0, Math.floor(seconds || 0));
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+}
+
 function tickDock() {
-  const fills = [$("npFill"), $("topFill")];
   const span = dock.end - dock.start;
   const ratio = span > 0 ? Math.max(0, Math.min(1, (Date.now() - dock.start) / span)) : 0;
-  fills.forEach((fill) => {
-    fill.style.transform = `scaleX(${ratio})`;
-  });
+  $("topFill").style.transform = `scaleX(${ratio})`;
+
+  if (manual.audio) {
+    const audio = manual.audio;
+    const length = audio.duration || 30;
+    $("npFill").style.transform = `scaleX(${Math.min(1, audio.currentTime / length)})`;
+    $("npNow").textContent = fmtClock(audio.currentTime);
+    $("npLen").textContent = fmtClock(length);
+    if (!manual.seeking) $("npSeek").value = String(Math.round((audio.currentTime / length) * 1000));
+    return;
+  }
+
+  $("npFill").style.transform = `scaleX(${dock.song ? ratio : 0})`;
 }
 
 const lyrics = { id: "", lines: [], cache: new Map(), index: -2, lit: -1, timer: 0 };
@@ -4645,9 +5014,45 @@ async function loadLyricsFor(song, seconds) {
   tickLyrics();
 }
 
+function paintDockRow(song) {
+  const row = $("npRow");
+  const art = $("npArt");
+  const id = song ? song.id : "idle";
+
+  $("npCard").classList.toggle("idle", !song);
+  $("npTitle").textContent = song ? song.title : "Nothing playing";
+  $("npArtist").textContent = song ? song.artist : "Not listening right now";
+
+  if (song && song.art) {
+    art.src = song.art;
+    art.hidden = false;
+    $("npNote").style.display = "none";
+  } else {
+    art.hidden = true;
+    art.removeAttribute("src");
+    $("npNote").style.display = "";
+  }
+
+  if (dock.id !== id) {
+    dock.id = id;
+    row.classList.remove("swap");
+    void row.offsetWidth;
+    row.classList.add("swap");
+    const box = $("npDock");
+    if (!box.classList.contains("is-open") && song) {
+      box.classList.remove("ping");
+      void box.offsetWidth;
+      box.classList.add("ping");
+    }
+  }
+}
+
 function paintSpotify(data) {
   const track = data.listening_to_spotify && data.spotify;
   const box = $("npDock");
+
+  box.hidden = false;
+  requestAnimationFrame(() => box.classList.add("live"));
 
   if (!track) {
     $("npTop").classList.remove("live");
@@ -4657,14 +5062,17 @@ function paintSpotify(data) {
     clearInterval(lyrics.timer);
     lyrics.id = "";
     lyrics.lines = [];
-    box.classList.remove("live", "is-open");
-    $("npTab").setAttribute("aria-expanded", "false");
-    clearInterval(dock.timer);
-    dock.timer = 0;
+    dock.song = null;
+    dock.start = 0;
+    dock.end = 0;
+    if (!manual.audio) {
+      paintDockRow(null);
+      $("npAct").disabled = true;
+      clearInterval(dock.timer);
+      dock.timer = 0;
+      tickDock();
+    }
     paintAura(null);
-    setTimeout(() => {
-      if (!box.classList.contains("live")) box.hidden = true;
-    }, 600);
     return;
   }
 
@@ -4676,15 +5084,15 @@ function paintSpotify(data) {
     art: /^https:/i.test(track.album_art_url || "") ? track.album_art_url : ""
   };
 
-  box.hidden = false;
-  requestAnimationFrame(() => box.classList.add("live"));
-  $("npTitle").textContent = song.title;
-  $("npArtist").textContent = song.artist;
-  if (song.art) $("npArt").src = song.art;
+  dock.song = song;
   dock.start = (track.timestamps && track.timestamps.start) || 0;
   dock.end = (track.timestamps && track.timestamps.end) || 0;
+  if (!manual.audio) {
+    paintDockRow(song);
+    $("npAct").disabled = false;
+  }
   tickDock();
-  if (!dock.timer) dock.timer = setInterval(() => !document.hidden && tickDock(), 1000);
+  if (!dock.timer) dock.timer = setInterval(() => !document.hidden && tickDock(), manual.audio ? 250 : 1000);
   paintAura(song);
 
   $("topTitle").textContent = song.title;
@@ -4696,12 +5104,259 @@ function paintSpotify(data) {
   loadLyricsFor(song, seconds);
 }
 
+function fold(text) {
+  return String(text || "")
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
+function matchScore(haystack, query) {
+  const text = fold(haystack);
+  const terms = fold(query).split(" ").filter(Boolean);
+  if (!terms.length) return 1;
+  let score = 0;
+  for (const term of terms) {
+    if (text.includes(term)) {
+      score += 3;
+      continue;
+    }
+    if (!text.split(" ").some((word) => word.startsWith(term) || term.startsWith(word))) return 0;
+    score += 1;
+  }
+  if (text.startsWith(fold(query))) score += 2;
+  return score;
+}
+
+const finder = { songs: null, loading: null, rows: null, busy: "", previews: new Map() };
+
+function loadFinder() {
+  if (finder.songs) return Promise.resolve(finder.songs);
+  if (finder.loading) return finder.loading;
+
+  finder.loading = (async () => {
+    const map = new Map();
+    const add = (track) => {
+      if (!track || !track.name) return;
+      const album = track.albums && track.albums[0];
+      const artist = (track.artists || []).map((item) => item.name).join(", ");
+      const id = fold(`${track.name} ${artist}`);
+      if (map.has(id)) return;
+      map.set(id, { id, name: track.name, artist, image: /^https:/i.test((album && album.image) || "") ? album.image : "" });
+    };
+
+    if (profile.statsfmId) {
+      const [top, recent] = await Promise.all([
+        statsRequest("/top/tracks", { range: "lifetime", orderBy: "SPOTIFY", limit: 100 }).catch(() => null),
+        statsRequest("/streams/recent", { limit: 50 }).catch(() => null)
+      ]);
+      ((recent && recent.items) || []).forEach((item) => add(item.track));
+      ((top && top.items) || []).forEach((item) => add(item.track));
+    }
+
+    finder.songs = [...map.values()];
+    return finder.songs;
+  })();
+
+  return finder.loading;
+}
+
+async function previewFor(song) {
+  if (finder.previews.has(song.id)) return finder.previews.get(song.id);
+
+  const term = `${song.name} ${song.artist.split(",")[0]}`;
+  const response = await fetch(`https://itunes.apple.com/search?${new URLSearchParams({ term, media: "music", entity: "song", limit: "8" })}`);
+  const body = await response.json();
+  const wanted = fold(song.name);
+  const results = (body.results || []).filter((item) => item.previewUrl);
+  const hit = results.find((item) => fold(item.trackName) === wanted) || results.find((item) => fold(item.trackName).includes(wanted));
+  const url = hit ? hit.previewUrl : "";
+  finder.previews.set(song.id, url);
+  return url;
+}
+
+function markPlaying() {
+  document.querySelectorAll(".np-find-item").forEach((item) => {
+    item.classList.toggle("on", item.dataset.id === manual.id);
+    if (item.dataset.id !== finder.busy) item.classList.remove("busy");
+  });
+}
+
+function stopManual() {
+  manual.token += 1;
+  if (manual.audio) {
+    manual.audio.pause();
+    manual.audio.removeAttribute("src");
+    manual.audio.load();
+  }
+  manual.audio = null;
+  manual.id = "";
+  $("npCard").classList.remove("manual");
+  $("npAct").setAttribute("aria-label", "Show lyrics");
+  $("npAct").title = "Lyrics";
+  $("npSeek").value = "0";
+  paintDockRow(dock.song);
+  $("npAct").disabled = !dock.song;
+  clearInterval(dock.timer);
+  dock.timer = dock.song ? setInterval(() => !document.hidden && tickDock(), 1000) : 0;
+  tickDock();
+  markPlaying();
+}
+
+function findNote(text) {
+  const list = $("npResults");
+  list.querySelectorAll(".np-empty").forEach((node) => node.remove());
+  const note = document.createElement("p");
+  note.className = "np-empty";
+  note.textContent = text;
+  list.prepend(note);
+  setTimeout(() => note.remove(), 2600);
+}
+
+async function toggleSong(song) {
+  if (manual.id === song.id) {
+    stopManual();
+    return;
+  }
+
+  const token = ++manual.token;
+  finder.busy = song.id;
+  const item = [...document.querySelectorAll(".np-find-item")].find((node) => node.dataset.id === song.id);
+  if (item) item.classList.add("busy");
+
+  let url = "";
+  try {
+    url = await previewFor(song);
+  } catch (error) {
+    url = "";
+  }
+
+  if (token !== manual.token) return;
+  finder.busy = "";
+  if (item) item.classList.remove("busy");
+
+  if (!url) {
+    findNote("No preview available for that song.");
+    return;
+  }
+
+  const audio = new Audio(url);
+  audio.volume = 0.7;
+  audio.addEventListener("ended", () => {
+    if (manual.audio === audio) stopManual();
+  });
+
+  try {
+    await audio.play();
+  } catch (error) {
+    findNote("Your browser blocked the playback.");
+    return;
+  }
+
+  if (token !== manual.token) {
+    audio.pause();
+    return;
+  }
+
+  if (manual.audio) manual.audio.pause();
+  manual.audio = audio;
+  manual.id = song.id;
+  $("npCard").classList.add("manual");
+  $("npAct").disabled = false;
+  $("npAct").setAttribute("aria-label", "Stop playback and return to Spotify");
+  $("npAct").title = "Stop playback and return to Spotify";
+  paintDockRow({ id: `manual:${song.id}`, title: song.name, artist: song.artist, art: song.image });
+  clearInterval(dock.timer);
+  dock.timer = setInterval(() => !document.hidden && tickDock(), 250);
+  tickDock();
+  markPlaying();
+}
+
+function renderFinder(query) {
+  const list = $("npResults");
+  const text = query.trim();
+
+  if (!text) {
+    list.innerHTML = "";
+    return;
+  }
+
+  const rows = (finder.songs || [])
+    .map((song) => ({ song, score: matchScore(`${song.name} ${song.artist}`, text) }))
+    .filter((row) => row.score > 0)
+    .sort((a, b) => b.score - a.score || a.song.name.localeCompare(b.song.name))
+    .slice(0, 8)
+    .map((row) => row.song);
+
+  finder.rows = new Map(rows.map((song) => [song.id, song]));
+
+  if (!rows.length) {
+    list.innerHTML = '<p class="np-empty">No songs matched that search.</p>';
+    return;
+  }
+
+  list.innerHTML = rows
+    .map(
+      (song, index) =>
+        `<button class="np-find-item${song.id === manual.id ? " on" : ""}" type="button" data-id="${esc(song.id)}" style="--i:${index}"><span class="np-thumb">${song.image ? `<img src="${esc(song.image)}" alt="" loading="lazy" decoding="async">` : ""}</span><span><strong>${esc(song.name)}</strong><small>${esc(song.artist)}</small></span><span class="np-go"><svg class="i-play" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M8 5.5v13l11-6.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><rect x="7" y="5.5" width="3.6" height="13" rx="1"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1"/></svg></span></button>`
+    )
+    .join("");
+}
+
 function setupDock() {
   const box = $("npDock");
+  const input = $("npSearch");
+
   $("npTab").addEventListener("click", () => {
     const open = box.classList.toggle("is-open");
     $("npTab").setAttribute("aria-expanded", String(open));
+    $("npTab").setAttribute("aria-label", open ? "Collapse now playing" : "Expand now playing");
+    box.classList.remove("ping");
+    if (open) loadFinder();
   });
+
+  input.addEventListener("focus", loadFinder);
+  input.addEventListener("input", async () => {
+    await loadFinder();
+    renderFinder(input.value);
+  });
+
+  $("npResults").addEventListener("click", (event) => {
+    const item = event.target.closest(".np-find-item");
+    const song = item && finder.rows && finder.rows.get(item.dataset.id);
+    if (song) toggleSong(song);
+  });
+
+  $("npAct").addEventListener("click", () => {
+    if (manual.audio) {
+      stopManual();
+      return;
+    }
+    const block = $("npBlock");
+    if (!block.hidden) block.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  const seek = $("npSeek");
+  seek.addEventListener("pointerdown", () => {
+    manual.seeking = true;
+  });
+  seek.addEventListener("input", () => {
+    if (!manual.audio) return;
+    const length = manual.audio.duration || 30;
+    manual.audio.currentTime = (Number(seek.value) / 1000) * length;
+    tickDock();
+  });
+  const release = () => {
+    manual.seeking = false;
+  };
+  seek.addEventListener("pointerup", release);
+  seek.addEventListener("pointercancel", release);
+  seek.addEventListener("blur", release);
+
+  box.hidden = false;
+  requestAnimationFrame(() => box.classList.add("live"));
 }
 
 function setupHour() {
@@ -4709,6 +5364,7 @@ function setupHour() {
   const text = $("hourText");
   const hourHand = chip.querySelector(".hh");
   const minuteHand = chip.querySelector(".mm");
+  const orbit = chip.querySelector(".orbit");
   let format;
   let turns = 0;
   let lastMinute = -1;
@@ -4724,6 +5380,11 @@ function setupHour() {
     const parts = Object.fromEntries(format.formatToParts(now).map((part) => [part.type, part.value]));
     const hour = Number(parts.hour) % 12;
     const minute = Number(parts.minute);
+
+    if (!orbit.dataset.sync) {
+      orbit.style.animationDelay = `-${new Date().getSeconds() + new Date().getMilliseconds() / 1000}s`;
+      orbit.dataset.sync = "1";
+    }
 
     if (minute === lastMinute) return;
     if (lastMinute !== -1 && minute < lastMinute) turns += 1;
@@ -5082,7 +5743,7 @@ function countUp(id, value) {
   const el = $(id);
   const end = Math.round(Number(value) || 0);
   const run = (el.dataset.run = String(Number(el.dataset.run || 0) + 1));
-  if (end < 30 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (end < 30) {
     el.textContent = end.toLocaleString("en");
     return;
   }
