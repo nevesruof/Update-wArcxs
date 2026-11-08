@@ -1098,7 +1098,7 @@ body.entered .rise {
 .devices [data-status="idle"] { color: #facc15; --dot: #facc15; }
 .devices [data-status="dnd"] { color: #f87171; --dot: #f87171; }
 
-.devices .tip {
+.devices .dev-tip {
   position: absolute;
   left: 50%;
   bottom: calc(100% + 9px);
@@ -1126,7 +1126,7 @@ body.entered .rise {
   transition: opacity 0.18s ease, transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.devices .tip::before {
+.devices .dev-tip::before {
   content: "";
   width: 6px;
   height: 6px;
@@ -1135,13 +1135,13 @@ body.entered .rise {
   box-shadow: 0 0 8px var(--dot, transparent);
 }
 
-.devices .tip small {
+.devices .dev-tip small {
   font-size: inherit;
   color: #77777c;
 }
 
-.devices > span:hover .tip,
-.devices > span:focus-visible .tip {
+.devices > span:hover .dev-tip,
+.devices > span:focus-visible .dev-tip {
   opacity: 1;
   transform: translate(-50%, 0) scale(1);
 }
@@ -4491,7 +4491,7 @@ function paintDevices(data, status) {
   ].filter((entry) => entry[1]);
 
   wrap.innerHTML = active
-    .map(([key, , label]) => `<span data-status="${status}" tabindex="0" aria-label="${label}, ${status}">${deviceIcons[key]}<i class="tip">${label}<small>${status}</small></i></span>`)
+    .map(([key, , label]) => `<span data-status="${status}" tabindex="0" aria-label="${label}, ${status}">${deviceIcons[key]}<i class="dev-tip">${label}<small>${status}</small></i></span>`)
     .join("");
 }
 
