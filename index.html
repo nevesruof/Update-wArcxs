@@ -4840,8 +4840,8 @@ function simulatedYear(weeks) {
     const burst = noise(Math.floor(index / 5) + 7) > 0.3 ? 1 : 0.6;
     const weekend = weekday === 0 || weekday === 6 ? 0.85 : 1;
     const roll = noise(index + 3);
-    const chance = 0.95 * season * burst * weekend + 0.1;
-    const count = roll < chance ? Math.max(1, Math.round(noise(index * 2.3) * 14 * season * burst + 2)) : 0;
+    const chance = 0.9 * season * burst * weekend + 0.1;
+    const count = roll < chance ? Math.max(1, Math.round(noise(index * 2.3) * 11.5 * season * burst + 1.6)) : 0;
     days.push({ date: isoDay(cursor), count, level: 0 });
   }
 
