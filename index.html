@@ -4045,6 +4045,7 @@ const profile = {
   statsfmId: "31esju7gpv3nvyqglogd3mqyczd4",
   github: "",
   roblox: "zahidtql12",
+  rap: 20529,
   avatarModel: {
     obj: "30DAY-50093cd1fff5d2d5e3d9845f2ce39cf6",
     mtl: "30DAY-9474c141ede5bf918475aed082d749a6",
@@ -4956,7 +4957,8 @@ function paintRoblox(info) {
   show("rbFriends", info.friends);
   show("rbFollowing", info.following);
   show("rbFollowers", info.followers);
-  $("rbRap").textContent = info.rap === null || info.rap === undefined ? "—" : `${info.rap.toLocaleString("en-US")} R$`;
+  const rap = profile.rap ?? info.rap;
+  $("rbRap").textContent = rap === null || rap === undefined ? "—" : `${rap.toLocaleString("en-US")} R$`;
 
   if (info.userId) mountAvatar3d(info.userId, info.model || profile.avatarModel);
 
