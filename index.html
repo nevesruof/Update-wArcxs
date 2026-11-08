@@ -10,13 +10,13 @@
 <meta property="og:title" content="Take">
 <meta property="og:description" content="Break it to understand it. Build it so it can't be broken.">
 <meta property="og:url" content="https://www.whoistake.com/">
-<meta property="og:image" content="https://www.whoistake.com/assets/og.png">
+<meta property="og:image" content="https://www.whoistake.com/assets/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Take">
 <meta name="twitter:description" content="Break it to understand it. Build it so it can't be broken.">
-<meta name="twitter:image" content="https://www.whoistake.com/assets/og.png">
+<meta name="twitter:image" content="https://www.whoistake.com/assets/og.jpg">
 <title>Take</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
@@ -7301,22 +7301,60 @@ function tickLyrics() {
   }
 }
 
+function reserveLyricSpace() {
+  const box = $("npLyric");
+  const rows = lyrics.lines;
+  if (!rows.length) {
+    box.style.minHeight = "";
+    return;
+  }
+
+  const probe = document.createElement("span");
+  probe.className = "line";
+  probe.setAttribute("aria-hidden", "true");
+  probe.style.cssText = "position:absolute;left:0;top:0;width:100%;visibility:hidden;pointer-events:none;animation:none";
+  box.appendChild(probe);
+
+  let tallest = 0;
+  for (let i = 0; i < rows.length; i += 1) {
+    probe.innerHTML = rows[i].text
+      ? rows[i].text
+          .split(/\s+/)
+          .map((word) => `<span class="w">${esc(word)}</span>`)
+          .join(" ")
+      : "&nbsp;";
+    tallest = Math.max(tallest, probe.getBoundingClientRect().height);
+  }
+
+  probe.remove();
+  const style = getComputedStyle(box);
+  const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+  box.style.minHeight = `${Math.ceil(tallest + padding)}px`;
+}
+
 async function loadLyricsFor(song, seconds) {
   if (lyrics.id === song.id) return;
   lyrics.id = song.id;
   lyrics.lines = [];
   lyrics.index = -2;
   lyrics.words = [];
+  $("npLyric").style.minHeight = "";
   showLine(null);
 
   const rows = await lyricsFor(song.id, song, seconds);
 
   if (lyrics.id !== song.id) return;
   lyrics.lines = rows;
+  reserveLyricSpace();
   clearInterval(lyrics.timer);
   if (rows.length) lyrics.timer = setInterval(() => !document.hidden && tickLyrics(), 140);
   tickLyrics();
 }
+
+window.addEventListener("resize", () => {
+  clearTimeout(lyrics.fit);
+  lyrics.fit = setTimeout(reserveLyricSpace, 150);
+});
 
 function paintDockRow(song) {
   followCover();

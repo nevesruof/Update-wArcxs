@@ -9,7 +9,7 @@ Página de perfil con presencia de Discord (tu bot), juegos con ficha de IGDB (T
 - `api/last-played.js`: último juego de Roblox según el bot.
 - `404.html`: página de error con el auto ASCII (Vercel la sirve sola en rutas que no existen).
 - `manifest.webmanifest`, `sw.js`, `assets/icon-*.png`, `assets/favicon-*.png`, `assets/apple-touch-icon.png`: la página se puede instalar como app y abre sin conexión.
-- `assets/og.png`: imagen de vista previa al compartir el enlace (1200x630).
+- `assets/og.jpg`: imagen de vista previa al compartir el enlace (1200x630).
 - `api/presence.js`, `api/activity.js`, `api/game-info.js`: funciones de Vercel que hablan con tu bot, Discord, IGDB, Steam y Roblox.
 - `lib/`: lógica compartida de las funciones.
 - `scripts/dev.mjs`: servidor local (`npm run dev`).
