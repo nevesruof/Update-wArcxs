@@ -51,7 +51,9 @@ async function serveFile(pathname, res) {
     res.end(body);
   } catch {
     res.statusCode = 404;
-    res.end("Not found");
+    const page = await readFile(join(root, "404.html")).catch(() => null);
+    if (page) res.setHeader("Content-Type", TYPES[".html"]);
+    res.end(page || "Not found");
   }
 }
 

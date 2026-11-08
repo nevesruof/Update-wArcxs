@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#000000">
+<meta name="robots" content="noindex">
+<title>404 · Take</title>
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  background: #000;
+  color: #eee;
+  overflow: hidden;
+  font-family: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.shade {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(60% 46% at 50% 50%, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.05) 100%);
+  pointer-events: none;
+}
+
+main {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+}
+
+.code {
+  font-family: "Geist Mono", ui-monospace, Menlo, monospace;
+  font-size: clamp(3.4rem, 13vw, 7.5rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-indent: 0.08em;
+  color: #fff;
+  text-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  animation: rise 0.9s 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.note {
+  font-family: "Geist Mono", ui-monospace, Menlo, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #a2a2a8;
+  text-shadow: 0 0 12px #000;
+  opacity: 0;
+  animation: rise 0.9s 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.back {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(10, 10, 12, 0.6);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: #eee;
+  font-size: 0.86rem;
+  font-weight: 500;
+  text-decoration: none;
+  opacity: 0;
+  animation: rise 0.9s 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.back:hover {
+  background: rgba(40, 40, 44, 0.75);
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+.back:focus-visible {
+  outline: 1.5px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 3px;
+}
+
+.back svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .code,
+  .note,
+  .back {
+    animation-duration: 0.01s;
+  }
+}
+</style>
+</head>
+<body>
+
+<canvas id="ascii" aria-hidden="true"></canvas>
+<div class="shade"></div>
+
+<main>
+  <h1 class="code">404</h1>
+  <p class="note">esta ruta no existe</p>
+  <a class="back" href="/"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>volver al inicio</a>
+</main>
+
+<script src="/assets/porsche-logo.js"></script>
+<script>
+const canvas = document.getElementById("ascii");
+const ctx = canvas.getContext("2d", { alpha: false });
+const ramp = " .:ilrsxf29A5HM#8@";
+const cellW = 7;
+const cellH = 12;
+const levels = 32;
+const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const shades = Array.from({ length: levels }, (_, i) => {
+  const v = i / (levels - 1);
+  const shade = Math.round(12 + v * v * 150);
+  return `rgb(${shade},${shade},${Math.min(255, shade + 4)})`;
+});
+const groups = Array.from({ length: levels }, () => []);
+const mask = document.createElement("canvas");
+const maskCtx = mask.getContext("2d", { willReadFrequently: true });
+
+let cols = 0;
+let rows = 0;
+let base = null;
+let radial = null;
+let text = null;
+let colWave = null;
+let rowWave = null;
+let diagWave = null;
+let logo = null;
+let shownAt = 0;
+let last = -1000;
+let resizing = 0;
+
+function loadLogo(url, done) {
+  const image = new Image();
+
+  image.onload = () => {
+    const art = document.createElement("canvas");
+    art.width = image.width;
+    art.height = image.height;
+    const c = art.getContext("2d", { willReadFrequently: true });
+    c.drawImage(image, 0, 0);
+
+    try {
+      const pixels = c.getImageData(0, 0, art.width, art.height);
+      const data = pixels.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const luma = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114) / 255;
+        const strength = (data[i + 3] / 255) * (0.35 + 0.65 * luma);
+        data[i] = 255;
+        data[i + 1] = 255;
+        data[i + 2] = 255;
+        data[i + 3] = Math.round(strength * 255);
+      }
+      c.putImageData(pixels, 0, 0);
+    } catch (error) {
+      return;
+    }
+
+    done(art);
+  };
+
+  image.src = url;
+}
+
+function build() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  cols = Math.ceil(canvas.width / cellW);
+  rows = Math.ceil(canvas.height / cellH);
+  mask.width = cols;
+  mask.height = rows;
+  maskCtx.clearRect(0, 0, cols, rows);
+
+  if (logo) {
+    const ratio = (logo.width / logo.height) * (cellH / cellW);
+    let height = rows * 0.62;
+    let width = height * ratio;
+    if (width > cols * 0.8) {
+      width = cols * 0.8;
+      height = width / ratio;
+    }
+    maskCtx.drawImage(logo, cols / 2 - width / 2, rows / 2 - height / 2, width, height);
+  }
+
+  const pixels = maskCtx.getImageData(0, 0, cols, rows).data;
+  const total = cols * rows;
+  base = new Float32Array(total);
+  radial = new Float32Array(total);
+  text = new Float32Array(total);
+  colWave = new Float32Array(cols);
+  rowWave = new Float32Array(rows);
+  diagWave = new Float32Array(cols + rows);
+
+  for (let y = 0; y < rows; y += 1) {
+    for (let x = 0; x < cols; x += 1) {
+      const i = y * cols + x;
+      const edge = Math.max(0, 1 - Math.hypot(x / cols - 0.5, (y / rows - 0.5) * 1.1) * 1.5);
+      base[i] = 0.15 + edge * 0.06;
+      radial[i] = Math.hypot(x - cols / 2, (y - rows / 2) * 1.8) * 0.12;
+      text[i] = pixels[i * 4 + 3] / 255;
+    }
+  }
+
+  ctx.font = `${cellH - 1}px "Geist Mono", monospace`;
+  ctx.textBaseline = "top";
+  last = -1000;
+}
+
+function paint(now) {
+  const t = calm ? 0 : now / 1000;
+  const fade = shownAt ? Math.min(1, (now - shownAt) / 900) * 0.7 : 0;
+
+  for (let x = 0; x < cols; x += 1) colWave[x] = Math.sin(x * 0.07 + t * 0.9) * 0.5;
+  for (let y = 0; y < rows; y += 1) rowWave[y] = Math.sin(y * 0.11 - t * 1.2) * 0.5;
+  for (let k = 0; k < diagWave.length; k += 1) diagWave[k] = Math.sin(k * 0.045 + t * 0.6) * 0.5;
+  for (const group of groups) group.length = 0;
+
+  const phase = t * 1.4;
+  for (let y = 0; y < rows; y += 1) {
+    const row = rowWave[y];
+    const py = y * cellH;
+    for (let x = 0; x < cols; x += 1) {
+      const i = y * cols + x;
+      const wave = colWave[x] + row + diagWave[x + y] + Math.sin(radial[i] - phase) * 0.5;
+      const value = base[i] + wave * 0.06 + text[i] * fade;
+      if (value < 0.12) continue;
+      const clamped = value > 1 ? 1 : value;
+      const glyph = Math.min(ramp.length - 1, Math.floor(clamped * ramp.length));
+      if (!glyph) continue;
+      groups[Math.floor(clamped * (levels - 1))].push(x * cellW, py, glyph);
+    }
+  }
+
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let g = 0; g < levels; g += 1) {
+    const group = groups[g];
+    if (!group.length) continue;
+    ctx.fillStyle = shades[g];
+    for (let k = 0; k < group.length; k += 3) ctx.fillText(ramp[group[k + 2]], group[k], group[k + 1]);
+  }
+}
+
+function frame(now) {
+  if (document.hidden) {
+    setTimeout(() => requestAnimationFrame(frame), 400);
+    return;
+  }
+
+  const gap = shownAt && now - shownAt < 900 ? 45 : 90;
+  if (now - last >= gap) {
+    last = now;
+    paint(now);
+  }
+
+  if (!calm || now - shownAt < 1000) requestAnimationFrame(frame);
+}
+
+build();
+window.addEventListener("resize", () => {
+  clearTimeout(resizing);
+  resizing = setTimeout(() => {
+    build();
+    paint(performance.now());
+  }, 120);
+});
+
+if (window.INTRO_LOGO) {
+  loadLogo(window.INTRO_LOGO, (art) => {
+    logo = art;
+    shownAt = performance.now();
+    build();
+  });
+}
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

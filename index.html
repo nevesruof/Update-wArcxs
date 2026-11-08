@@ -1553,53 +1553,6 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   from { transform: scaleX(0); }
 }
 
-html.lite *,
-html.lite *::before,
-html.lite *::after {
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
-
-html.lite .aura,
-html.lite .backdrop canvas {
-  display: none;
-}
-
-html.lite .wk-col i,
-html.lite .tg-row s::after {
-  animation: none;
-}
-
-html.lite .figure img {
-  transition: none;
-}
-
-.site-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-left: 7px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
-  vertical-align: middle;
-  transform: translateY(-1px);
-  transition: background 0.4s, box-shadow 0.4s;
-}
-
-.project .out .site-dot {
-  margin: 0 2px 0 0;
-}
-
-.site-dot.up {
-  background: var(--green);
-  box-shadow: 0 0 8px rgb(63 185 80 / 0.55);
-}
-
-.site-dot.down {
-  background: #ff6369;
-  box-shadow: 0 0 8px rgb(255 99 105 / 0.5);
-}
-
 .peek-card {
   position: fixed;
   z-index: 41;
@@ -1671,6 +1624,57 @@ html.lite .figure img {
   .peek-card {
     display: none;
   }
+}
+
+.sound.share-btn {
+  top: 116px;
+}
+
+.share-card {
+  width: min(360px, 100%);
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(12, 12, 14, 0.97);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  transform: translateY(8px) scale(0.985);
+  transition: transform 0.25s ease;
+}
+
+.keys.open .share-card {
+  transform: none;
+}
+
+.share-card img {
+  display: block;
+  width: 100%;
+  max-height: 64vh;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #060607;
+}
+
+.share-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.share-actions button {
+  flex: 1;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.share-actions button:hover {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.24);
 }
 
 .keys {
@@ -4785,6 +4789,8 @@ button:focus-visible {
 
 <button class="sound theme" id="theme" type="button" aria-label="Cambiar tema"><i></i></button>
 
+<button class="sound share-btn" id="shareBtn" type="button" aria-label="Compartir como imagen" title="compartir como imagen"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="m4 17 5-4.5 3.5 3 3-2.5 4.5 4"/></svg></button>
+
 <div class="flash" id="flash" role="status" aria-live="polite"></div>
 
 <div class="now" id="now" aria-hidden="true" role="dialog" aria-label="Live view">
@@ -4810,6 +4816,17 @@ button:focus-visible {
   <p class="now-hint">esc para volver</p>
 </div>
 
+<div class="keys" id="share" aria-hidden="true">
+  <div class="share-card" role="dialog" aria-label="Tarjeta para compartir">
+    <img id="shareImg" alt="Tarjeta de perfil">
+    <div class="share-actions">
+      <button type="button" id="shareSave">Descargar PNG</button>
+      <button type="button" id="shareSend" hidden>Compartir</button>
+      <button type="button" id="shareCopy" hidden>Copiar</button>
+    </div>
+  </div>
+</div>
+
 <div class="keys" id="keys" aria-hidden="true">
   <div class="keys-card" role="dialog" aria-label="Atajos de teclado">
     <h3>atajos</h3>
@@ -4817,7 +4834,7 @@ button:focus-visible {
     <div><span>Abrir o cerrar el reproductor</span><kbd>P</kbd></div>
     <div><span>Buscar canción</span><kbd>/</kbd></div>
     <div><span>Cambiar tema</span><kbd>T</kbd></div>
-    <div><span>Modo lite (menos efectos)</span><kbd>L</kbd></div>
+    <div><span>Compartir como imagen</span><kbd>C</kbd></div>
     <div><span>Abrir stats.fm</span><kbd>S</kbd></div>
     <div><span>Siguiente / anterior en la playlist</span><kbd>N / B</kbd></div>
     <div><span>Vista en vivo (lo que escucho y juego)</span><kbd>F</kbd></div>
@@ -4900,12 +4917,6 @@ button:focus-visible {
     <div class="feed" id="feed"></div>
   </section>
 
-  <section class="block rise" style="--i:5" id="playBlock" hidden>
-    <div class="label"><span>playtime</span><span id="playTotal"></span></div>
-    <div class="week" id="week" role="img"></div>
-    <div class="top-games" id="topGames"></div>
-  </section>
-
   <section class="block rise" style="--i:5">
     <div class="label">
       <span>recent plays</span>
@@ -4923,7 +4934,13 @@ button:focus-visible {
     <div class="legend"><span>less</span><i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i><span>more</span></div>
   </section>
 
-  <section class="block rise" style="--i:7">
+  <section class="block rise" style="--i:7" id="playBlock" hidden>
+    <div class="label"><span>playtime</span><span id="playTotal"></span></div>
+    <div class="week" id="week" role="img"></div>
+    <div class="top-games" id="topGames"></div>
+  </section>
+
+  <section class="block rise" style="--i:8">
     <div class="label"><span>roblox</span></div>
     <div class="roblox">
       <div>
@@ -4950,7 +4967,7 @@ button:focus-visible {
     </div>
   </section>
 
-  <p class="credit rise" style="--i:8">diseño inspirado en <a href="https://plxne.com/" target="_blank" rel="noopener">plxne.com</a> · créditos a plxne<span class="hint"> · pulsa <b>?</b> para ver los atajos</span></p>
+  <p class="credit rise" style="--i:9">diseño inspirado en <a href="https://plxne.com/" target="_blank" rel="noopener">plxne.com</a> · créditos a plxne<span class="hint"> · pulsa <b>?</b> para ver los atajos</span></p>
 
 </main>
 
@@ -5508,7 +5525,7 @@ function loadLogo(url, done) {
 function runIntro(onEnter) {
   const intro = $("intro");
 
-  if (!profile.intro || isLite()) {
+  if (!profile.intro) {
     intro.remove();
     onEnter();
     return;
@@ -5703,7 +5720,7 @@ function renderHead() {
   }
 
   $("bioLinks").innerHTML = profile.bioLinks
-    .map((link) => `<a href="${esc(link.href)}" target="_blank" rel="noopener">${esc(link.label)}${statusDot(link.href)}</a>`)
+    .map((link) => `<a href="${esc(link.href)}" target="_blank" rel="noopener">${esc(link.label)}</a>`)
     .join("");
 }
 
@@ -5921,7 +5938,7 @@ function renderProject() {
 
   let side = "";
   if (project.href) {
-    side = `<a class="out" href="${esc(project.href)}" target="_blank" rel="noopener">${statusDot(project.href)}${esc(project.label)}${arrowIcon}</a>`;
+    side = `<a class="out" href="${esc(project.href)}" target="_blank" rel="noopener">${esc(project.label)}${arrowIcon}</a>`;
   } else if (project.label) {
     side = `<span class="out">${esc(project.label)}</span>`;
   }
@@ -6201,7 +6218,7 @@ function paintRoblox(info) {
   const rap = profile.rap ?? info.rap;
   $("rbRap").textContent = rap === null || rap === undefined ? "—" : `${rap.toLocaleString("en-US")} R$`;
 
-  if (info.userId && !isLite()) mountAvatar3d(info.userId, info.model || profile.avatarModel);
+  if (info.userId) mountAvatar3d(info.userId, info.model || profile.avatarModel);
 
   if (info.avatarUrl) {
     $("rbFigure").src = info.avatarUrl;
@@ -6538,7 +6555,7 @@ function setupFigureTilt() {
   };
 
   window.addEventListener("mousemove", (event) => {
-    if (!visible || queued || isLite()) return;
+    if (!visible || queued) return;
     point = { x: event.clientX, y: event.clientY };
     queued = requestAnimationFrame(apply);
   }, { passive: true });
@@ -8894,6 +8911,7 @@ function setupEscape() {
 
     const layers = [
       ["keys", () => toggleLayer($("keys"), false)],
+      ["share", () => toggleLayer($("share"), false)],
       ["now", () => setNowOpen(false)],
       ["shotOverlay", () => toggleLayer($("shotOverlay"), false)],
       ["gameOverlay", closeGame],
@@ -8919,85 +8937,6 @@ function flash(text, time) {
   bubble.classList.add("on");
   clearTimeout(flashState.timer);
   flashState.timer = setTimeout(() => bubble.classList.remove("on"), time || 1400);
-}
-
-const isLite = () => document.documentElement.classList.contains("lite");
-
-function liteSetting() {
-  try {
-    return localStorage.getItem("lite");
-  } catch (error) {
-    return null;
-  }
-}
-
-function wantsLite() {
-  const saved = liteSetting();
-  if (saved === "1") return true;
-  if (saved === "0") return false;
-  const connection = navigator.connection || {};
-  return Boolean(
-    connection.saveData ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      (navigator.deviceMemory && navigator.deviceMemory <= 2)
-  );
-}
-
-function setLite(on, notify, persist) {
-  document.documentElement.classList.toggle("lite", on);
-  const back = $("backdrop");
-
-  if (on) {
-    backdropState.paused = true;
-    back.classList.add("fallback");
-  } else {
-    back.classList.remove("fallback");
-    if (backdropState.ready) backdropState.paused = false;
-    else startBackdrop();
-  }
-
-  if (persist) {
-    try {
-      localStorage.setItem("lite", on ? "1" : "0");
-    } catch (error) {
-      return;
-    }
-  }
-
-  if (notify) flash(on ? "modo lite · pulsa L para volver al completo" : "modo completo", on ? 2600 : 1400);
-}
-
-function watchFrames() {
-  if (isLite() || liteSetting() === "0" || backdropState.software) return;
-
-  let last = 0;
-  let started = 0;
-  let frames = 0;
-  let slow = 0;
-
-  const step = (now) => {
-    if (document.hidden) {
-      last = 0;
-      started = 0;
-      frames = 0;
-      slow = 0;
-    } else {
-      if (!started) started = now + 1500;
-      if (last && now > started) {
-        frames += 1;
-        if (now - last > 50) slow += 1;
-      }
-      last = now;
-
-      if (now - started > 3500 && frames > 20) {
-        if (slow / frames > 0.6) setLite(true, true, false);
-        return;
-      }
-    }
-    requestAnimationFrame(step);
-  };
-
-  requestAnimationFrame(step);
 }
 
 function registerWorker() {
@@ -9043,35 +8982,6 @@ function savedTheme() {
 }
 
 const liveState = { game: null, presence: null, github: null };
-
-const siteState = { sites: new Map() };
-
-function statusDot(href) {
-  try {
-    return `<i class="site-dot" data-host="${esc(new URL(href).hostname)}" aria-hidden="true"></i>`;
-  } catch (error) {
-    return "";
-  }
-}
-
-function paintSites() {
-  document.querySelectorAll(".site-dot").forEach((dot) => {
-    const site = siteState.sites.get(dot.dataset.host);
-    dot.classList.toggle("up", Boolean(site && site.up));
-    dot.classList.toggle("down", Boolean(site && !site.up));
-    dot.title = site ? (site.up ? `online${site.ms ? ` · ${site.ms} ms` : ""}` : "offline") : "";
-  });
-}
-
-async function loadSites() {
-  try {
-    const body = await api("/api/status");
-    siteState.sites = new Map((body.sites || []).map((site) => [site.host, site]));
-    paintSites();
-  } catch (error) {
-    return;
-  }
-}
 
 async function githubCard() {
   if (liveState.github) return liveState.github;
@@ -9295,6 +9205,336 @@ function setupNow() {
   feed.timer = setInterval(() => !document.hidden && stepFeed(), 250);
 }
 
+const shareState = { blob: null, url: "", busy: false };
+
+function loadPicture(url) {
+  return new Promise((resolve) => {
+    if (!/^https:/i.test(url || "")) return resolve(null);
+    const image = new Image();
+    const timer = setTimeout(() => resolve(null), 6000);
+    image.crossOrigin = "anonymous";
+    image.onload = () => {
+      clearTimeout(timer);
+      resolve(image);
+    };
+    image.onerror = () => {
+      clearTimeout(timer);
+      resolve(null);
+    };
+    image.src = url;
+  });
+}
+
+function roundPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function wrapLines(ctx, text, width, limit) {
+  const words = String(text || "").split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = "";
+  for (const word of words) {
+    const next = line ? `${line} ${word}` : word;
+    if (ctx.measureText(next).width > width && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  }
+  if (line) lines.push(line);
+  if (lines.length > limit) {
+    lines.length = limit;
+    lines[limit - 1] = `${lines[limit - 1].replace(/[\s.,;:]+$/, "")}…`;
+  }
+  return lines;
+}
+
+function fitText(ctx, text, width) {
+  let value = String(text || "");
+  if (ctx.measureText(value).width <= width) return value;
+  while (value.length > 1 && ctx.measureText(`${value}…`).width > width) value = value.slice(0, -1);
+  return `${value.trimEnd()}…`;
+}
+
+async function drawCard() {
+  const W = 1080;
+  const H = 1350;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  const fog = (getComputedStyle(document.documentElement).getPropertyValue("--fog") || "150 154 163").trim().split(/\s+/).join(",");
+  const sans = '"Geist", "Inter", system-ui, sans-serif';
+  const mono = '"Geist Mono", ui-monospace, monospace';
+
+  try {
+    await Promise.race([
+      Promise.all([document.fonts.load(`650 64px ${sans}`), document.fonts.load(`400 28px ${mono}`)]),
+      new Promise((done) => setTimeout(done, 1500))
+    ]);
+  } catch (error) {
+    ctx.font = "16px sans-serif";
+  }
+
+  const track = !manual.audio && dock.song
+    ? { kind: "listening on spotify", title: dock.song.title, artist: dock.song.artist, art: dock.song.art, ratio: dock.end > dock.start ? Math.max(0, Math.min(1, (Date.now() - dock.start) / (dock.end - dock.start))) : 0 }
+    : manual.audio && manual.song
+      ? { kind: "playing from the page", title: manual.song.name, artist: manual.song.artist, art: manual.song.image, ratio: manual.audio.duration ? manual.audio.currentTime / manual.audio.duration : 0 }
+      : finder.top && finder.top[0]
+        ? { kind: "most played song", title: finder.top[0].name, artist: finder.top[0].artist, art: finder.top[0].image, ratio: 0 }
+        : { kind: "not listening right now", title: "Nothing playing", artist: "", art: "", ratio: 0 };
+
+  const avatarUrl = $("avatar").hidden ? "" : $("avatar").currentSrc || $("avatar").src;
+  const [avatar, cover] = await Promise.all([loadPicture(avatarUrl), loadPicture(track.art)]);
+
+  ctx.fillStyle = "#050506";
+  ctx.fillRect(0, 0, W, H);
+  const glowA = ctx.createRadialGradient(W * 0.2, H * 0.08, 0, W * 0.2, H * 0.08, W * 0.85);
+  glowA.addColorStop(0, `rgba(${fog},0.34)`);
+  glowA.addColorStop(1, `rgba(${fog},0)`);
+  ctx.fillStyle = glowA;
+  ctx.fillRect(0, 0, W, H);
+  const glowB = ctx.createRadialGradient(W * 0.95, H * 0.78, 0, W * 0.95, H * 0.78, W * 0.8);
+  glowB.addColorStop(0, `rgba(${fog},0.22)`);
+  glowB.addColorStop(1, `rgba(${fog},0)`);
+  ctx.fillStyle = glowB;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = "rgba(255,255,255,0.1)";
+  ctx.lineWidth = 2;
+  roundPath(ctx, 28, 28, W - 56, H - 56, 44);
+  ctx.stroke();
+
+  const left = 96;
+  const inner = W - left * 2;
+
+  ctx.fillStyle = "rgba(255,255,255,0.45)";
+  ctx.font = `400 26px ${mono}`;
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText("profile", left, 112);
+
+  const size = 176;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(left + size / 2, 232 + size / 2, size / 2, 0, Math.PI * 2);
+  ctx.clip();
+  if (avatar) {
+    ctx.drawImage(avatar, left, 232, size, size);
+  } else {
+    ctx.fillStyle = "#26262b";
+    ctx.fillRect(left, 232, size, size);
+    ctx.fillStyle = "#fff";
+    ctx.font = `600 84px ${sans}`;
+    ctx.textAlign = "center";
+    ctx.fillText(($("nameText").textContent || "t").charAt(0).toUpperCase(), left + size / 2, 232 + size / 2 + 30);
+    ctx.textAlign = "left";
+  }
+  ctx.restore();
+  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(left + size / 2, 232 + size / 2, size / 2, 0, Math.PI * 2);
+  ctx.stroke();
+
+  const textX = left + size + 44;
+  ctx.fillStyle = "#fff";
+  ctx.font = `650 72px ${sans}`;
+  ctx.fillText(fitText(ctx, $("nameText").textContent || profile.name, W - textX - left), textX, 306);
+  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.font = `400 32px ${mono}`;
+  ctx.fillText(fitText(ctx, $("handle").textContent || profile.handle, W - textX - left), textX, 360);
+
+  const statusText = $("statusLine").hidden ? "" : `${$("statusEmoji").hidden ? "" : `${$("statusEmoji").textContent} `}${$("statusText").textContent}`;
+  let y = 480;
+  ctx.fillStyle = "rgba(255,255,255,0.82)";
+  ctx.font = `400 38px ${sans}`;
+  for (const line of wrapLines(ctx, profile.bio, inner, 3)) {
+    ctx.fillText(line, left, y);
+    y += 54;
+  }
+
+  if (statusText) {
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.font = `italic 400 30px ${sans}`;
+    ctx.fillText(fitText(ctx, statusText, inner), left, y + 14);
+  }
+
+  const cardY = 690;
+  const cardH = 292;
+  roundPath(ctx, left, cardY, inner, cardH, 28);
+  ctx.fillStyle = "rgba(255,255,255,0.05)";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.12)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  const art = 220;
+  const artX = left + 36;
+  const artY = cardY + (cardH - art) / 2;
+  ctx.save();
+  roundPath(ctx, artX, artY, art, art, 20);
+  ctx.clip();
+  if (cover) {
+    ctx.drawImage(cover, artX, artY, art, art);
+  } else {
+    const fill = ctx.createLinearGradient(artX, artY, artX + art, artY + art);
+    fill.addColorStop(0, "#34343a");
+    fill.addColorStop(1, "#16161a");
+    ctx.fillStyle = fill;
+    ctx.fillRect(artX, artY, art, art);
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(artX + 96, artY + 140);
+    ctx.lineTo(artX + 96, artY + 70);
+    ctx.lineTo(artX + 156, artY + 60);
+    ctx.lineTo(artX + 156, artY + 128);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(artX + 82, artY + 142, 14, 0, Math.PI * 2);
+    ctx.arc(artX + 142, artY + 130, 14, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  const tx = artX + art + 36;
+  const tw = left + inner - tx - 36;
+  ctx.fillStyle = "rgba(255,255,255,0.5)";
+  ctx.font = `400 24px ${mono}`;
+  ctx.fillText(track.kind.toUpperCase(), tx, cardY + 72);
+  ctx.fillStyle = "#fff";
+  ctx.font = `650 44px ${sans}`;
+  const titleLines = wrapLines(ctx, track.title, tw, 2);
+  titleLines.forEach((line, index) => ctx.fillText(line, tx, cardY + 132 + index * 52));
+  ctx.fillStyle = "rgba(255,255,255,0.62)";
+  ctx.font = `400 32px ${sans}`;
+  ctx.fillText(fitText(ctx, track.artist, tw), tx, cardY + 132 + titleLines.length * 52 + 8);
+
+  if (track.ratio > 0) {
+    const barY = cardY + cardH - 52;
+    ctx.fillStyle = "rgba(255,255,255,0.16)";
+    roundPath(ctx, tx, barY, tw, 6, 3);
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    roundPath(ctx, tx, barY, Math.max(8, tw * Math.min(1, track.ratio)), 6, 3);
+    ctx.fill();
+  }
+
+  const game = liveState.game
+    ? { label: "playing now", name: liveState.game.name, detail: liveState.game.detail }
+    : played.name
+      ? { label: "last played · roblox", name: played.name, detail: "" }
+      : null;
+
+  if (game) {
+    const gy = cardY + cardH + 36;
+    roundPath(ctx, left, gy, inner, 132, 28);
+    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.12)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.font = `400 24px ${mono}`;
+    ctx.fillText(game.label.toUpperCase(), left + 36, gy + 54);
+    ctx.fillStyle = "#fff";
+    ctx.font = `600 40px ${sans}`;
+    ctx.fillText(fitText(ctx, game.name, inner - 72), left + 36, gy + 104);
+    if (game.detail) {
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.font = `400 26px ${sans}`;
+      ctx.textAlign = "right";
+      ctx.fillText(fitText(ctx, game.detail, inner * 0.4), left + inner - 36, gy + 104);
+      ctx.textAlign = "left";
+    }
+  }
+
+  ctx.fillStyle = "rgba(255,255,255,0.72)";
+  ctx.font = `500 30px ${mono}`;
+  ctx.fillText(location.host || "perfil", left, H - 96);
+  ctx.fillStyle = "rgba(255,255,255,0.32)";
+  ctx.font = `400 22px ${mono}`;
+  ctx.fillText("diseño inspirado en plxne.com · créditos a plxne", left, H - 58);
+  ctx.textAlign = "right";
+  ctx.fillText(`tema ${(document.documentElement.dataset.theme || "mono")}`, left + inner, H - 58);
+  ctx.textAlign = "left";
+
+  return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), "image/png"));
+}
+
+async function openShare() {
+  if (shareState.busy) return;
+  const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "now", "keys"].some((id) => $(id).classList.contains("open"));
+  if (busy) return;
+
+  shareState.busy = true;
+  flash("generando tarjeta…", 1800);
+
+  try {
+    const blob = await drawCard();
+    if (!blob) throw new Error("sin imagen");
+    if (shareState.url) URL.revokeObjectURL(shareState.url);
+    shareState.blob = blob;
+    shareState.url = URL.createObjectURL(blob);
+    $("shareImg").src = shareState.url;
+    toggleLayer($("share"), true);
+  } catch (error) {
+    flash("no se pudo crear la tarjeta");
+  } finally {
+    shareState.busy = false;
+  }
+}
+
+function setupShare() {
+  const layer = $("share");
+  const file = () => new File([shareState.blob], "take-profile.png", { type: "image/png" });
+
+  $("shareBtn").addEventListener("click", openShare);
+  layer.addEventListener("click", (event) => {
+    if (event.target === layer) toggleLayer(layer, false);
+  });
+
+  $("shareSave").addEventListener("click", () => {
+    if (!shareState.url) return;
+    const link = document.createElement("a");
+    link.href = shareState.url;
+    link.download = "take-profile.png";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  });
+
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [new File([""], "a.png", { type: "image/png" })] })) {
+      $("shareSend").hidden = false;
+      $("shareSend").addEventListener("click", () => {
+        if (shareState.blob) navigator.share({ files: [file()], title: profile.name }).catch(() => {});
+      });
+    }
+  } catch (error) {
+    $("shareSend").hidden = true;
+  }
+
+  if (navigator.clipboard && window.ClipboardItem) {
+    $("shareCopy").hidden = false;
+    $("shareCopy").addEventListener("click", () => {
+      if (!shareState.blob) return;
+      navigator.clipboard
+        .write([new ClipboardItem({ "image/png": shareState.blob })])
+        .then(() => flash("imagen copiada"))
+        .catch(() => flash("no se pudo copiar"));
+    });
+  }
+}
+
 function setupShortcuts() {
   $("theme").addEventListener("click", cycleTheme);
 
@@ -9313,6 +9553,7 @@ function setupShortcuts() {
     const key = event.key.toLowerCase();
 
     if ($("now").classList.contains("open") && !["f", "m", "t"].includes(key)) return;
+    if ($("share").classList.contains("open")) return;
 
     if (key === "?" || (key === "/" && event.shiftKey)) {
       event.preventDefault();
@@ -9334,15 +9575,15 @@ function setupShortcuts() {
       $("npSearch").focus();
     } else if (key === "t") {
       cycleTheme();
-    } else if (key === "l") {
-      setLite(!isLite(), true, true);
     } else if (key === "s") {
-      const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "now"].some((id) => $(id).classList.contains("open"));
+      const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "now", "share"].some((id) => $(id).classList.contains("open"));
       if (!busy) $("openStats").click();
     } else if (key === "n" && queue.active) {
       queueStep(1);
     } else if (key === "b" && queue.active) {
       queueStep(-1);
+    } else if (key === "c") {
+      openShare();
     } else if (key === "f") {
       setNowOpen(!$("now").classList.contains("open"));
     } else if (key === "g") {
@@ -9383,8 +9624,7 @@ function setupSound() {
 
 function init() {
   applyTheme(savedTheme(), false);
-  if (wantsLite()) setLite(true, false, false);
-  else startBackdrop();
+  startBackdrop();
   registerWorker();
   renderHead();
   renderSocials();
@@ -9409,6 +9649,7 @@ function init() {
   setupShortcuts();
   setupNow();
   setupPeek();
+  setupShare();
   const armToast = setupToast();
 
   $("feed").addEventListener("scroll", syncFeedMask, { passive: true });
@@ -9421,8 +9662,6 @@ function init() {
   loadDiscord();
   loadActivity();
   loadViews();
-  loadSites();
-  setInterval(loadSites, 120000);
 
   setInterval(() => {
     if (!document.hidden) loadDiscord();
@@ -9440,7 +9679,6 @@ function init() {
     document.body.classList.add("entered");
     startAudio();
     watchMark();
-    watchFrames();
     if (armToast) armToast();
   });
 }
