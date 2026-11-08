@@ -895,32 +895,6 @@ a.change:hover {
   display: block;
 }
 
-.intro-mark {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  height: min(54vh, 430px);
-  width: auto;
-  max-width: 78vw;
-  object-fit: contain;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  user-select: none;
-  filter: drop-shadow(0 18px 50px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 46px rgba(214, 170, 70, 0.16));
-  animation: markIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) both, markFloat 7s ease-in-out 1.4s infinite;
-}
-
-@keyframes markIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -46%) scale(0.9);
-  }
-}
-
-@keyframes markFloat {
-  50% { transform: translate(-50%, -51%) scale(1.012); }
-}
-
 .intro p {
   position: absolute;
   left: 0;
@@ -947,7 +921,7 @@ a.change:hover {
 }
 
 @keyframes pulse {
-  50% { opacity: 0.55; }
+  50% { opacity: 0.78; }
 }
 
 .sound {
@@ -3853,7 +3827,6 @@ button:focus-visible {
 
 <div class="intro" id="intro">
   <canvas id="ascii"></canvas>
-  <img class="intro-mark" src="assets/porsche.webp" alt="" width="428" height="560" decoding="async">
   <p>click to enter</p>
 </div>
 
@@ -4475,6 +4448,13 @@ function setupToast() {
   };
 }
 
+function loadLogo(url, done) {
+  const image = new Image();
+  image.onload = () => done(image);
+  image.onerror = () => {};
+  image.src = url;
+}
+
 function runIntro(onEnter) {
   const intro = $("intro");
 
@@ -4486,24 +4466,127 @@ function runIntro(onEnter) {
 
   const canvas = $("ascii");
   const ctx = canvas.getContext("2d");
-  const ramp = " .:ilrsxf29A5HM#8@";
+  const ramp = " .'`^,:;-~+*=ixlrsfo29A5HM#&8@";
+  const glyphs = "01<>/\\|{}[]#$%&*+=-";
   const cellW = 7;
   const cellH = 12;
+  const ratio = Math.min(2, window.devicePixelRatio || 1);
+  const tileW = ratio > 1 ? 2.5 : 4;
+  const tileH = ratio > 1 ? 4.4 : 7;
+  let width = 0;
+  let height = 0;
+  const sample = document.createElement("canvas");
+  const sampleCtx = sample.getContext("2d", { willReadFrequently: true });
+  const layer = document.createElement("canvas");
+  const layerCtx = layer.getContext("2d");
   let cols = 0;
   let rows = 0;
   let stop = false;
+  let logo = null;
+  let shownAt = 0;
+  let cells = [];
+  let tiles = { cols: 0, rows: 0, x: 0, y: 0 };
 
   const build = () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    cols = Math.ceil(canvas.width / cellW);
-    rows = Math.ceil(canvas.height / cellH);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    cols = Math.ceil(width / cellW);
+    rows = Math.ceil(height / cellH);
     ctx.font = `${cellH - 1}px "Geist Mono", monospace`;
     ctx.textBaseline = "top";
+    cells = [];
+
+    if (!logo) return;
+
+    let markH = Math.min(height * 0.62, 520);
+    let markW = markH * (logo.width / logo.height);
+    if (markW > width * 0.8) {
+      markW = width * 0.8;
+      markH = markW / (logo.width / logo.height);
+    }
+
+    tiles = {
+      cols: Math.max(8, Math.round(markW / tileW)),
+      rows: Math.max(8, Math.round(markH / tileH)),
+      x: width / 2 - markW / 2,
+      y: height * 0.46 - markH / 2
+    };
+
+    sample.width = tiles.cols;
+    sample.height = tiles.rows;
+    sampleCtx.clearRect(0, 0, tiles.cols, tiles.rows);
+    sampleCtx.imageSmoothingQuality = "high";
+    sampleCtx.drawImage(logo, 0, 0, tiles.cols, tiles.rows);
+    const data = sampleCtx.getImageData(0, 0, tiles.cols, tiles.rows).data;
+
+    for (let y = 0; y < tiles.rows; y += 1) {
+      for (let x = 0; x < tiles.cols; x += 1) {
+        const i = (y * tiles.cols + x) * 4;
+        const alpha = data[i + 3] / 255;
+        if (alpha < 0.35) continue;
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const luma = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+        const dark = Math.max(r, g, b) < 100;
+        const lift = 1.3;
+        const color = dark
+          ? "rgb(74,74,80)"
+          : `rgb(${Math.min(255, Math.round(r * lift))},${Math.min(255, Math.round(g * lift))},${Math.min(255, Math.round(b * lift))})`;
+        const level = dark ? ramp.length - 3 : Math.min(ramp.length - 1, Math.floor((0.55 + 0.45 * luma) * ramp.length));
+        cells.push({ x: x * tileW + tiles.x, y: y * tileH + tiles.y, char: ramp[level], color, seed: Math.abs(Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1 });
+      }
+    }
+
+    layer.width = canvas.width;
+    layer.height = canvas.height;
+    layerCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    layerCtx.font = `bold ${tileH}px "Geist Mono", monospace`;
+    layerCtx.textBaseline = "top";
+    cells.forEach((cell) => {
+      layerCtx.fillStyle = cell.color;
+      layerCtx.fillText(cell.char, cell.x, cell.y);
+    });
   };
 
   build();
   window.addEventListener("resize", build);
+
+  loadLogo("assets/porsche.webp", (image) => {
+    logo = image;
+    shownAt = performance.now();
+    build();
+  });
+
+  const paintLogo = (now) => {
+    if (!cells.length) return;
+    const progress = Math.min(1, (now - shownAt) / 1800);
+
+    if (progress >= 1) {
+      ctx.drawImage(layer, 0, 0, width, height);
+      return;
+    }
+
+    ctx.font = `bold ${tileH}px "Geist Mono", monospace`;
+    for (const cell of cells) {
+      const wave = (cell.y - tiles.y) / (tiles.rows * tileH);
+      const local = Math.max(0, Math.min(1, progress * 1.6 - wave * 0.6 - cell.seed * 0.35));
+      if (local <= 0) continue;
+      if (local >= 1) {
+        ctx.fillStyle = cell.color;
+        ctx.fillText(cell.char, cell.x, cell.y);
+      } else {
+        ctx.fillStyle = cell.color;
+        ctx.globalAlpha = local * 0.8;
+        ctx.fillText(glyphs[Math.floor((cell.seed * 997 + now * 0.02) % glyphs.length)], cell.x, cell.y);
+        ctx.globalAlpha = 1;
+      }
+    }
+    ctx.font = `${cellH - 1}px "Geist Mono", monospace`;
+  };
 
   const draw = (now) => {
     if (stop) return;
@@ -4511,7 +4594,7 @@ function runIntro(onEnter) {
 
     const t = now / 1000;
     ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, width, height);
 
     for (let y = 0; y < rows; y += 1) {
       for (let x = 0; x < cols; x += 1) {
@@ -4533,6 +4616,8 @@ function runIntro(onEnter) {
         ctx.fillText(char, x * cellW, y * cellH);
       }
     }
+
+    paintLogo(now);
   };
 
   requestAnimationFrame(draw);
