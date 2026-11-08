@@ -151,6 +151,222 @@ img {
     var(--bg);
 }
 
+.aura {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.4s ease;
+}
+
+.aura.on {
+  opacity: 1;
+}
+
+.aura-layer {
+  position: absolute;
+  inset: -4%;
+  opacity: 0;
+  background:
+    radial-gradient(110vw 46vh at var(--ax, 30%) var(--ay, 18%), rgb(var(--ac, 120 120 120) / 0.17), transparent 70%),
+    radial-gradient(62vw 28vh at 18% var(--ay, 18%), rgb(var(--ac, 120 120 120) / 0.07), transparent 74%),
+    radial-gradient(110vw 46vh at var(--bx, 72%) var(--by, 82%), rgb(var(--ac, 120 120 120) / 0.11), transparent 70%),
+    radial-gradient(62vw 28vh at 82% var(--by, 82%), rgb(var(--ac, 120 120 120) / 0.06), transparent 74%);
+  transition: opacity 1.6s ease;
+  animation: auraDrift 24s ease-in-out infinite alternate;
+}
+
+.aura-layer.show {
+  opacity: 1;
+}
+
+@keyframes auraDrift {
+  from { transform: translate3d(-1.5%, -1%, 0); }
+  to { transform: translate3d(1.5%, 1.2%, 0); }
+}
+
+.np-dock {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  z-index: 38;
+  display: flex;
+  align-items: stretch;
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+body.entered .np-dock.live {
+  opacity: 1;
+  pointer-events: none;
+}
+
+.np-dock > * {
+  pointer-events: auto;
+}
+
+.np-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 0;
+  max-width: 0;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+  border: 0 solid rgba(255, 255, 255, 0.1);
+  border-left-width: 0;
+  background: rgba(10, 10, 11, 0.92);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5), 0 0 34px rgb(var(--ac, 120 120 120) / 0.14);
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, padding 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.np-dock.is-open .np-card {
+  width: min(100vw - 3.5rem, 330px);
+  max-width: min(100vw - 3.5rem, 330px);
+  padding: 9px 12px 9px 9px;
+  opacity: 1;
+  border-width: 1px 0 1px 0;
+}
+
+.np-card img {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #1b1b1e;
+}
+
+.np-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.np-meta b,
+.np-meta span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.np-meta b {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e6e6e6;
+}
+
+.np-meta span {
+  margin-top: 1px;
+  font-size: 0.74rem;
+  color: #8f8f94;
+}
+
+.np-bar {
+  height: 3px;
+  margin-top: 8px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.np-bar i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.86);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.np-tab {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  min-height: 54px;
+  border-radius: 0 9px 9px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 0;
+  background: rgba(10, 10, 11, 0.9);
+  color: #fff;
+  box-shadow: 0 0 22px rgb(var(--ac, 120 120 120) / 0.2);
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.np-tab:hover {
+  opacity: 0.85;
+  background: rgba(24, 24, 26, 0.95);
+}
+
+.np-tab svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.np-dock.is-open .np-tab svg {
+  transform: rotate(180deg);
+}
+
+.changes {
+  display: grid;
+  gap: 2px;
+}
+
+.change {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 0.84rem;
+  color: var(--soft);
+  animation: changeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(var(--n, 0) * 70ms);
+  transition: color 0.2s ease;
+}
+
+a.change:hover {
+  color: #fff;
+}
+
+.change code {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--label);
+}
+
+.change span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.change time {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--label);
+}
+
+@keyframes changeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
 .grain {
   position: absolute;
   inset: 0;
@@ -502,6 +718,27 @@ body.entered .rise {
 @keyframes pop-in {
   from { transform: scale(0); }
   to { transform: scale(1); }
+}
+
+.hour {
+  margin-left: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: #9a9a9f;
+  white-space: nowrap;
+  cursor: default;
+  animation: pop-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+.hour:hover {
+  color: #fff;
 }
 
 .copied {
@@ -2604,6 +2841,11 @@ button:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .aura-layer,
+  .change {
+    animation: none !important;
+  }
+
   .panel,
   .panel > *,
   .grid-panel,
@@ -2623,6 +2865,10 @@ button:focus-visible {
 
 <div class="backdrop" id="backdrop" aria-hidden="true">
   <canvas id="bgCanvas"></canvas>
+  <div class="aura" id="aura">
+    <div class="aura-layer" id="auraA"></div>
+    <div class="aura-layer" id="auraB"></div>
+  </div>
   <div class="grain"></div>
 </div>
 
@@ -2659,6 +2905,7 @@ button:focus-visible {
       <div class="name-row">
         <h1 id="name"><span id="nameText">take</span></h1>
         <div class="devices" id="devices"></div>
+        <span class="hour" id="hour" hidden></span>
         <span class="copied" id="copiedId" hidden>Copied ID!</span>
       </div>
       <div class="sub">
@@ -2679,6 +2926,11 @@ button:focus-visible {
   <section class="block rise" style="--i:3" id="projectBlock">
     <div class="label"><span>current project</span></div>
     <div class="project" id="project"></div>
+  </section>
+
+  <section class="block rise" style="--i:4" id="changeBlock" hidden>
+    <div class="label"><span>changelog</span><span id="changeMeta"></span></div>
+    <div class="changes" id="changes"></div>
   </section>
 
   <section class="block rise" style="--i:4">
@@ -2849,6 +3101,18 @@ button:focus-visible {
 
 <audio id="ambient" loop preload="none"></audio>
 
+<aside class="np-dock" id="npDock" aria-label="Spotify" hidden>
+  <div class="np-card" id="npCard">
+    <img id="npArt" alt="">
+    <div class="np-meta">
+      <b id="npTitle"></b>
+      <span id="npArtist"></span>
+      <div class="np-bar"><i id="npFill"></i></div>
+    </div>
+  </div>
+  <button class="np-tab" id="npTab" type="button" aria-expanded="false" aria-label="Now playing"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
+</aside>
+
 <div class="rail" id="rail" aria-hidden="true"><i id="railThumb"></i></div>
 <script src="assets/porsche-logo.js"></script>
 <script>
@@ -2862,6 +3126,9 @@ const profile = {
   avatarDecoration: "",
   apiBase: "",
   discordId: "893966003690668102",
+  timezone: "America/Mexico_City",
+  place: "Mexico City",
+  changelog: { repo: "nevesruof/LarpingClient", count: 4 },
   bio: "Break it to understand it. Build it so it can't be broken.",
   bioLinks: [
     { label: "larpingclient.com", href: "https://larpingclient.vercel.app" },
@@ -3839,11 +4106,223 @@ function avatarUrl(user) {
   return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${extension}?size=256`;
 }
 
+const aura = { track: "", front: "auraA", color: "" };
+const dock = { start: 0, end: 0, timer: 0 };
+
+function hashColor(text) {
+  let hash = 0;
+  for (const char of text) hash = (hash * 31 + char.charCodeAt(0)) % 360;
+  const h = hash / 360;
+  const f = (n) => {
+    const k = (n + h * 12) % 12;
+    return Math.round((0.55 - 0.3 * Math.max(-1, Math.min(k - 3, 9 - k, 1))) * 255);
+  };
+  return `${f(0)} ${f(8)} ${f(4)}`;
+}
+
+function artColor(url, fallback, done) {
+  const image = new Image();
+  image.crossOrigin = "anonymous";
+  image.onload = () => {
+    try {
+      const probe = document.createElement("canvas");
+      probe.width = 24;
+      probe.height = 24;
+      const c = probe.getContext("2d", { willReadFrequently: true });
+      c.drawImage(image, 0, 0, 24, 24);
+      const px = c.getImageData(0, 0, 24, 24).data;
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      let weight = 0;
+      for (let i = 0; i < px.length; i += 4) {
+        const max = Math.max(px[i], px[i + 1], px[i + 2]);
+        const min = Math.min(px[i], px[i + 1], px[i + 2]);
+        const w = 0.15 + (max - min) / 255 + max / 600;
+        r += px[i] * w;
+        g += px[i + 1] * w;
+        b += px[i + 2] * w;
+        weight += w;
+      }
+      const top = Math.max(r, g, b) / weight || 1;
+      const lift = Math.min(2.2, 175 / top);
+      done([r, g, b].map((v) => Math.min(255, Math.round((v / weight) * lift))).join(" "));
+    } catch (error) {
+      done(fallback);
+    }
+  };
+  image.onerror = () => done(fallback);
+  image.src = url;
+}
+
+function paintAura(song) {
+  const root = $("aura");
+  if (!song) {
+    root.classList.remove("on");
+    aura.track = "";
+    return;
+  }
+
+  if (aura.track === song.id) return;
+  aura.track = song.id;
+  const fallback = hashColor(`${song.title}${song.artist}`);
+
+  artColor(song.art, fallback, (color) => {
+    if (aura.track !== song.id) return;
+    const next = aura.front === "auraA" ? "auraB" : "auraA";
+    const layer = $(next);
+    layer.style.setProperty("--ac", color);
+    layer.style.setProperty("--ax", `${20 + Math.random() * 30}%`);
+    layer.style.setProperty("--ay", `${10 + Math.random() * 22}%`);
+    layer.style.setProperty("--bx", `${55 + Math.random() * 30}%`);
+    layer.style.setProperty("--by", `${70 + Math.random() * 22}%`);
+    layer.classList.add("show");
+    $(aura.front).classList.remove("show");
+    aura.front = next;
+    document.documentElement.style.setProperty("--ac", color);
+    $("npDock").style.setProperty("--ac", color);
+    root.classList.add("on");
+  });
+}
+
+function tickDock() {
+  const fill = $("npFill");
+  const span = dock.end - dock.start;
+  if (!span || span <= 0) {
+    fill.style.transform = "scaleX(0)";
+    return;
+  }
+  fill.style.transform = `scaleX(${Math.max(0, Math.min(1, (Date.now() - dock.start) / span))})`;
+}
+
+function paintSpotify(data) {
+  const track = data.listening_to_spotify && data.spotify;
+  const box = $("npDock");
+
+  if (!track) {
+    box.classList.remove("live", "is-open");
+    $("npTab").setAttribute("aria-expanded", "false");
+    clearInterval(dock.timer);
+    dock.timer = 0;
+    paintAura(null);
+    setTimeout(() => {
+      if (!box.classList.contains("live")) box.hidden = true;
+    }, 600);
+    return;
+  }
+
+  const song = {
+    id: track.track_id || `${track.song}|${track.artist}`,
+    title: track.song || "",
+    artist: track.artist || "",
+    art: /^https:/i.test(track.album_art_url || "") ? track.album_art_url : ""
+  };
+
+  box.hidden = false;
+  requestAnimationFrame(() => box.classList.add("live"));
+  $("npTitle").textContent = song.title;
+  $("npArtist").textContent = song.artist;
+  if (song.art) $("npArt").src = song.art;
+  dock.start = (track.timestamps && track.timestamps.start) || 0;
+  dock.end = (track.timestamps && track.timestamps.end) || 0;
+  tickDock();
+  if (!dock.timer) dock.timer = setInterval(() => !document.hidden && tickDock(), 1000);
+  paintAura(song);
+}
+
+function setupDock() {
+  const box = $("npDock");
+  $("npTab").addEventListener("click", () => {
+    const open = box.classList.toggle("is-open");
+    $("npTab").setAttribute("aria-expanded", String(open));
+  });
+}
+
+function setupHour() {
+  const chip = $("hour");
+  let format;
+  let detail;
+
+  try {
+    format = new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: true, timeZone: profile.timezone });
+    detail = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: profile.timezone });
+  } catch (error) {
+    return;
+  }
+
+  const update = () => {
+    const now = new Date();
+    chip.textContent = format.format(now).toLowerCase();
+    chip.title = `${detail.format(now).toLowerCase()} · ${profile.place}`;
+    chip.hidden = false;
+  };
+
+  update();
+  setInterval(update, 30000);
+}
+
+function timeAgoShort(date) {
+  const minutes = Math.max(1, Math.round((Date.now() - date) / 60000));
+  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1440) return `${Math.round(minutes / 60)}h ago`;
+  if (minutes < 20160) return `${Math.round(minutes / 1440)}d ago`;
+  return `${Math.round(minutes / 43200)}mo ago`;
+}
+
+async function loadChangelog() {
+  const config = profile.changelog;
+  if (!config || !config.repo) return;
+
+  const key = `changelog:${config.repo}`;
+  let commits = null;
+
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(key) || "null");
+    if (saved && Date.now() - saved.at < 600000) commits = saved.items;
+  } catch (error) {
+    commits = null;
+  }
+
+  if (!commits) {
+    try {
+      const response = await fetch(`https://api.github.com/repos/${config.repo}/commits?per_page=${config.count || 4}`, { headers: { Accept: "application/vnd.github+json" } });
+      if (!response.ok) return;
+      const body = await response.json();
+      commits = body.map((item) => ({
+        sha: String(item.sha || "").slice(0, 7),
+        message: String((item.commit && item.commit.message) || "").split("\n")[0],
+        date: item.commit && item.commit.author && item.commit.author.date,
+        url: item.html_url
+      }));
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ at: Date.now(), items: commits }));
+      } catch (error) {
+        commits = commits;
+      }
+    } catch (error) {
+      return;
+    }
+  }
+
+  if (!commits.length) return;
+
+  $("changes").innerHTML = commits
+    .map((item, index) => {
+      const open = /^https:\/\/github\.com\//.test(item.url || "") ? `a href="${esc(item.url)}" target="_blank" rel="noopener"` : "div";
+      const close = open === "div" ? "div" : "a";
+      return `<${open} class="change" style="--n:${index}"><code>${esc(item.sha)}</code><span>${esc(item.message)}</span><time>${item.date ? timeAgoShort(new Date(item.date)) : ""}</time></${close}>`;
+    })
+    .join("");
+  $("changeMeta").textContent = `latest commits · ${config.repo.split("/")[1]}`;
+  $("changeBlock").hidden = false;
+}
+
 function paintDiscord(data) {
   const status = ["online", "idle", "dnd"].includes(data.discord_status) ? data.discord_status : "offline";
   $("presence").dataset.status = status;
   $("presence").title = statusLabels[status];
   paintDevices(data, status);
+  paintSpotify(data);
 
   const user = data.discord_user || {};
   setNames(user.display_name || user.global_name || user.username, user.username);
@@ -4676,6 +5155,9 @@ function init() {
   renderSocials();
   renderProject();
   setupRail();
+  setupDock();
+  setupHour();
+  loadChangelog();
   renderFeed();
   showLastPlayed(profile.lastPlayed);
   setupPlaysHover();
