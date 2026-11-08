@@ -39,6 +39,23 @@
 
 html {
   background: var(--bg);
+  scrollbar-width: thin;
+  scrollbar-color: #2e2e33 transparent;
+}
+
+@supports not (scrollbar-color: auto) {
+  html::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  html::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  html::-webkit-scrollbar-thumb {
+    background: #2e2e33;
+    border-radius: 8px;
+  }
 }
 
 body {
