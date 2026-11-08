@@ -1566,6 +1566,133 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   transform: none;
 }
 
+.letter-card {
+  position: relative;
+  width: min(400px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 30px 26px 22px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgb(var(--fog) / 0.12), transparent 70%),
+    rgba(12, 12, 14, 0.97);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  text-align: center;
+  transform: translateY(10px) scale(0.985);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  scrollbar-width: none;
+}
+
+.letter-card::-webkit-scrollbar {
+  display: none;
+}
+
+.keys.open .letter-card {
+  transform: none;
+}
+
+.letter-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--soft);
+  transition: background 0.2s, color 0.2s;
+}
+
+.letter-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.letter-close svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.letter-seal {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--fog) / 0.45);
+  background: rgb(var(--fog) / 0.1);
+  color: #fff;
+}
+
+.keys.open .letter-seal {
+  animation: sealIn 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) 0.1s backwards;
+}
+
+@keyframes sealIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.7) rotate(-12deg); }
+}
+
+.letter-seal svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.letter-card small {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.letter-body {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+  text-align: left;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #d9d9de;
+}
+
+.letter-gif {
+  margin: 16px 0 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #0b0b0c;
+}
+
+.letter-gif img {
+  display: block;
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+}
+
+.letter-sign {
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  color: var(--soft);
+}
+
 .keys-card h3 {
   margin-bottom: 14px;
   font-family: var(--mono);
@@ -4797,6 +4924,7 @@ button:focus-visible {
 </button>
   <button class="sound theme" id="theme" type="button" aria-label="Change theme"><i></i></button>
   <button class="sound share-btn" id="shareBtn" type="button" aria-label="Share as image" title="share as image"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="m4 17 5-4.5 3.5 3 3-2.5 4.5 4"/></svg></button>
+  <button class="sound letter-btn" id="letterBtn" type="button" aria-label="A letter for Matheo" title="a letter for Matheo"><svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7.5 7.5 5.5 7.5-5.5"/></svg></button>
 </div>
 
 <div class="flash" id="flash" role="status" aria-live="polite"></div>
@@ -4821,6 +4949,17 @@ button:focus-visible {
       <button type="button" id="shareSend" hidden>Share</button>
       <button type="button" id="shareCopy" hidden>Copy</button>
     </div>
+  </div>
+</div>
+
+<div class="keys" id="letter" aria-hidden="true">
+  <div class="letter-card" role="dialog" aria-label="A letter for Matheo">
+    <button class="letter-close" id="letterClose" type="button" aria-label="Close letter"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    <div class="letter-seal"><svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7.5 7.5 5.5 7.5-5.5"/></svg></div>
+    <small id="letterTo"></small>
+    <div class="letter-body" id="letterBody"></div>
+    <figure class="letter-gif" id="letterGifBox" hidden><img id="letterGif" alt="" decoding="async"></figure>
+    <p class="letter-sign" id="letterSign"></p>
   </div>
 </div>
 
@@ -5122,6 +5261,16 @@ button:focus-visible {
 <script src="assets/porsche-logo.js" async id="logoScript"></script>
 <script>
 const profile = {
+  letter: {
+    to: "for Matheo",
+    gif: "",
+    lines: [
+      "Matheo,",
+      "I don't say this enough, so I'm putting it in writing: your friendship means a lot to me. You've been around for the good days and the stupid ones, and I never took that for granted.",
+      "Thanks for being real with me, for the laughs, and for sticking around. I appreciate you, man."
+    ],
+    sign: "— Take"
+  },
   name: "Take",
   handle: "singledeve",
   nameStyle: { font_id: 8, effect_id: 4, colors: [16777215] },
@@ -8966,6 +9115,7 @@ function setupEscape() {
 
     const layers = [
       ["keys", () => toggleLayer($("keys"), false)],
+      ["letter", () => toggleLayer($("letter"), false)],
       ["share", () => toggleLayer($("share"), false)],
       ["lyr", () => setLyrOpen(false)],
       ["shotOverlay", () => toggleLayer($("shotOverlay"), false)],
@@ -9629,7 +9779,7 @@ async function drawCard() {
 
 async function openShare() {
   if (shareState.busy) return;
-  const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "keys", "lyr"].some((id) => $(id).classList.contains("open"));
+  const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "keys", "letter", "lyr"].some((id) => $(id).classList.contains("open"));
   if (busy) return;
 
   shareState.busy = true;
@@ -9648,6 +9798,34 @@ async function openShare() {
   } finally {
     shareState.busy = false;
   }
+}
+
+function setupLetter() {
+  const layer = $("letter");
+  const data = profile.letter;
+  if (!data) {
+    $("letterBtn").remove();
+    return;
+  }
+
+  $("letterTo").textContent = data.to;
+  $("letterSign").textContent = data.sign;
+  $("letterBody").innerHTML = data.lines.map((line) => `<p>${esc(line)}</p>`).join("");
+
+  const image = $("letterGif");
+  image.addEventListener("load", () => {
+    $("letterGifBox").hidden = false;
+  });
+  image.addEventListener("error", () => {
+    $("letterGifBox").hidden = true;
+  });
+  if (data.gif && /^(https:|assets\/)/i.test(data.gif)) image.src = data.gif;
+
+  $("letterBtn").addEventListener("click", () => toggleLayer(layer, true));
+  $("letterClose").addEventListener("click", () => toggleLayer(layer, false));
+  layer.addEventListener("click", (event) => {
+    if (event.target === layer) toggleLayer(layer, false);
+  });
 }
 
 function setupShare() {
@@ -9704,6 +9882,7 @@ function setupTools() {
 
   toggle.addEventListener("click", () => setOpen(!box.classList.contains("open")));
   $("shareBtn").addEventListener("click", () => setOpen(false));
+  $("letterBtn").addEventListener("click", () => setOpen(false));
   document.addEventListener("pointerdown", (event) => {
     if (box.classList.contains("open") && !box.contains(event.target)) setOpen(false);
   }, { passive: true });
@@ -9730,7 +9909,7 @@ function setupShortcuts() {
     const key = event.key.toLowerCase();
 
     if ($("lyr").classList.contains("open") && !["m", "t"].includes(key)) return;
-    if ($("share").classList.contains("open")) return;
+    if ($("share").classList.contains("open") || $("letter").classList.contains("open")) return;
 
     if (key === "?" || (key === "/" && event.shiftKey)) {
       event.preventDefault();
@@ -9753,7 +9932,7 @@ function setupShortcuts() {
     } else if (key === "t") {
       cycleTheme();
     } else if (key === "s") {
-      const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "share", "lyr"].some((id) => $(id).classList.contains("open"));
+      const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "share", "letter", "lyr"].some((id) => $(id).classList.contains("open"));
       if (!busy) $("openStats").click();
     } else if (key === "n" && queue.active) {
       queueStep(1);
@@ -9829,6 +10008,7 @@ function init() {
   setupLyrics();
   setupPeek();
   setupShare();
+  setupLetter();
   const armToast = setupToast();
 
   $("feed").addEventListener("scroll", syncFeedMask, { passive: true });

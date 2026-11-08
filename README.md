@@ -37,3 +37,7 @@ El dominio no cambia: en Vercel sigue apuntando al mismo proyecto. Si redesplieg
 ## Atajos
 
 `?` ayuda, `M` sonido, `P` reproductor, `/` buscar canción, `N` / `B` siguiente y anterior de la playlist, `T` tema (incluye `auto`, que toma el color de la portada), `Y` letras (también con el icono de micrófono de la tarjeta de actividad), `C` compartir como imagen, `S` stats.fm, `G` arriba. Para ver la intro completa otra vez abre la página con `?intro` al final.
+
+## Carta para Matheo
+
+El botón del sobre (junto a sonido, tema y compartir) abre una carta. El texto y el GIF se editan en `profile.letter` de `index.html` (`to`, `lines`, `sign`, `gif`). Para el GIF, copia el archivo a `assets/` y pon `gif: "assets/nombre.gif"` (también acepta una URL https).
