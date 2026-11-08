@@ -2827,7 +2827,11 @@ function runIntro(onEnter) {
   let carBox = null;
 
   const paintCar = () => {
-    const fineW = small ? 3.6 : 6;
+    const fineW = small ? 3.6 : 7;
+    const boost = small ? 3.2 : 2.6;
+    const curve = small ? 1.9 : 1.55;
+    const top = small ? 205 : 190;
+    const gain = small ? 1 : 0.92;
     const fineH = fineW * 1.8;
     const gridCols = Math.floor(carBox.w / fineW);
     const gridRows = Math.floor(carBox.h / fineH);
@@ -2867,11 +2871,11 @@ function runIntro(onEnter) {
             count += 1;
           }
         }
-        const sharp = Math.max(0, Math.min(1, here + (here - sum / count) * 3.2));
-        const value = Math.pow(sharp, 1.9);
+        const sharp = Math.max(0, Math.min(1, here * gain + (here - sum / count) * boost));
+        const value = Math.pow(sharp, curve);
         if (value < 0.05) continue;
         const char = ramp[Math.min(ramp.length - 1, Math.floor(value * ramp.length))];
-        const shade = Math.round(26 + value * 205);
+        const shade = Math.round(26 + value * top);
         layer.fillStyle = `rgb(${shade},${shade},${Math.min(255, shade + 3)})`;
         layer.fillText(char, x * fineW, y * fineH);
       }
