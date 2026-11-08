@@ -4309,7 +4309,7 @@ function timeAgo(days) {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
-const backdropState = { software: false, scale: 0.5, full: false };
+const backdropState = { software: false, scale: 0.5, full: false, paused: false };
 
 function startBackdrop() {
   const canvas = $("bgCanvas");
@@ -4407,7 +4407,7 @@ void main(){
 
   const frame = (now) => {
     requestAnimationFrame(frame);
-    if (document.body.classList.contains("locked") || document.hidden) return;
+    if (backdropState.paused || document.body.classList.contains("locked") || document.hidden) return;
     if (now - last < 33) return;
     last = now;
     gl.uniform2f(resolution, canvas.width, canvas.height);
@@ -4491,19 +4491,35 @@ function runIntro(onEnter) {
     return;
   }
 
+  backdropState.paused = true;
   const canvas = $("ascii");
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { alpha: false });
   const ramp = " .:ilrsxf29A5HM#8@";
   const cellW = 7;
   const cellH = 12;
+  const reveal = 900;
+  const levels = 32;
+  const shades = Array.from({ length: levels }, (_, i) => {
+    const v = i / (levels - 1);
+    const shade = Math.round(12 + v * v * 168);
+    return `rgb(${shade},${shade},${Math.min(255, shade + 4)})`;
+  });
   const mask = document.createElement("canvas");
   const maskCtx = mask.getContext("2d", { willReadFrequently: true });
+  const groups = Array.from({ length: levels }, () => []);
   let cols = 0;
   let rows = 0;
-  let maskData = null;
+  let base = null;
+  let radial = null;
+  let text = null;
+  let colWave = null;
+  let rowWave = null;
+  let diagWave = null;
   let stop = false;
   let logo = null;
   let shownAt = 0;
+  let last = -1000;
+  let resizing = 0;
 
   const build = () => {
     canvas.width = window.innerWidth;
@@ -4513,6 +4529,7 @@ function runIntro(onEnter) {
     mask.width = cols;
     mask.height = rows;
     maskCtx.clearRect(0, 0, cols, rows);
+
     if (logo) {
       const ratio = (logo.width / logo.height) * (cellH / cellW);
       let height = rows * 0.62;
@@ -4523,13 +4540,89 @@ function runIntro(onEnter) {
       }
       maskCtx.drawImage(logo, cols / 2 - width / 2, rows / 2 - height / 2, width, height);
     }
-    maskData = maskCtx.getImageData(0, 0, cols, rows).data;
+
+    const pixels = maskCtx.getImageData(0, 0, cols, rows).data;
+    const total = cols * rows;
+    base = new Float32Array(total);
+    radial = new Float32Array(total);
+    text = new Float32Array(total);
+    colWave = new Float32Array(cols);
+    rowWave = new Float32Array(rows);
+    diagWave = new Float32Array(cols + rows);
+
+    for (let y = 0; y < rows; y += 1) {
+      for (let x = 0; x < cols; x += 1) {
+        const i = y * cols + x;
+        const edge = Math.max(0, 1 - Math.hypot(x / cols - 0.5, (y / rows - 0.5) * 1.1) * 1.5);
+        base[i] = 0.15 + edge * 0.06;
+        radial[i] = Math.hypot(x - cols / 2, (y - rows / 2) * 1.8) * 0.12;
+        text[i] = pixels[i * 4 + 3] / 255;
+      }
+    }
+
     ctx.font = `${cellH - 1}px "Geist Mono", monospace`;
     ctx.textBaseline = "top";
+    last = -1000;
+  };
+
+  const paint = (now) => {
+    const t = now / 1000;
+    const fade = shownAt ? Math.min(1, (now - shownAt) / reveal) * 0.85 : 0;
+
+    for (let x = 0; x < cols; x += 1) colWave[x] = Math.sin(x * 0.07 + t * 0.9) * 0.5;
+    for (let y = 0; y < rows; y += 1) rowWave[y] = Math.sin(y * 0.11 - t * 1.2) * 0.5;
+    for (let k = 0; k < diagWave.length; k += 1) diagWave[k] = Math.sin(k * 0.045 + t * 0.6) * 0.5;
+    for (const group of groups) group.length = 0;
+
+    const phase = t * 1.4;
+    for (let y = 0; y < rows; y += 1) {
+      const row = rowWave[y];
+      const py = y * cellH;
+      for (let x = 0; x < cols; x += 1) {
+        const i = y * cols + x;
+        const wave = colWave[x] + row + diagWave[x + y] + Math.sin(radial[i] - phase) * 0.5;
+        const value = base[i] + wave * 0.06 + text[i] * fade;
+        if (value < 0.12) continue;
+        const clamped = value > 1 ? 1 : value;
+        const glyph = Math.min(ramp.length - 1, Math.floor(clamped * ramp.length));
+        if (!glyph) continue;
+        groups[Math.floor(clamped * (levels - 1))].push(x * cellW, py, glyph);
+      }
+    }
+
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let g = 0; g < levels; g += 1) {
+      const group = groups[g];
+      if (!group.length) continue;
+      ctx.fillStyle = shades[g];
+      for (let k = 0; k < group.length; k += 3) ctx.fillText(ramp[group[k + 2]], group[k], group[k + 1]);
+    }
+  };
+
+  const frame = (now) => {
+    if (stop) return;
+
+    if (document.hidden) {
+      setTimeout(() => requestAnimationFrame(frame), 400);
+      return;
+    }
+
+    const gap = shownAt && now - shownAt < reveal ? 45 : 85;
+    if (now - last >= gap) {
+      last = now;
+      paint(now);
+    }
+
+    requestAnimationFrame(frame);
   };
 
   build();
-  window.addEventListener("resize", build);
+  window.addEventListener("resize", () => {
+    clearTimeout(resizing);
+    resizing = setTimeout(build, 120);
+  });
 
   if (profile.introLogo) {
     loadLogo(profile.introLogo, (art) => {
@@ -4539,50 +4632,17 @@ function runIntro(onEnter) {
     });
   }
 
-  const draw = (now) => {
-    if (stop) return;
-    setTimeout(() => requestAnimationFrame(draw), 40);
-
-    const t = now / 1000;
-    const reveal = shownAt ? Math.min(1, (now - shownAt) / 900) : 0;
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    for (let y = 0; y < rows; y += 1) {
-      for (let x = 0; x < cols; x += 1) {
-        const nx = x / cols;
-        const ny = y / rows;
-        const wave =
-          Math.sin(x * 0.07 + t * 0.9) * 0.5 +
-          Math.sin(y * 0.11 - t * 1.2) * 0.5 +
-          Math.sin((x + y) * 0.045 + t * 0.6) * 0.5 +
-          Math.sin(Math.hypot(x - cols / 2, (y - rows / 2) * 1.8) * 0.12 - t * 1.4) * 0.5;
-        const text = (maskData[(y * cols + x) * 4 + 3] / 255) * reveal;
-        const edge = Math.max(0, 1 - Math.hypot(nx - 0.5, (ny - 0.5) * 1.1) * 1.5);
-        let value = 0.15 + wave * 0.06 + text * 0.85 + edge * 0.06;
-        value = Math.max(0, Math.min(1, value));
-        if (value < 0.12) continue;
-
-        const char = ramp[Math.min(ramp.length - 1, Math.floor(value * ramp.length))];
-        const shade = Math.round(12 + value * value * 168);
-        ctx.fillStyle = `rgb(${shade},${shade},${Math.min(255, shade + 4)})`;
-        ctx.fillText(char, x * cellW, y * cellH);
-      }
-    }
-  };
-
-  requestAnimationFrame(draw);
+  requestAnimationFrame(frame);
 
   let entered = false;
   const enter = () => {
     if (entered) return;
     entered = true;
+    stop = true;
+    backdropState.paused = false;
     intro.classList.add("leaving");
     onEnter();
-    setTimeout(() => {
-      stop = true;
-      intro.remove();
-    }, 560);
+    setTimeout(() => intro.remove(), 560);
   };
 
   intro.addEventListener("click", enter);
