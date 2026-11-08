@@ -1111,7 +1111,7 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   inset: -12%;
   background-size: cover;
   background-position: center;
-  filter: blur(48px) saturate(1.3) brightness(0.42);
+  filter: blur(70px) saturate(1.3) brightness(0.42);
   opacity: 0;
   transform: scale(1.1);
   transition: opacity 0.9s ease;
@@ -1654,7 +1654,9 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   place-items: center;
   border-radius: 9px;
   border: 1px solid var(--line);
-  background: rgba(12, 12, 13, 0.8);
+  background: rgba(10, 10, 11, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   color: var(--soft);
   transition: background 0.2s, border-color 0.2s;
 }
@@ -1683,7 +1685,9 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   place-items: center;
   border-radius: 9px;
   border: 1px solid var(--line);
-  background: rgba(12, 12, 13, 0.8);
+  background: rgba(10, 10, 11, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   color: var(--soft);
   transition: background 0.2s, border-color 0.2s;
 }
@@ -2351,6 +2355,115 @@ body.entered .np-top.live {
   transform-origin: left;
   transform: scaleX(0);
   transition: transform 1s linear;
+}
+
+.np-panel {
+  position: relative;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.np-win:has(.np-lyric .line) .np-panel {
+  grid-template-rows: 1fr;
+}
+
+.np-panel > div {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.np-panel > div > .np-lyric {
+  position: relative;
+  margin: 0 14px 14px 24px;
+  padding: 2px 0 2px 14px;
+}
+
+.np-lyric::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(rgb(var(--ac, 220 220 220)), rgb(var(--ac, 220 220 220) / 0.1));
+  animation: edgePulse 2.4s ease-in-out infinite;
+}
+
+.np-lyric {
+  display: grid;
+  min-height: 1.35em;
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #fff;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7);
+}
+
+.np-lyric .line {
+  position: relative;
+  grid-area: 1 / 1;
+  animation: lineIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.np-lyric .line.out {
+  animation: lineOut 0.4s ease forwards;
+}
+
+.np-lyric .w {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.25s ease, text-shadow 0.4s ease;
+}
+
+.np-lyric .w.lit {
+  color: #fff;
+  text-shadow: 0 0 16px rgb(var(--ac, 255 255 255) / 0.75);
+  animation: hop 0.6s cubic-bezier(0.3, 1.7, 0.5, 1);
+}
+
+.np-lyric .gap {
+  display: inline-flex;
+  gap: 5px;
+  padding-top: 0.5em;
+}
+
+.np-lyric .gap s {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  animation: breathe 1.4s ease-in-out infinite;
+}
+
+.np-lyric .gap s:nth-child(2) { animation-delay: 0.18s; }
+.np-lyric .gap s:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes edgePulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+@keyframes hop {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-6px) scale(1.12); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes lineIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes lineOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
 }
 
 .eq {
@@ -4645,6 +4758,8 @@ a.rank-card:hover .rank-art img {
 
   .np-card {
     background: radial-gradient(120% 120% at 0% 0%, rgba(255, 255, 255, 0.05), transparent 60%), rgba(10, 10, 11, 0.985);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
   }
 
   .game-id {
@@ -4787,6 +4902,7 @@ button:focus-visible {
             <div class="np-prog"><i id="topFill"></i></div>
           </div>
         </div>
+        <div class="np-panel"><div><p class="np-lyric" id="npLyric"></p></div></div>
       </div>
     </div>
   </section>
@@ -5249,7 +5365,7 @@ function startBackdrop() {
   const debug = gl.getExtension("WEBGL_debug_renderer_info");
   const renderer = debug ? String(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)) : "";
   backdropState.software = /swiftshader|llvmpipe|softpipe|software|basic render/i.test(renderer);
-  backdropState.scale = backdropState.software ? 0.3 : 0.4;
+  backdropState.scale = backdropState.software ? 0.34 : 0.55;
 
   const vertex = "attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}";
   const fragment = `
@@ -5269,7 +5385,7 @@ float noise(vec2 p){
 }
 float fbm(vec2 p){
   float v=0.0;float a=0.5;
-  for(int i=0;i<3;i++){v+=a*noise(p);p=p*2.02+vec2(17.3,9.1);a*=0.5;}
+  for(int i=0;i<4;i++){v+=a*noise(p);p=p*2.02+vec2(17.3,9.1);a*=0.5;}
   return v;
 }
 void main(){
@@ -5334,7 +5450,7 @@ void main(){
   backdropState.resize = resize;
 
   const started = performance.now();
-  const gap = window.matchMedia("(pointer: coarse)").matches ? 66 : 45;
+  const gap = window.matchMedia("(pointer: coarse)").matches ? 50 : 33;
   let last = 0;
 
   const frame = (now) => {
@@ -7008,7 +7124,7 @@ function tickDock() {
   $("npFill").style.transform = `scaleX(${dock.song ? ratio : 0})`;
 }
 
-const lyrics = { cache: new Map() };
+const lyrics = { id: "", lines: [], cache: new Map(), index: -2, lit: -1, timer: 0 };
 
 function parseLrc(text) {
   const rows = [];
@@ -7125,6 +7241,84 @@ async function stepFeed() {
   }
 }
 
+function showLine(row) {
+  const box = $("npLyric");
+  box.querySelectorAll(".line:not(.out)").forEach((old) => {
+    old.classList.add("out");
+    setTimeout(() => old.remove(), 420);
+  });
+  if (row === null) return;
+
+  const line = document.createElement("span");
+  line.className = "line";
+
+  if (!row.text) {
+    line.innerHTML = '<span class="gap"><s></s><s></s><s></s></span>';
+  } else {
+    line.innerHTML = row.text
+      .split(/\s+/)
+      .map((word) => `<span class="w">${esc(word)}</span>`)
+      .join(" ");
+  }
+
+  box.appendChild(line);
+  lyrics.words = [...line.querySelectorAll(".w")];
+  lyrics.weights = lyrics.words.map((el) => el.textContent.length + 1);
+  lyrics.total = lyrics.weights.reduce((sum, n) => sum + n, 0);
+  lyrics.lit = -1;
+}
+
+function tickLyrics() {
+  const rows = lyrics.lines;
+  if (!rows.length || !dock.start) return;
+
+  const elapsed = Date.now() - dock.start + 180;
+  let index = -1;
+  for (let i = 0; i < rows.length; i += 1) {
+    if (rows[i].at <= elapsed) index = i;
+    else break;
+  }
+
+  if (index !== lyrics.index) {
+    lyrics.index = index;
+    showLine(index === -1 ? { text: "" } : rows[index]);
+  }
+
+  if (index === -1 || !lyrics.words || !lyrics.words.length) return;
+
+  const next = rows[index + 1];
+  const span = Math.max(1200, Math.min(6500, (next ? next.at : rows[index].at + 5000) - rows[index].at));
+  const progress = Math.min(1, (elapsed - rows[index].at) / (span * 0.82));
+  let before = 0;
+  let count = 0;
+  for (let i = 0; i < lyrics.words.length; i += 1) {
+    if (before / lyrics.total <= progress) count = i + 1;
+    before += lyrics.weights[i];
+  }
+
+  while (lyrics.lit < count - 1) {
+    lyrics.lit += 1;
+    lyrics.words[lyrics.lit].classList.add("lit");
+  }
+}
+
+async function loadLyricsFor(song, seconds) {
+  if (lyrics.id === song.id) return;
+  lyrics.id = song.id;
+  lyrics.lines = [];
+  lyrics.index = -2;
+  lyrics.words = [];
+  showLine(null);
+
+  const rows = await lyricsFor(song.id, song, seconds);
+
+  if (lyrics.id !== song.id) return;
+  lyrics.lines = rows;
+  clearInterval(lyrics.timer);
+  if (rows.length) lyrics.timer = setInterval(() => !document.hidden && tickLyrics(), 140);
+  tickLyrics();
+}
+
 function paintDockRow(song) {
   followCover();
   const row = $("npRow");
@@ -7172,6 +7366,9 @@ function paintSpotify(data) {
     setTimeout(() => {
       if (!$("npTop").classList.contains("live")) $("npBlock").hidden = true;
     }, 800);
+    clearInterval(lyrics.timer);
+    lyrics.id = "";
+    lyrics.lines = [];
     dock.song = null;
     dock.start = 0;
     dock.end = 0;
@@ -7212,6 +7409,8 @@ function paintSpotify(data) {
   if (song.art) $("topArt").src = song.art;
   $("npBlock").hidden = false;
   requestAnimationFrame(() => $("npTop").classList.add("live"));
+  const seconds = dock.end && dock.start ? (dock.end - dock.start) / 1000 : 0;
+  loadLyricsFor(song, seconds);
 }
 
 function fold(text) {
