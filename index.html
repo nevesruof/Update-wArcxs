@@ -4045,6 +4045,20 @@ const profile = {
   statsfmId: "31esju7gpv3nvyqglogd3mqyczd4",
   github: "",
   roblox: "zahidtql12",
+  avatarModel: {
+    obj: "30DAY-c22f61d111daef209f8b18980233ac01",
+    mtl: "30DAY-01082ba97a2ae588a13be7f943f50944",
+    textures: [
+      "30DAY-59b99826cf25f3a0787f31f34199edd4",
+      "30DAY-5357f674bbdefc9844c1f651de47534c",
+      "30DAY-78859d9d99929b395944c6a5962ceb34",
+      "30DAY-12c1fcf3e4815130153badb0234fb2c1",
+      "30DAY-c57bb6a922bcc62cab6c947fb9d86798",
+      "30DAY-d267a1aa976836a63e4c26803bc694eb"
+    ],
+    aabb: { min: { x: -5.32708, y: 99.9373, z: -0.882296 }, max: { x: 5.28718, y: 106.487, z: 3.953 } },
+    camera: { fov: 23.1815 }
+  },
   lastPlayed: "",
   audio: "",
   viewsKey: ""
@@ -4948,7 +4962,7 @@ function paintRoblox(info) {
   show("rbFollowers", info.followers);
   $("rbRap").textContent = info.rap === null || info.rap === undefined ? "—" : `${info.rap.toLocaleString("en-US")} R$`;
 
-  if (info.userId) mountAvatar3d(info.userId, info.model);
+  if (info.userId) mountAvatar3d(info.userId, info.model || profile.avatarModel);
 
   if (info.avatarUrl) {
     $("rbFigure").src = info.avatarUrl;
@@ -5044,11 +5058,11 @@ function loadThree() {
 }
 
 function rbxUrl(ref) {
-  const found = String(ref || "").match(/((?:\d+DAY-)?[a-f0-9]{16,128})/i);
-  if (!found) return "";
+  const tail = String(ref || "").split("/").pop().split("?")[0];
+  if (!/^[\w-]{16,200}$/.test(tail)) return "";
   let bucket = 31;
-  for (const char of found[1]) bucket ^= char.charCodeAt(0);
-  return `https://t${bucket % 8}.rbxcdn.com/${found[1]}`;
+  for (const char of tail) bucket ^= char.charCodeAt(0);
+  return `https://t${bucket % 8}.rbxcdn.com/${tail}`;
 }
 
 function parseMaterials(text) {
@@ -5168,6 +5182,7 @@ async function mountAvatar3d(userId, ready) {
     const max = model.aabb && model.aabb.max ? model.aabb.max : { x: 2, y: 5, z: 1 };
     const center = new THREE.Vector3((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
     const height = Math.max(0.1, max.y - min.y);
+    const width = Math.max(0.1, Math.max(max.x - min.x, max.z - min.z));
 
     const pivot = new THREE.Group();
     object.position.sub(center);
@@ -5177,7 +5192,8 @@ async function mountAvatar3d(userId, ready) {
     const camera = new THREE.PerspectiveCamera((model.camera && model.camera.fov) || 30, 1, 0.1, 500);
     const place = () => {
       const fov = (camera.fov * Math.PI) / 180;
-      const distance = (height * 0.62) / Math.tan(fov / 2) / Math.min(1, camera.aspect * 1.05);
+      const half = Math.max(height, width / camera.aspect) * 0.58;
+      const distance = half / Math.tan(fov / 2);
       camera.position.set(0, 0, distance);
       camera.lookAt(0, 0, 0);
     };
@@ -5194,7 +5210,7 @@ async function mountAvatar3d(userId, ready) {
     size();
     new ResizeObserver(size).observe(stage);
 
-    const motion = { yaw: 0.5, speed: 0, drag: false, lastX: 0, idle: performance.now(), visible: true, running: false, last: 0 };
+    const motion = { yaw: Math.PI + 0.45, speed: 0, drag: false, lastX: 0, idle: performance.now(), visible: true, running: false, last: 0 };
 
     const frame = (now) => {
       if (!motion.visible || document.hidden) {
