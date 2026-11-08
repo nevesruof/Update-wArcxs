@@ -1673,7 +1673,13 @@ body.entered .np-top.live {
   cursor: pointer;
 }
 
+.who {
+  flex: 1;
+  min-width: 0;
+}
+
 .who .handle {
+  flex: none;
   padding: 0;
   font: inherit;
   color: inherit;
@@ -1817,6 +1823,7 @@ body.entered .np-top.live {
 }
 
 .who .sub {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 9px;
@@ -1824,6 +1831,50 @@ body.entered .np-top.live {
   font-size: 0.8rem;
   color: var(--muted);
   line-height: 1.2;
+}
+
+.status-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  opacity: 0;
+  transform: translateX(-6px);
+  filter: blur(3px);
+  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+}
+
+.status-line.on {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.status-line.swap em {
+  animation: statusSwap 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.status-line b {
+  flex: none;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.status-line em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: italic;
+  color: #6f6f76;
+  letter-spacing: 0.005em;
+}
+
+@keyframes statusSwap {
+  from { opacity: 0; transform: translateY(5px); filter: blur(3px); }
 }
 
 .bio {
@@ -3864,6 +3915,7 @@ button:focus-visible {
       <div class="sub">
         <button class="handle" id="handle" type="button">take</button>
         <span class="copied" id="copiedUser" hidden>Copied!</span>
+        <span class="status-line" id="statusLine" hidden><b id="statusEmoji" hidden></b><em id="statusText"></em></span>
       </div>
     </div>
     </header>
@@ -4771,6 +4823,45 @@ function setNames(display, username) {
   $("nameText").setAttribute("data-username-with-effects", shown);
   $("handle").textContent = profile.handle;
   $("initial").textContent = shown.charAt(0);
+}
+
+function paintStatus(data) {
+  const line = $("statusLine");
+  const custom = (data.activities || []).find((item) => item.type === 4 && item.state);
+  const text = custom ? String(custom.state).trim() : "";
+
+  if (!text) {
+    if (line.hidden) return;
+    line.classList.remove("on");
+    setTimeout(() => {
+      if (!line.classList.contains("on")) line.hidden = true;
+    }, 600);
+    return;
+  }
+
+  const name = custom.emoji && custom.emoji.name;
+  const emoji = name && /\p{Extended_Pictographic}/u.test(name) ? name : "";
+  const signature = `${emoji}|${text}`;
+  const changed = line.dataset.sig !== signature;
+
+  line.dataset.sig = signature;
+  $("statusText").textContent = text;
+  $("statusEmoji").textContent = emoji;
+  $("statusEmoji").hidden = !emoji;
+  line.title = text;
+
+  if (line.hidden) {
+    line.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => line.classList.add("on")));
+    return;
+  }
+
+  line.classList.add("on");
+  if (changed) {
+    line.classList.remove("swap");
+    void line.offsetWidth;
+    line.classList.add("swap");
+  }
 }
 
 function paintDevices(data, status) {
@@ -6661,6 +6752,7 @@ function paintDiscord(data) {
   $("presence").dataset.status = status;
   $("presence").title = statusLabels[status];
   paintDevices(data, status);
+  paintStatus(data);
   paintSpotify(data);
 
   const user = data.discord_user || {};
