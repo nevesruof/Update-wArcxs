@@ -576,6 +576,7 @@ body.entered .rise {
 }
 
 .head {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 13px;
@@ -721,8 +722,11 @@ body.entered .rise {
 }
 
 .hour {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-left: 2px;
-  padding: 1px 8px;
+  padding: 2px 9px 2px 7px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(255, 255, 255, 0.03);
@@ -734,11 +738,249 @@ body.entered .rise {
   color: #9a9a9f;
   white-space: nowrap;
   cursor: default;
+  transition: color 0.2s ease, border-color 0.2s ease;
   animation: pop-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+.hour b {
+  font-weight: 500;
 }
 
 .hour:hover {
   color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.clk {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.clk circle {
+  stroke-opacity: 0.55;
+}
+
+.clk line {
+  transform-origin: 12px 12px;
+  transform-box: view-box;
+  transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.np-top {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  display: grid;
+  justify-items: end;
+  gap: 9px;
+  width: min(300px, 46%);
+  text-align: right;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.7s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.entered .np-top.live {
+  opacity: 1;
+  transform: none;
+}
+
+.np-top-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 11px;
+  max-width: 100%;
+}
+
+.np-top-text {
+  min-width: 0;
+}
+
+.np-top-text b {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #f2f2f2;
+}
+
+.np-top-text span {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 2px;
+  font-size: 0.74rem;
+  color: #8f8f94;
+}
+
+.np-top-text em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: normal;
+}
+
+.eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 10px;
+  flex: none;
+}
+
+.eq s {
+  display: block;
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background: rgb(var(--ac, 220 220 220));
+  transform-origin: bottom;
+  animation: eqBar 1.1s ease-in-out infinite;
+}
+
+.eq s:nth-child(2) { animation-delay: -0.4s; animation-duration: 0.9s; }
+.eq s:nth-child(3) { animation-delay: -0.7s; animation-duration: 1.3s; }
+
+@keyframes eqBar {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(1); }
+}
+
+.np-disc {
+  position: relative;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 6px 22px rgb(var(--ac, 120 120 120) / 0.3);
+  animation: spinDisc 14s linear infinite;
+}
+
+.np-disc::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: #0a0a0b;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.np-disc img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes spinDisc {
+  to { transform: rotate(360deg); }
+}
+
+.np-lyric {
+  display: grid;
+  width: 100%;
+  min-height: 1.4em;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #fff;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7);
+}
+
+.np-lyric .line {
+  grid-area: 1 / 1;
+  animation: lineIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.np-lyric .line.out {
+  animation: lineOut 0.4s ease forwards;
+}
+
+.np-lyric .w {
+  display: inline-block;
+  margin-left: 0.28em;
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.25s ease, text-shadow 0.4s ease;
+}
+
+.np-lyric .w.lit {
+  color: #fff;
+  text-shadow: 0 0 16px rgb(var(--ac, 255 255 255) / 0.75);
+  animation: hop 0.6s cubic-bezier(0.3, 1.7, 0.5, 1);
+}
+
+.np-lyric .gap {
+  display: inline-flex;
+  gap: 5px;
+  padding-top: 0.5em;
+}
+
+.np-lyric .gap s {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  animation: breathe 1.4s ease-in-out infinite;
+}
+
+.np-lyric .gap s:nth-child(2) { animation-delay: 0.18s; }
+.np-lyric .gap s:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes hop {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-6px) scale(1.12); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes lineIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes lineOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@media (max-width: 640px) {
+  .np-top {
+    position: static;
+    width: 100%;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .head {
+    flex-wrap: wrap;
+  }
+
+  .np-top-head {
+    flex-direction: row-reverse;
+  }
 }
 
 .copied {
@@ -2842,7 +3084,11 @@ button:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .aura-layer,
-  .change {
+  .change,
+  .np-disc,
+  .eq s,
+  .np-lyric .w.lit,
+  .np-lyric .gap s {
     animation: none !important;
   }
 
@@ -2905,13 +3151,23 @@ button:focus-visible {
       <div class="name-row">
         <h1 id="name"><span id="nameText">take</span></h1>
         <div class="devices" id="devices"></div>
-        <span class="hour" id="hour" hidden></span>
+        <span class="hour" id="hour" hidden><svg class="clk" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line class="hh" x1="12" y1="12" x2="12" y2="7.2"/><line class="mm" x1="12" y1="12" x2="12" y2="4.6"/></svg><b id="hourText"></b></span>
         <span class="copied" id="copiedId" hidden>Copied ID!</span>
       </div>
       <div class="sub">
         <button class="handle" id="handle" type="button">take</button>
         <span class="copied" id="copiedUser" hidden>Copied!</span>
       </div>
+    </div>
+    <div class="np-top" id="npTop" aria-label="Now playing">
+      <div class="np-top-head">
+        <div class="np-top-text">
+          <b id="topTitle"></b>
+          <span><i class="eq"><s></s><s></s><s></s></i><em id="topArtist"></em></span>
+        </div>
+        <div class="np-disc"><img id="topArt" alt=""></div>
+      </div>
+      <p class="np-lyric" id="npLyric"></p>
     </div>
   </header>
 
@@ -4181,6 +4437,7 @@ function paintAura(song) {
     aura.front = next;
     document.documentElement.style.setProperty("--ac", color);
     $("npDock").style.setProperty("--ac", color);
+    $("npTop").style.setProperty("--ac", color);
     root.classList.add("on");
   });
 }
@@ -4195,11 +4452,134 @@ function tickDock() {
   fill.style.transform = `scaleX(${Math.max(0, Math.min(1, (Date.now() - dock.start) / span))})`;
 }
 
+const lyrics = { id: "", lines: [], cache: new Map(), index: -2, lit: -1, timer: 0 };
+
+function parseLrc(text) {
+  const rows = [];
+  String(text || "")
+    .split("\n")
+    .forEach((row) => {
+      const match = row.match(/^\[(\d+):(\d+(?:\.\d+)?)\]\s*(.*)$/);
+      if (match) rows.push({ at: Number(match[1]) * 60000 + Number(match[2]) * 1000, text: match[3].trim() });
+    });
+  return rows.sort((a, b) => a.at - b.at);
+}
+
+async function fetchLyrics(song, seconds) {
+  const base = "https://lrclib.net/api";
+  const query = new URLSearchParams({ track_name: song.title, artist_name: song.artist.split(",")[0].trim() });
+  if (song.album) query.set("album_name", song.album);
+  if (seconds) query.set("duration", String(Math.round(seconds)));
+
+  try {
+    const direct = await fetch(`${base}/get?${query}`, { signal: AbortSignal.timeout(8000) });
+    if (direct.ok) {
+      const body = await direct.json();
+      if (body.syncedLyrics) return parseLrc(body.syncedLyrics);
+    }
+
+    const search = new URLSearchParams({ track_name: song.title, artist_name: song.artist.split(",")[0].trim() });
+    const found = await fetch(`${base}/search?${search}`, { signal: AbortSignal.timeout(8000) });
+    if (!found.ok) return [];
+    const list = await found.json();
+    const hit = (Array.isArray(list) ? list : []).find((item) => item.syncedLyrics);
+    return hit ? parseLrc(hit.syncedLyrics) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function showLine(row) {
+  const box = $("npLyric");
+  box.querySelectorAll(".line:not(.out)").forEach((old) => {
+    old.classList.add("out");
+    setTimeout(() => old.remove(), 420);
+  });
+  if (row === null) return;
+
+  const line = document.createElement("span");
+  line.className = "line";
+
+  if (!row.text) {
+    line.innerHTML = '<span class="gap"><s></s><s></s><s></s></span>';
+  } else {
+    line.innerHTML = row.text
+      .split(/\s+/)
+      .map((word) => `<span class="w">${esc(word)}</span>`)
+      .join(" ");
+  }
+
+  box.appendChild(line);
+  lyrics.words = [...line.querySelectorAll(".w")];
+  lyrics.weights = lyrics.words.map((el) => el.textContent.length + 1);
+  lyrics.total = lyrics.weights.reduce((sum, n) => sum + n, 0);
+  lyrics.lit = -1;
+}
+
+function tickLyrics() {
+  const rows = lyrics.lines;
+  if (!rows.length || !dock.start) return;
+
+  const elapsed = Date.now() - dock.start + 180;
+  let index = -1;
+  for (let i = 0; i < rows.length; i += 1) {
+    if (rows[i].at <= elapsed) index = i;
+    else break;
+  }
+
+  if (index !== lyrics.index) {
+    lyrics.index = index;
+    showLine(index === -1 ? { text: "" } : rows[index]);
+  }
+
+  if (index === -1 || !lyrics.words || !lyrics.words.length) return;
+
+  const next = rows[index + 1];
+  const span = Math.max(1200, Math.min(6500, (next ? next.at : rows[index].at + 5000) - rows[index].at));
+  const progress = Math.min(1, (elapsed - rows[index].at) / (span * 0.82));
+  let before = 0;
+  let count = 0;
+  for (let i = 0; i < lyrics.words.length; i += 1) {
+    if (before / lyrics.total <= progress) count = i + 1;
+    before += lyrics.weights[i];
+  }
+
+  while (lyrics.lit < count - 1) {
+    lyrics.lit += 1;
+    lyrics.words[lyrics.lit].classList.add("lit");
+  }
+}
+
+async function loadLyricsFor(song, seconds) {
+  if (lyrics.id === song.id) return;
+  lyrics.id = song.id;
+  lyrics.lines = [];
+  lyrics.index = -2;
+  lyrics.words = [];
+  showLine(null);
+
+  let rows = lyrics.cache.get(song.id);
+  if (!rows) {
+    rows = await fetchLyrics(song, seconds);
+    lyrics.cache.set(song.id, rows);
+  }
+
+  if (lyrics.id !== song.id) return;
+  lyrics.lines = rows;
+  clearInterval(lyrics.timer);
+  if (rows.length) lyrics.timer = setInterval(() => !document.hidden && tickLyrics(), 140);
+  tickLyrics();
+}
+
 function paintSpotify(data) {
   const track = data.listening_to_spotify && data.spotify;
   const box = $("npDock");
 
   if (!track) {
+    $("npTop").classList.remove("live");
+    clearInterval(lyrics.timer);
+    lyrics.id = "";
+    lyrics.lines = [];
     box.classList.remove("live", "is-open");
     $("npTab").setAttribute("aria-expanded", "false");
     clearInterval(dock.timer);
@@ -4215,6 +4595,7 @@ function paintSpotify(data) {
     id: track.track_id || `${track.song}|${track.artist}`,
     title: track.song || "",
     artist: track.artist || "",
+    album: track.album || "",
     art: /^https:/i.test(track.album_art_url || "") ? track.album_art_url : ""
   };
 
@@ -4228,6 +4609,13 @@ function paintSpotify(data) {
   tickDock();
   if (!dock.timer) dock.timer = setInterval(() => !document.hidden && tickDock(), 1000);
   paintAura(song);
+
+  $("topTitle").textContent = song.title;
+  $("topArtist").textContent = song.artist;
+  if (song.art) $("topArt").src = song.art;
+  $("npTop").classList.add("live");
+  const seconds = dock.end && dock.start ? (dock.end - dock.start) / 1000 : 0;
+  loadLyricsFor(song, seconds);
 }
 
 function setupDock() {
@@ -4240,25 +4628,38 @@ function setupDock() {
 
 function setupHour() {
   const chip = $("hour");
+  const text = $("hourText");
+  const hourHand = chip.querySelector(".hh");
+  const minuteHand = chip.querySelector(".mm");
   let format;
-  let detail;
+  let turns = 0;
+  let lastMinute = -1;
 
   try {
-    format = new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: true, timeZone: profile.timezone });
-    detail = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: profile.timezone });
+    format = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: profile.timezone });
   } catch (error) {
     return;
   }
 
   const update = () => {
     const now = new Date();
-    chip.textContent = format.format(now).toLowerCase();
-    chip.title = `${detail.format(now).toLowerCase()} · ${profile.place}`;
+    const parts = Object.fromEntries(format.formatToParts(now).map((part) => [part.type, part.value]));
+    const hour = Number(parts.hour) % 12;
+    const minute = Number(parts.minute);
+
+    if (minute === lastMinute) return;
+    if (lastMinute !== -1 && minute < lastMinute) turns += 1;
+    lastMinute = minute;
+
+    text.textContent = `${parts.hour}:${parts.minute} ${String(parts.dayPeriod).toLowerCase()}`;
+    chip.title = profile.place;
+    hourHand.style.transform = `rotate(${(hour + minute / 60) * 30 + turns * 360}deg)`;
+    minuteHand.style.transform = `rotate(${minute * 6 + turns * 360}deg)`;
     chip.hidden = false;
   };
 
   update();
-  setInterval(update, 30000);
+  setInterval(update, 1000);
 }
 
 function timeAgoShort(date) {
