@@ -10,6 +10,7 @@
 <meta property="og:description" content="Break it to understand it. Build it so it can't be broken.">
 <meta name="twitter:card" content="summary">
 <title>Take</title>
+<link rel="preload" as="image" href="assets/porsche.webp" type="image/webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Pixelify+Sans:wght@700&family=Newsreader:wght@400;500;600&display=swap" rel="stylesheet">
@@ -881,7 +882,7 @@ a.change:hover {
   z-index: 50;
   background: #000;
   cursor: pointer;
-  transition: opacity 0.8s ease;
+  transition: opacity 0.5s ease;
 }
 
 .intro.leaving {
@@ -895,34 +896,78 @@ a.change:hover {
   display: block;
 }
 
-.intro p {
+@property --spin {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.enter {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 34px;
-  text-align: center;
+  left: 50%;
+  bottom: max(34px, 7vh);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 24px 11px 19px;
+  border-radius: 99px;
   font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: 0.24em;
-  text-indent: 0.24em;
+  font-weight: 500;
+  letter-spacing: 0.26em;
   color: #fff;
-  text-shadow: 0 0 10px #000;
-  animation: pulse 2.6s ease-in-out infinite;
+  background: rgba(255, 255, 255, 0.035);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transform: translateX(-50%);
+  transition: background 0.3s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: enterIn 0.8s 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.intro p::after {
+.enter::before {
   content: "";
-  display: block;
-  width: 150px;
-  height: 1px;
-  margin: 10px auto 0;
-  background: #fff;
-  transform: scaleY(0.5);
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--spin), rgba(255, 255, 255, 0.1), rgba(236, 196, 98, 0.95) 12%, rgba(255, 255, 255, 0.1) 28%, rgba(255, 255, 255, 0.1) 62%, rgba(196, 44, 58, 0.85) 75%, rgba(255, 255, 255, 0.1) 88%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin 4.5s linear infinite;
+  pointer-events: none;
 }
 
-@keyframes pulse {
-  50% { opacity: 0.78; }
+.enter i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ecc462;
+  box-shadow: 0 0 10px rgba(236, 196, 98, 0.8);
+  animation: beat 1.8s ease-in-out infinite;
 }
+
+.intro:hover .enter {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.intro:active .enter {
+  transform: translateX(-50%) scale(0.97);
+}
+
+@keyframes spin {
+  to { --spin: 360deg; }
+}
+
+@keyframes beat {
+  50% { transform: scale(0.6); opacity: 0.5; }
+}
+
+@keyframes enterIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+}
+
 
 .sound {
   position: fixed;
@@ -3827,7 +3872,7 @@ button:focus-visible {
 
 <div class="intro" id="intro">
   <canvas id="ascii"></canvas>
-  <p>click to enter</p>
+  <div class="enter"><i></i><span>click to enter</span></div>
 </div>
 
 <button class="sound" id="sound" type="button" aria-pressed="false" aria-label="Sonido">
@@ -4451,7 +4496,6 @@ function setupToast() {
 function loadLogo(url, done) {
   const image = new Image();
   image.onload = () => done(image);
-  image.onerror = () => {};
   image.src = url;
 }
 
@@ -4465,39 +4509,49 @@ function runIntro(onEnter) {
   }
 
   const canvas = $("ascii");
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { alpha: false });
   const ramp = " .'`^,:;-~+*=ixlrsfo29A5HM#&8@";
-  const glyphs = "01<>/\\|{}[]#$%&*+=-";
-  const cellW = 7;
-  const cellH = 12;
+  const cellW = 8;
+  const cellH = 14;
   const ratio = Math.min(2, window.devicePixelRatio || 1);
   const tileW = ratio > 1 ? 2.5 : 4;
   const tileH = ratio > 1 ? 4.4 : 7;
-  let width = 0;
-  let height = 0;
+  const reveal = 850;
+  const shades = Array.from({ length: 48 }, (_, i) => {
+    const v = i / 47;
+    const shade = Math.round(12 + v * v * 120);
+    return `rgb(${shade},${shade},${shade + 4})`;
+  });
+  const field = document.createElement("canvas");
+  const fieldCtx = field.getContext("2d", { alpha: false });
   const sample = document.createElement("canvas");
   const sampleCtx = sample.getContext("2d", { willReadFrequently: true });
   const layer = document.createElement("canvas");
   const layerCtx = layer.getContext("2d");
+  let width = 0;
+  let height = 0;
   let cols = 0;
   let rows = 0;
   let stop = false;
   let logo = null;
   let shownAt = 0;
-  let cells = [];
-  let tiles = { cols: 0, rows: 0, x: 0, y: 0 };
+  let box = null;
+  let fieldAt = -1000;
+  let timer = 0;
+  let resizing = 0;
 
   const build = () => {
     width = window.innerWidth;
     height = window.innerHeight;
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    canvas.width = field.width = layer.width = Math.round(width * ratio);
+    canvas.height = field.height = layer.height = Math.round(height * ratio);
+    for (const c of [ctx, fieldCtx, layerCtx]) c.setTransform(ratio, 0, 0, ratio, 0, 0);
     cols = Math.ceil(width / cellW);
     rows = Math.ceil(height / cellH);
-    ctx.font = `${cellH - 1}px "Geist Mono", monospace`;
-    ctx.textBaseline = "top";
-    cells = [];
+    fieldCtx.font = `${cellH - 2}px "Geist Mono", monospace`;
+    fieldCtx.textBaseline = "top";
+    fieldAt = -1000;
+    box = null;
 
     if (!logo) return;
 
@@ -4508,119 +4562,132 @@ function runIntro(onEnter) {
       markH = markW / (logo.width / logo.height);
     }
 
-    tiles = {
-      cols: Math.max(8, Math.round(markW / tileW)),
-      rows: Math.max(8, Math.round(markH / tileH)),
-      x: width / 2 - markW / 2,
-      y: height * 0.46 - markH / 2
-    };
+    const tilesX = Math.max(8, Math.round(markW / tileW));
+    const tilesY = Math.max(8, Math.round(markH / tileH));
+    const x0 = width / 2 - markW / 2;
+    const y0 = height * 0.46 - markH / 2;
+    box = { x: x0, y: y0, w: markW, h: markH };
 
-    sample.width = tiles.cols;
-    sample.height = tiles.rows;
-    sampleCtx.clearRect(0, 0, tiles.cols, tiles.rows);
+    sample.width = tilesX;
+    sample.height = tilesY;
+    sampleCtx.clearRect(0, 0, tilesX, tilesY);
     sampleCtx.imageSmoothingQuality = "high";
-    sampleCtx.drawImage(logo, 0, 0, tiles.cols, tiles.rows);
-    const data = sampleCtx.getImageData(0, 0, tiles.cols, tiles.rows).data;
+    sampleCtx.drawImage(logo, 0, 0, tilesX, tilesY);
+    const data = sampleCtx.getImageData(0, 0, tilesX, tilesY).data;
 
-    for (let y = 0; y < tiles.rows; y += 1) {
-      for (let x = 0; x < tiles.cols; x += 1) {
-        const i = (y * tiles.cols + x) * 4;
-        const alpha = data[i + 3] / 255;
-        if (alpha < 0.35) continue;
+    layerCtx.clearRect(0, 0, width, height);
+    layerCtx.font = `bold ${tileH}px "Geist Mono", monospace`;
+    layerCtx.textBaseline = "top";
+
+    for (let y = 0; y < tilesY; y += 1) {
+      for (let x = 0; x < tilesX; x += 1) {
+        const i = (y * tilesX + x) * 4;
+        if (data[i + 3] < 90) continue;
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
-        const luma = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
         const dark = Math.max(r, g, b) < 100;
-        const lift = 1.3;
-        const color = dark
-          ? "rgb(74,74,80)"
-          : `rgb(${Math.min(255, Math.round(r * lift))},${Math.min(255, Math.round(g * lift))},${Math.min(255, Math.round(b * lift))})`;
+        const luma = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
         const level = dark ? ramp.length - 3 : Math.min(ramp.length - 1, Math.floor((0.55 + 0.45 * luma) * ramp.length));
-        cells.push({ x: x * tileW + tiles.x, y: y * tileH + tiles.y, char: ramp[level], color, seed: Math.abs(Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1 });
+        layerCtx.fillStyle = dark
+          ? "rgb(74,74,80)"
+          : `rgb(${Math.min(255, Math.round(r * 1.3))},${Math.min(255, Math.round(g * 1.3))},${Math.min(255, Math.round(b * 1.3))})`;
+        layerCtx.fillText(ramp[level], x0 + x * tileW, y0 + y * tileH);
       }
     }
-
-    layer.width = canvas.width;
-    layer.height = canvas.height;
-    layerCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    layerCtx.font = `bold ${tileH}px "Geist Mono", monospace`;
-    layerCtx.textBaseline = "top";
-    cells.forEach((cell) => {
-      layerCtx.fillStyle = cell.color;
-      layerCtx.fillText(cell.char, cell.x, cell.y);
-    });
   };
 
-  build();
-  window.addEventListener("resize", build);
+  const paintField = (t) => {
+    fieldCtx.fillStyle = "#000";
+    fieldCtx.fillRect(0, 0, width, height);
 
-  loadLogo("assets/porsche.webp", (image) => {
-    logo = image;
-    shownAt = performance.now();
-    build();
-  });
+    for (let y = 0; y < rows; y += 1) {
+      const ny = (y / rows - 0.5) * 1.1;
+      const rowWave = Math.sin(y * 0.2 - t * 1.2) * 0.5;
+      for (let x = 0; x < cols; x += 1) {
+        const nx = x / cols - 0.5;
+        const wave = rowWave + Math.sin(x * 0.13 + t * 0.9) * 0.5 + Math.sin((x + y) * 0.08 + t * 0.6) * 0.5;
+        const edge = Math.max(0, 1 - Math.hypot(nx, ny) * 1.5);
+        const value = 0.15 + wave * 0.07 + edge * 0.07;
+        if (value < 0.12) continue;
+        const char = ramp[Math.min(ramp.length - 1, Math.floor(value * ramp.length))];
+        fieldCtx.fillStyle = shades[Math.min(47, Math.floor(value * 47))];
+        fieldCtx.fillText(char, x * cellW, y * cellH);
+      }
+    }
+  };
 
-  const paintLogo = (now) => {
-    if (!cells.length) return;
-    const progress = Math.min(1, (now - shownAt) / 1800);
+  const compose = (now) => {
+    ctx.drawImage(field, 0, 0, width, height);
+    if (!box || !shownAt) return;
 
-    if (progress >= 1) {
+    const p = Math.min(1, (now - shownAt) / reveal);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const edge = box.y + eased * (box.h + 24);
+    const top = Math.max(0, box.y - 4);
+    const bottom = Math.min(height, edge);
+
+    if (p >= 1) {
       ctx.drawImage(layer, 0, 0, width, height);
       return;
     }
 
-    ctx.font = `bold ${tileH}px "Geist Mono", monospace`;
-    for (const cell of cells) {
-      const wave = (cell.y - tiles.y) / (tiles.rows * tileH);
-      const local = Math.max(0, Math.min(1, progress * 1.6 - wave * 0.6 - cell.seed * 0.35));
-      if (local <= 0) continue;
-      if (local >= 1) {
-        ctx.fillStyle = cell.color;
-        ctx.fillText(cell.char, cell.x, cell.y);
-      } else {
-        ctx.fillStyle = cell.color;
-        ctx.globalAlpha = local * 0.8;
-        ctx.fillText(glyphs[Math.floor((cell.seed * 997 + now * 0.02) % glyphs.length)], cell.x, cell.y);
-        ctx.globalAlpha = 1;
-      }
+    if (bottom > top) {
+      ctx.drawImage(layer, 0, top * ratio, width * ratio, (bottom - top) * ratio, 0, top, width, bottom - top);
+      const fade = ctx.createLinearGradient(0, bottom - 22, 0, bottom);
+      fade.addColorStop(0, "rgba(0,0,0,0)");
+      fade.addColorStop(1, "rgba(0,0,0,0.85)");
+      ctx.fillStyle = fade;
+      ctx.fillRect(box.x - 6, bottom - 22, box.w + 12, 22);
+      const glow = ctx.createLinearGradient(box.x, 0, box.x + box.w, 0);
+      glow.addColorStop(0, "rgba(236,196,98,0)");
+      glow.addColorStop(0.5, "rgba(255,226,150,0.9)");
+      glow.addColorStop(1, "rgba(236,196,98,0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(box.x, bottom - 1, box.w, 1.5);
     }
-    ctx.font = `${cellH - 1}px "Geist Mono", monospace`;
   };
 
-  const draw = (now) => {
+  const frame = (now) => {
     if (stop) return;
-    setTimeout(() => requestAnimationFrame(draw), 40);
 
-    const t = now / 1000;
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, width, height);
-
-    for (let y = 0; y < rows; y += 1) {
-      for (let x = 0; x < cols; x += 1) {
-        const nx = x / cols;
-        const ny = y / rows;
-        const wave =
-          Math.sin(x * 0.07 + t * 0.9) * 0.5 +
-          Math.sin(y * 0.11 - t * 1.2) * 0.5 +
-          Math.sin((x + y) * 0.045 + t * 0.6) * 0.5 +
-          Math.sin(Math.hypot(x - cols / 2, (y - rows / 2) * 1.8) * 0.12 - t * 1.4) * 0.5;
-        const edge = Math.max(0, 1 - Math.hypot(nx - 0.5, (ny - 0.5) * 1.1) * 1.5);
-        let value = 0.15 + wave * 0.06 + edge * 0.06;
-        value = Math.max(0, Math.min(1, value));
-        if (value < 0.12) continue;
-
-        const char = ramp[Math.min(ramp.length - 1, Math.floor(value * ramp.length))];
-        const shade = Math.round(12 + value * value * 168);
-        ctx.fillStyle = `rgb(${shade},${shade},${Math.min(255, shade + 4)})`;
-        ctx.fillText(char, x * cellW, y * cellH);
-      }
+    if (document.hidden) {
+      timer = setTimeout(() => requestAnimationFrame(frame), 300);
+      return;
     }
 
-    paintLogo(now);
+    const revealing = shownAt && now - shownAt < reveal;
+    let dirty = Boolean(revealing);
+
+    if (now - fieldAt > 110) {
+      paintField(now / 1000);
+      fieldAt = now;
+      dirty = true;
+    }
+
+    if (dirty || shownAt) compose(now);
+
+    if (revealing) requestAnimationFrame(frame);
+    else timer = setTimeout(() => requestAnimationFrame(frame), 55);
   };
 
-  requestAnimationFrame(draw);
+  build();
+  window.addEventListener("resize", () => {
+    clearTimeout(resizing);
+    resizing = setTimeout(() => {
+      build();
+      if (!shownAt) return;
+      shownAt = Math.min(shownAt, performance.now() - reveal);
+    }, 120);
+  });
+
+  loadLogo("assets/porsche.webp", (image) => {
+    logo = image;
+    build();
+    shownAt = performance.now();
+  });
+
+  requestAnimationFrame(frame);
 
   let entered = false;
   const enter = () => {
@@ -4630,8 +4697,9 @@ function runIntro(onEnter) {
     onEnter();
     setTimeout(() => {
       stop = true;
+      clearTimeout(timer);
       intro.remove();
-    }, 900);
+    }, 560);
   };
 
   intro.addEventListener("click", enter);
