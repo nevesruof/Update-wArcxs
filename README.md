@@ -8,7 +8,8 @@ Página de perfil con presencia de Discord (tu bot), juegos con ficha de IGDB (T
 - `assets/porsche-logo.js`: logo de la intro.
 - `api/last-played.js`: último juego de Roblox según el bot.
 - `404.html`: página de error con el auto ASCII (Vercel la sirve sola en rutas que no existen).
-- `manifest.webmanifest`, `sw.js`, `assets/icon-*.png`: la página se puede instalar como app y abre sin conexión.
+- `manifest.webmanifest`, `sw.js`, `assets/icon-*.png`, `assets/favicon-*.png`, `assets/apple-touch-icon.png`: la página se puede instalar como app y abre sin conexión.
+- `assets/og.png`: imagen de vista previa al compartir el enlace (1200x630).
 - `api/presence.js`, `api/activity.js`, `api/game-info.js`: funciones de Vercel que hablan con tu bot, Discord, IGDB, Steam y Roblox.
 - `lib/`: lógica compartida de las funciones.
 - `scripts/dev.mjs`: servidor local (`npm run dev`).
@@ -35,4 +36,4 @@ El dominio no cambia: en Vercel sigue apuntando al mismo proyecto. Si redesplieg
 
 ## Atajos
 
-`?` ayuda, `M` sonido, `P` reproductor, `/` buscar canción, `N` / `B` siguiente y anterior de la playlist, `T` tema, `C` compartir como imagen, `S` stats.fm, `F` vista en vivo (también al pulsar tu avatar), `G` arriba. Para ver la intro completa otra vez abre la página con `?intro` al final.
+`?` ayuda, `M` sonido, `P` reproductor, `/` buscar canción, `N` / `B` siguiente y anterior de la playlist, `T` tema (incluye `auto`, que toma el color de la portada), `Y` letras, `C` compartir como imagen, `S` stats.fm, `F` vista en vivo (también al pulsar tu avatar), `G` arriba. Para ver la intro completa otra vez abre la página con `?intro` al final.

@@ -1,5 +1,5 @@
-const VERSION = "take-v1";
-const SHELL = ["/", "/assets/porsche-logo.js", "/assets/larp-mark.svg", "/assets/icon-192.png", "/manifest.webmanifest"];
+const VERSION = "take-v2";
+const SHELL = ["/", "/assets/porsche-logo.js", "/assets/larp-mark.svg", "/assets/favicon-64.png", "/assets/icon-192.png", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(VERSION).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -25,11 +25,13 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const copy = response.clone();
-          caches.open(VERSION).then((cache) => cache.put("/", copy));
+          if (response.ok && url.pathname === "/") {
+            const copy = response.clone();
+            caches.open(VERSION).then((cache) => cache.put("/", copy));
+          }
           return response;
         })
-        .catch(() => caches.match("/"))
+        .catch(() => caches.match("/").then((saved) => saved || Response.error()))
     );
     return;
   }
@@ -42,7 +44,7 @@ self.addEventListener("fetch", (event) => {
             if (response.ok) cache.put(request, response.clone());
             return response;
           })
-          .catch(() => saved);
+          .catch(() => saved || Response.error());
         return saved || fresh;
       })
     )

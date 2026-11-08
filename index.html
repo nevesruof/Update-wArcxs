@@ -6,18 +6,28 @@
 <meta name="theme-color" content="#030405">
 <meta name="description" content="Break it to understand it. Build it so it can't be broken.">
 <meta property="og:type" content="profile">
+<meta property="og:site_name" content="Take">
 <meta property="og:title" content="Take">
 <meta property="og:description" content="Break it to understand it. Build it so it can't be broken.">
-<meta name="twitter:card" content="summary">
+<meta property="og:url" content="https://www.whoistake.com/">
+<meta property="og:image" content="https://www.whoistake.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Take">
+<meta name="twitter:description" content="Break it to understand it. Build it so it can't be broken.">
+<meta name="twitter:image" content="https://www.whoistake.com/assets/og.png">
 <title>Take</title>
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
-<link rel="apple-touch-icon" href="/assets/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-64.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Pixelify+Sans:wght@700&family=Newsreader:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Pixelify+Sans:wght@700&family=Newsreader:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Pixelify+Sans:wght@700&family=Newsreader:wght@400;500;600&display=swap"></noscript>
 <style>
 :root {
   --bg: #030405;
@@ -1054,10 +1064,6 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   color: #fff;
 }
 
-.sound.theme {
-  top: 72px;
-}
-
 .sound.theme i {
   width: 14px;
   height: 14px;
@@ -1332,49 +1338,6 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   animation: lineIn 0.45s ease both;
 }
 
-.now-game {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: fit-content;
-  max-width: 100%;
-  padding: 12px 18px 12px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(10, 10, 12, 0.55);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-}
-
-.now-game .tile {
-  width: 46px;
-  height: 46px;
-  border-radius: 10px;
-}
-
-.now-game small {
-  display: block;
-  font-family: var(--mono);
-  font-size: 0.64rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.now-game b {
-  display: block;
-  margin-top: 2px;
-  font-size: 0.98rem;
-  color: #fff;
-}
-
-.now-game span {
-  display: block;
-  margin-top: 1px;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
 .now-hint {
   position: fixed;
   left: 0;
@@ -1406,10 +1369,6 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
 
   .now-text {
     text-align: center;
-  }
-
-  .now-game {
-    margin: 0 auto;
   }
 
   .now-hint {
@@ -1624,10 +1583,6 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   .peek-card {
     display: none;
   }
-}
-
-.sound.share-btn {
-  top: 116px;
 }
 
 .lyr {
@@ -1928,6 +1883,90 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   -webkit-backdrop-filter: blur(10px);
   color: var(--soft);
   transition: background 0.2s, border-color 0.2s;
+}
+
+.tools {
+  position: fixed;
+  top: 28px;
+  right: 17px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tools .sound,
+.tools-toggle {
+  position: static;
+  top: auto;
+  right: auto;
+}
+
+.tools-toggle {
+  display: none;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: rgba(10, 10, 11, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--soft);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.tools-toggle svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.tools-toggle .x {
+  display: none;
+}
+
+.tools.open .tools-toggle .bars {
+  display: none;
+}
+
+.tools.open .tools-toggle .x {
+  display: block;
+}
+
+@keyframes toolIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.9); }
+}
+
+@media (max-width: 760px) {
+  .tools {
+    top: 12px;
+    right: 14px;
+  }
+
+  .tools-toggle {
+    display: grid;
+  }
+
+  .tools .sound {
+    display: none;
+  }
+
+  .tools.open .sound {
+    display: grid;
+    animation: toolIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .tools.open .sound:nth-of-type(3) {
+    animation-delay: 0.04s;
+  }
+
+  .tools.open .sound:nth-of-type(4) {
+    animation-delay: 0.08s;
+  }
 }
 
 .sound:hover {
@@ -3924,23 +3963,61 @@ a.social:hover b {
 
 .clock svg path {
   fill: #d4d4d4;
-  transition: fill 0.2s ease;
+  transition: fill 0.2s ease, fill-opacity 0.2s ease;
+}
+
+.clock svg path[data-hour] {
+  transform-origin: 120px 120px;
 }
 
 .clock svg path[data-hour]:hover {
   fill: #fff;
+  fill-opacity: 1;
 }
 
-.overlay.open .clock svg {
-  animation: clockIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.3s backwards;
+.clock svg path.top {
+  fill: var(--green);
 }
 
-@keyframes clockIn {
+.clock svg path.top:hover {
+  fill: var(--green);
+}
+
+.clock svg .ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-dasharray: 2 4;
+}
+
+.clock svg .tick {
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1;
+}
+
+.clock svg text.mid {
+  font-size: 11px;
+  font-weight: 700;
+  fill: #f2f2f2;
+}
+
+.clock svg text.sub {
+  font-size: 6.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.overlay.open .clock svg path[data-hour] {
+  animation: sliceIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(0.25s + var(--h) * 18ms);
+}
+
+@keyframes sliceIn {
   from {
     opacity: 0;
-    transform: scale(0.88) rotate(-14deg);
+    transform: scale(0.2);
   }
 }
+
 
 .clock .caps {
   margin-top: 4px;
@@ -4903,17 +4980,18 @@ button:focus-visible {
   <p>click to enter</p>
 </div>
 
-<button class="sound" id="sound" type="button" aria-pressed="false" aria-label="Sound">
+<div class="tools" id="tools">
+  <button class="tools-toggle" id="toolsToggle" type="button" aria-label="Open tools" aria-expanded="false"><svg class="bars" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg><svg class="x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  <button class="sound" id="sound" type="button" aria-pressed="false" aria-label="Sound">
   <svg viewBox="0 0 24 24">
     <path d="M11 5 6 9H3v6h3l5 4V5Z"/>
     <path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>
     <path class="slash" d="m16 9 5 6m0-6-5 6"/>
   </svg>
 </button>
-
-<button class="sound theme" id="theme" type="button" aria-label="Change theme"><i></i></button>
-
-<button class="sound share-btn" id="shareBtn" type="button" aria-label="Share as image" title="share as image"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="m4 17 5-4.5 3.5 3 3-2.5 4.5 4"/></svg></button>
+  <button class="sound theme" id="theme" type="button" aria-label="Change theme"><i></i></button>
+  <button class="sound share-btn" id="shareBtn" type="button" aria-label="Share as image" title="share as image"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="m4 17 5-4.5 3.5 3 3-2.5 4.5 4"/></svg></button>
+</div>
 
 <div class="flash" id="flash" role="status" aria-live="polite"></div>
 
@@ -4931,10 +5009,6 @@ button:focus-visible {
         <div class="now-time"><span id="nowNow">0:00</span><span id="nowLen">0:00</span></div>
         <div class="now-lyrics" id="nowLyrics"><p id="nowPrev"></p><p id="nowCur"></p><p id="nowNext"></p></div>
       </div>
-    </div>
-    <div class="now-game" id="nowGame" hidden>
-      <div class="tile" id="nowGameIcon">G</div>
-      <div><small>playing now</small><b id="nowGameName"></b><span id="nowGameInfo"></span></div>
     </div>
   </div>
   <p class="now-hint">esc to close</p>
@@ -4970,6 +5044,7 @@ button:focus-visible {
     <div><span>Open or close the player</span><kbd>P</kbd></div>
     <div><span>Search a song</span><kbd>/</kbd></div>
     <div><span>Change theme</span><kbd>T</kbd></div>
+    <div><span>Open lyrics</span><kbd>Y</kbd></div>
     <div><span>Share as image</span><kbd>C</kbd></div>
     <div><span>Open stats.fm</span><kbd>S</kbd></div>
     <div><span>Next / previous in the playlist</span><kbd>N / B</kbd></div>
@@ -5190,9 +5265,9 @@ button:focus-visible {
           <p id="rankDesc"></p>
         </div>
         <div class="rank-actions">
-          <button class="sq" id="rankPrev" type="button" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button>
-          <button class="sq" id="rankNext" type="button" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
-          <button class="sq" id="rankGrid" type="button" aria-label="Ver todo"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></svg></button>
+          <button class="sq" id="rankPrev" type="button" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button>
+          <button class="sq" id="rankNext" type="button" aria-label="Next"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
+          <button class="sq" id="rankGrid" type="button" aria-label="View all"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></svg></button>
         </div>
       </div>
       <div class="rank-row" id="rankRow"></div>
@@ -5258,7 +5333,7 @@ button:focus-visible {
 </aside>
 
 <div class="rail" id="rail" aria-hidden="true"><i id="railThumb"></i></div>
-<script src="assets/porsche-logo.js"></script>
+<script src="assets/porsche-logo.js" async id="logoScript"></script>
 <script>
 const profile = {
   name: "Take",
@@ -5266,7 +5341,7 @@ const profile = {
   nameStyle: { font_id: 8, effect_id: 4, colors: [16777215] },
   intro: true,
   introRepeatHours: 12,
-  introLogo: window.INTRO_LOGO || "",
+  introLogo: "",
   avatar: "",
   avatarDecoration: "",
   apiBase: "",
@@ -5808,13 +5883,18 @@ function runIntro(onEnter) {
     resizing = setTimeout(build, 120);
   });
 
-  if (profile.introLogo) {
-    loadLogo(profile.introLogo, (art) => {
+  const showLogo = () => {
+    if (!window.INTRO_LOGO || stop || logo) return;
+    loadLogo(window.INTRO_LOGO, (art) => {
+      if (stop) return;
       logo = art;
       shownAt = performance.now();
       build();
     });
-  }
+  };
+
+  if (window.INTRO_LOGO) showLogo();
+  else $("logoScript").addEventListener("load", showLogo, { once: true });
 
   requestAnimationFrame(frame);
 
@@ -6812,7 +6892,7 @@ function loadYouTube() {
     script.src = "https://www.youtube.com/iframe_api";
     script.onerror = () => {
       clearTimeout(timeout);
-      reject(new Error("YouTube no disponible"));
+      reject(new Error("YouTube unavailable"));
     };
     document.head.append(script);
   }).catch((error) => {
@@ -6888,7 +6968,7 @@ function ensurePlayer() {
           document.body.append(host);
           music.host = host;
 
-          const timer = setTimeout(() => reject(new Error("Reproductor no disponible")), 10000);
+          const timer = setTimeout(() => reject(new Error("Player unavailable")), 10000);
 
           music.player = new YT.Player("audioEngine", {
             width: "200",
@@ -7125,7 +7205,6 @@ function startMusic() {
   if (music.entered) return;
   music.entered = true;
   paintVolume();
-  ensurePlayer().catch(() => {});
   music.timer = setInterval(syncSpotify, 1000);
   ["pointerup", "touchend", "click", "keydown"].forEach((type) => document.addEventListener(type, retryBlocked, { passive: true }));
   document.addEventListener("visibilitychange", () => {
@@ -7466,6 +7545,7 @@ async function loadLyricsFor(song, seconds) {
 }
 
 function paintDockRow(song) {
+  followCover();
   const row = $("npRow");
   const art = $("npArt");
   const id = song ? song.id : "idle";
@@ -7501,6 +7581,7 @@ function paintDockRow(song) {
 function paintSpotify(data) {
   const track = data.listening_to_spotify && data.spotify;
   const box = $("npDock");
+  if (track && music.entered) ensurePlayer().catch(() => {});
 
   box.hidden = false;
   requestAnimationFrame(() => box.classList.add("live"));
@@ -8214,7 +8295,11 @@ function paintDiscord(data) {
       }
     : null;
 
-  renderFeed();
+  const feedSig = JSON.stringify(liveEntry);
+  if (feedSig !== liveState.feedSig) {
+    liveState.feedSig = feedSig;
+    renderFeed();
+  }
   if (liveEntry) prefetchGames([liveEntry.key]);
 
   if (game && game.name === "Roblox") {
@@ -8304,20 +8389,43 @@ function wedge(cx, cy, inner, outer, from, to) {
 
 function drawClock(svg, values) {
   const max = Math.max(...values, 0);
+  const total = values.reduce((sum, value) => sum + value, 0);
+  const peak = max ? values.indexOf(max) : -1;
   const inner = 30;
   const outer = 104;
+  const base = inner + 5;
   const gap = (0.8 * Math.PI) / 180;
-  let markup = '<circle cx="120" cy="120" r="104" fill="none" stroke="rgba(255,255,255,0.05)"/>';
+  svg.dataset.total = total;
+
+  let markup = "";
+  [0.5, 1].forEach((step) => {
+    markup += `<circle class="ring" cx="120" cy="120" r="${(base + (outer - base) * step).toFixed(1)}"/>`;
+  });
+
+  for (let hour = 0; hour < 24; hour += 3) {
+    const angle = (hour * 15 * Math.PI) / 180;
+    const x0 = 120 + (outer + 2) * Math.sin(angle);
+    const y0 = 120 - (outer + 2) * Math.cos(angle);
+    const x1 = 120 + (outer + 6) * Math.sin(angle);
+    const y1 = 120 - (outer + 6) * Math.cos(angle);
+    markup += `<line class="tick" x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}"/>`;
+  }
 
   values.forEach((value, hour) => {
     const ratio = max ? value / max : 0;
-    const radius = inner + 5 + (outer - inner - 5) * ratio;
+    const radius = base + (outer - base) * ratio;
     const from = (hour * 15 * Math.PI) / 180 + gap;
     const to = ((hour + 1) * 15 * Math.PI) / 180 - gap;
-    markup += `<path data-hour="${hour}" data-value="${value}" style="--h:${hour}" d="${wedge(120, 120, inner, radius, from, to)}"/>`;
+    const opacity = (0.3 + 0.7 * ratio).toFixed(2);
+    markup += `<path${hour === peak ? ' class="top"' : ""} data-hour="${hour}" data-value="${value}" fill-opacity="${opacity}" style="--h:${hour}" d="${wedge(120, 120, inner, radius, from, to)}"/>`;
   });
 
   markup += '<text x="120" y="13" text-anchor="middle">12am</text><text x="236" y="123" text-anchor="end">6am</text><text x="120" y="233" text-anchor="middle">12pm</text><text x="4" y="123" text-anchor="start">6pm</text>';
+
+  if (peak >= 0) {
+    markup += `<text class="mid" x="120" y="121" text-anchor="middle">${hourLabel(peak)}</text><text class="sub" x="120" y="131" text-anchor="middle">peak</text>`;
+  }
+
   svg.innerHTML = markup;
 }
 
@@ -8345,7 +8453,10 @@ function setupClockTips() {
 
       const hour = Number(slice.dataset.hour);
       tip.querySelector("b").textContent = `${hourLabel(hour)} – ${hourLabel((hour + 1) % 24)}`;
-      tip.querySelector("span").textContent = `${Number(slice.dataset.value).toLocaleString("en")} ${unit}`;
+      const value = Number(slice.dataset.value);
+      const total = Number(slice.ownerSVGElement.dataset.total) || 0;
+      const share = total ? ` · ${Math.round((value / total) * 100)}%` : "";
+      tip.querySelector("span").textContent = `${value.toLocaleString("en")} ${unit}${share}`;
       tip.style.left = `${x}px`;
       tip.style.top = `${y}px`;
       tip.classList.add("on");
@@ -8582,7 +8693,7 @@ async function loadStats(force) {
     if (days) countUp("vDaily", (summary.count || 0) / days);
     else $("vDaily").textContent = "—";
     $("cStreams").textContent = compact(summary.count);
-    $("cMinutes").textContent = `${compact(minutes)}m`;
+    $("cMinutes").textContent = `${compact(minutes)} min`;
     $("clockSub").textContent = `${compact(summary.count)} streams across ${rangeText[range]}`;
   }
 
@@ -8727,7 +8838,7 @@ function setupStats() {
   renderRank();
 }
 
-const gameState = { info: new Map(), history: [], returnFocus: null };
+const gameState = { info: new Map(), pending: new Set(), history: [], sig: "", returnFocus: null };
 
 const siteNames = {
   official: "Official site",
@@ -8798,8 +8909,9 @@ async function api(path) {
 }
 
 async function prefetchGames(keys) {
-  const missing = [...new Set(keys)].filter((key) => key && !gameState.info.has(key)).slice(0, 25);
+  const missing = [...new Set(keys)].filter((key) => key && !gameState.info.has(key) && !gameState.pending.has(key)).slice(0, 25);
   if (!missing.length) return;
+  missing.forEach((key) => gameState.pending.add(key));
 
   try {
     const list = await api(`/api/game-info?ids=${encodeURIComponent(missing.join(","))}`);
@@ -8808,6 +8920,8 @@ async function prefetchGames(keys) {
     renderFeed();
   } catch (error) {
     return;
+  } finally {
+    missing.forEach((key) => gameState.pending.delete(key));
   }
 }
 
@@ -8873,6 +8987,9 @@ function renderPlaytime() {
 async function loadActivity() {
   try {
     const body = await api("/api/activity");
+    const sig = JSON.stringify(body.games || []);
+    if (sig === gameState.sig) return;
+    gameState.sig = sig;
     gameState.history = body.games || [];
     renderPlaytime();
     renderFeed();
@@ -9086,18 +9203,130 @@ function registerWorker() {
 
 const themes = [
   { id: "mono", name: "mono", mid: [0.42, 0.43, 0.47] },
-  { id: "azul", name: "azul", mid: [0.22, 0.34, 0.62] },
-  { id: "rojo", name: "rojo", mid: [0.56, 0.2, 0.23] },
-  { id: "violeta", name: "violeta", mid: [0.38, 0.26, 0.64] },
-  { id: "verde", name: "verde", mid: [0.17, 0.45, 0.31] },
-  { id: "ambar", name: "amber", mid: [0.56, 0.39, 0.16] }
+  { id: "azul", name: "blue", mid: [0.22, 0.34, 0.62] },
+  { id: "rojo", name: "red", mid: [0.56, 0.2, 0.23] },
+  { id: "violeta", name: "violet", mid: [0.38, 0.26, 0.64] },
+  { id: "verde", name: "green", mid: [0.17, 0.45, 0.31] },
+  { id: "ambar", name: "amber", mid: [0.56, 0.39, 0.16] },
+  { id: "auto", name: "auto · cover color", mid: [0.42, 0.43, 0.47] }
 ];
+
+const autoTheme = { art: "", token: 0 };
+const autoProps = ["--fog", "--green", "--h1", "--h2", "--h3", "--h4"];
+
+function hslToRgb(h, s, l) {
+  const a = s * Math.min(l, 1 - l);
+  const f = (n) => {
+    const k = (n + h / 30) % 12;
+    return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+  };
+  return [f(0), f(8), f(4)].map((value) => Math.round(value * 255));
+}
+
+function dominantHue(image) {
+  const size = 24;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(image, 0, 0, size, size);
+
+  let data;
+  try {
+    data = ctx.getImageData(0, 0, size, size).data;
+  } catch (error) {
+    return null;
+  }
+
+  let x = 0;
+  let y = 0;
+  let total = 0;
+  let sat = 0;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i] / 255;
+    const g = data[i + 1] / 255;
+    const b = data[i + 2] / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const light = (max + min) / 2;
+    const chroma = max - min;
+    if (chroma < 0.08 || light < 0.1 || light > 0.92) continue;
+
+    const saturation = chroma / (1 - Math.abs(2 * light - 1));
+    let hue = 0;
+    if (max === r) hue = ((g - b) / chroma) % 6;
+    else if (max === g) hue = (b - r) / chroma + 2;
+    else hue = (r - g) / chroma + 4;
+    hue *= 60;
+
+    const weight = saturation * saturation * (1 - Math.abs(light - 0.5));
+    x += Math.cos((hue * Math.PI) / 180) * weight;
+    y += Math.sin((hue * Math.PI) / 180) * weight;
+    sat += saturation * weight;
+    total += weight;
+  }
+
+  if (total < 0.6) return null;
+  return { hue: ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360, sat: Math.min(0.85, Math.max(0.45, sat / total)) };
+}
+
+function clearAutoColors() {
+  const root = document.documentElement;
+  autoProps.forEach((name) => root.style.removeProperty(name));
+}
+
+function setAutoColors(color) {
+  const root = document.documentElement;
+  const base = themes[0].mid;
+
+  if (!color) {
+    clearAutoColors();
+    backdropState.mid = base;
+    if (backdropState.tint) backdropState.tint(base);
+    return;
+  }
+
+  const { hue, sat } = color;
+  const fog = hslToRgb(hue, sat, 0.62);
+  const mid = hslToRgb(hue, sat * 0.9, 0.3).map((value) => value / 255);
+  const heat = [0.18, 0.3, 0.45, 0.62].map((light) => hslToRgb(hue, 0.7, light));
+  const hex = (rgb) => `#${rgb.map((value) => value.toString(16).padStart(2, "0")).join("")}`;
+
+  root.style.setProperty("--fog", fog.join(" "));
+  root.style.setProperty("--green", hex(hslToRgb(hue, 0.75, 0.6)));
+  heat.forEach((rgb, index) => root.style.setProperty(`--h${index + 1}`, hex(rgb)));
+  backdropState.mid = mid;
+  if (backdropState.tint) backdropState.tint(mid);
+}
+
+function currentArt() {
+  if (manual.audio && manual.song) return manual.song.image || "";
+  return dock.song ? dock.song.art || "" : "";
+}
+
+async function followCover() {
+  if (document.documentElement.dataset.theme !== "auto") return;
+  const art = currentArt();
+  if (art === autoTheme.art) return;
+  autoTheme.art = art;
+  const token = ++autoTheme.token;
+  const image = art ? await loadPicture(art) : null;
+  if (token !== autoTheme.token || document.documentElement.dataset.theme !== "auto") return;
+  setAutoColors(image ? dominantHue(image) : null);
+}
 
 function applyTheme(id, notify) {
   const theme = themes.find((item) => item.id === id) || themes[0];
   document.documentElement.dataset.theme = theme.id;
+  autoTheme.token += 1;
+  clearAutoColors();
   if (backdropState.tint) backdropState.tint(theme.mid);
   backdropState.mid = theme.mid;
+  if (theme.id === "auto") {
+    autoTheme.art = "\u0000";
+    followCover();
+  }
   try {
     localStorage.setItem("theme", theme.id);
   } catch (error) {
@@ -9120,7 +9349,7 @@ function savedTheme() {
   }
 }
 
-const liveState = { game: null, presence: null, github: null };
+const liveState = { game: null, presence: null, github: null, feedSig: "" };
 
 async function githubCard() {
   if (liveState.github) return liveState.github;
@@ -9226,7 +9455,7 @@ function setupPeek() {
   window.addEventListener("scroll", hide, { passive: true });
 }
 
-const nowState = { timer: 0, art: "", title: "", game: "" };
+const nowState = { timer: 0, art: "", title: "" };
 
 function elapsedText(ms) {
   const minutes = Math.max(0, Math.floor(ms / 60000));
@@ -9296,22 +9525,6 @@ function paintNow() {
   $("nowNow").textContent = title ? fmtClock(current) : "";
   $("nowLen").textContent = title && length ? fmtClock(length) : "";
   $("nowLyrics").style.visibility = feed.rows.length && title ? "visible" : "hidden";
-
-  const game = liveState.game;
-  const gameBox = $("nowGame");
-  gameBox.hidden = !game;
-  if (game) {
-    if (nowState.game !== game.name + game.icon) {
-      nowState.game = game.name + game.icon;
-      $("nowGameName").textContent = game.name;
-      const tile = $("nowGameIcon");
-      tile.textContent = game.icon ? "" : game.name.charAt(0).toUpperCase();
-      tile.style.backgroundImage = game.icon ? `url("${game.icon.replace(/"/g, "%22")}")` : "";
-      tile.style.backgroundSize = "cover";
-    }
-    const parts = [game.detail, game.start ? elapsedText(Date.now() - game.start) : ""].filter(Boolean);
-    $("nowGameInfo").textContent = parts.join(" · ");
-  }
 }
 
 function setNowOpen(open) {
@@ -9322,7 +9535,6 @@ function setNowOpen(open) {
   if (open) {
     nowState.title = "\u0000";
     nowState.art = "\u0000";
-    nowState.game = "";
     paintNow();
     paintLines();
     nowState.timer = setInterval(() => !document.hidden && paintNow(), 250);
@@ -9774,6 +9986,26 @@ function setupShare() {
   }
 }
 
+function setupTools() {
+  const box = $("tools");
+  const toggle = $("toolsToggle");
+
+  const setOpen = (open) => {
+    box.classList.toggle("open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close tools" : "Open tools");
+  };
+
+  toggle.addEventListener("click", () => setOpen(!box.classList.contains("open")));
+  $("shareBtn").addEventListener("click", () => setOpen(false));
+  document.addEventListener("pointerdown", (event) => {
+    if (box.classList.contains("open") && !box.contains(event.target)) setOpen(false);
+  }, { passive: true });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setOpen(false);
+  });
+}
+
 function setupShortcuts() {
   $("theme").addEventListener("click", cycleTheme);
 
@@ -9822,6 +10054,9 @@ function setupShortcuts() {
       queueStep(1);
     } else if (key === "b" && queue.active) {
       queueStep(-1);
+    } else if (key === "y") {
+      if (feedSource() || dock.song || manual.song) setLyrOpen(true);
+      else flash("nothing playing");
     } else if (key === "c") {
       openShare();
     } else if (key === "f") {
@@ -9887,6 +10122,7 @@ function init() {
   setupGame();
   setupEscape();
   setupShortcuts();
+  setupTools();
   setupNow();
   setupPeek();
   setupShare();
