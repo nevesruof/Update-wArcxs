@@ -6829,6 +6829,8 @@ const music = {
   retryAt: 0,
   failures: 0,
   watch: 0,
+  stall: 0,
+  errorCode: 0,
   matches: new Map(),
   asks: new Map(),
   timer: 0
@@ -6952,6 +6954,7 @@ function ensurePlayer() {
                 music.playing = playing;
                 if (playing) {
                   clearTimeout(music.watch);
+                  clearTimeout(music.stall);
                   music.blocked = false;
                   music.failures = 0;
                 }
@@ -6960,8 +6963,9 @@ function ensurePlayer() {
               onAutoplayBlocked: () => {
                 music.blocked = true;
               },
-              onError: () => {
+              onError: (event) => {
                 clearTimeout(timer);
+                music.errorCode = Number(event && event.data) || 0;
                 music.loaded = "";
                 nextCandidate();
               }
@@ -7003,6 +7007,33 @@ async function resolveTrack(track, artist) {
   return ask;
 }
 
+function watchStart(request) {
+  clearTimeout(music.stall);
+  music.stall = setTimeout(() => {
+    if (request !== music.generation || music.playing) return;
+    try {
+      music.player.playVideo();
+    } catch (error) {
+      return;
+    }
+    music.stall = setTimeout(() => {
+      if (request !== music.generation || music.playing) return;
+      let state = -1;
+      try {
+        state = music.player.getPlayerState();
+      } catch (error) {
+        state = -1;
+      }
+      if (state === 3) {
+        watchStart(request);
+        return;
+      }
+      music.loaded = "";
+      nextCandidate();
+    }, 4500);
+  }, 2500);
+}
+
 function watchAutoplay(request) {
   clearTimeout(music.watch);
   music.watch = setTimeout(() => {
@@ -7035,6 +7066,7 @@ async function playVideo(id, offset, source, keep) {
 
     music.loaded = id;
     watchAutoplay(request);
+    if (source === "manual") watchStart(request);
     return true;
   } catch (error) {
     if (request === music.generation) nextCandidate();
@@ -7057,6 +7089,7 @@ function nextCandidate() {
   const wasManual = music.source === "manual";
   music.generation += 1;
   clearTimeout(music.watch);
+  clearTimeout(music.stall);
   music.source = "none";
   music.playing = false;
   music.loaded = "";
@@ -7064,7 +7097,8 @@ function nextCandidate() {
   music.key = "";
 
   if (wasManual) {
-    findNote("Couldn't play that song.");
+    findNote(music.errorCode ? `Couldn't play that song (code ${music.errorCode}).` : "Couldn't play that song.");
+    music.errorCode = 0;
     if (queue.active && manual.id) playQueueAt(queue.index + 1);
     else stopManual(queue.active);
   }
@@ -7072,6 +7106,7 @@ function nextCandidate() {
 
 function musicStop() {
   music.generation += 1;
+  clearTimeout(music.stall);
   music.candidates = [];
   music.key = "";
   music.blocked = false;
