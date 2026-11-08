@@ -5,7 +5,7 @@ Página de perfil con presencia de Discord (tu bot), juegos con ficha de IGDB (T
 ## Estructura
 
 - `index.html`: la página completa.
-- `assets/porsche.webp`: logo de la intro.
+- `assets/porsche-logo.js`: logo de la intro.
 - `api/presence.js`, `api/activity.js`, `api/game-info.js`: funciones de Vercel que hablan con tu bot, Discord, IGDB, Steam y Roblox.
 - `lib/`: lógica compartida de las funciones.
 - `scripts/dev.mjs`: servidor local (`npm run dev`).

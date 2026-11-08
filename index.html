@@ -10,7 +10,6 @@
 <meta property="og:description" content="Break it to understand it. Build it so it can't be broken.">
 <meta name="twitter:card" content="summary">
 <title>Take</title>
-<link rel="preload" as="image" href="assets/porsche.webp" type="image/webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Pixelify+Sans:wght@700&family=Newsreader:wght@400;500;600&display=swap" rel="stylesheet">
@@ -4145,12 +4144,14 @@ button:focus-visible {
 </aside>
 
 <div class="rail" id="rail" aria-hidden="true"><i id="railThumb"></i></div>
+<script src="assets/porsche-logo.js"></script>
 <script>
 const profile = {
   name: "Take",
   handle: "singledeve",
   nameStyle: { font_id: 8, effect_id: 4, colors: [16777215] },
   intro: true,
+  introLogo: window.INTRO_LOGO || "",
   avatar: "",
   avatarDecoration: "",
   apiBase: "",
@@ -4495,7 +4496,33 @@ function setupToast() {
 
 function loadLogo(url, done) {
   const image = new Image();
-  image.onload = () => done(image);
+
+  image.onload = () => {
+    const art = document.createElement("canvas");
+    art.width = image.width;
+    art.height = image.height;
+    const c = art.getContext("2d", { willReadFrequently: true });
+    c.drawImage(image, 0, 0);
+
+    try {
+      const pixels = c.getImageData(0, 0, art.width, art.height);
+      const data = pixels.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const luma = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114) / 255;
+        const strength = (data[i + 3] / 255) * (0.35 + 0.65 * luma);
+        data[i] = 255;
+        data[i + 1] = 255;
+        data[i + 2] = 255;
+        data[i + 3] = Math.round(strength * 255);
+      }
+      c.putImageData(pixels, 0, 0);
+    } catch (error) {
+      return;
+    }
+
+    done(art);
+  };
+
   image.src = url;
 }
 
@@ -4510,17 +4537,15 @@ function runIntro(onEnter) {
 
   const canvas = $("ascii");
   const ctx = canvas.getContext("2d", { alpha: false });
-  const ramp = " .'`^,:;-~+*=ixlrsfo29A5HM#&8@";
-  const cellW = 8;
-  const cellH = 14;
+  const ramp = " .:ilrsxf29A5HM#8@";
+  const cellW = 7;
+  const cellH = 12;
   const ratio = Math.min(2, window.devicePixelRatio || 1);
-  const tileW = ratio > 1 ? 2.5 : 4;
-  const tileH = ratio > 1 ? 4.4 : 7;
   const reveal = 850;
   const shades = Array.from({ length: 48 }, (_, i) => {
     const v = i / 47;
-    const shade = Math.round(12 + v * v * 120);
-    return `rgb(${shade},${shade},${shade + 4})`;
+    const shade = Math.round(12 + v * v * 168);
+    return `rgb(${shade},${shade},${Math.min(255, shade + 4)})`;
   });
   const field = document.createElement("canvas");
   const fieldCtx = field.getContext("2d", { alpha: false });
@@ -4555,18 +4580,18 @@ function runIntro(onEnter) {
 
     if (!logo) return;
 
-    let markH = Math.min(height * 0.62, 520);
+    let markH = height * 0.62;
     let markW = markH * (logo.width / logo.height);
     if (markW > width * 0.8) {
       markW = width * 0.8;
       markH = markW / (logo.width / logo.height);
     }
 
-    const tilesX = Math.max(8, Math.round(markW / tileW));
-    const tilesY = Math.max(8, Math.round(markH / tileH));
-    const x0 = width / 2 - markW / 2;
-    const y0 = height * 0.46 - markH / 2;
-    box = { x: x0, y: y0, w: markW, h: markH };
+    const tilesX = Math.max(8, Math.round(markW / cellW));
+    const tilesY = Math.max(8, Math.round(markH / cellH));
+    const x0 = width / 2 - (tilesX * cellW) / 2;
+    const y0 = height * 0.46 - (tilesY * cellH) / 2;
+    box = { x: x0, y: y0, w: tilesX * cellW, h: tilesY * cellH };
 
     sample.width = tilesX;
     sample.height = tilesY;
@@ -4576,23 +4601,18 @@ function runIntro(onEnter) {
     const data = sampleCtx.getImageData(0, 0, tilesX, tilesY).data;
 
     layerCtx.clearRect(0, 0, width, height);
-    layerCtx.font = `bold ${tileH}px "Geist Mono", monospace`;
+    layerCtx.font = `${cellH - 1}px "Geist Mono", monospace`;
     layerCtx.textBaseline = "top";
 
     for (let y = 0; y < tilesY; y += 1) {
       for (let x = 0; x < tilesX; x += 1) {
         const i = (y * tilesX + x) * 4;
-        if (data[i + 3] < 90) continue;
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        const dark = Math.max(r, g, b) < 100;
-        const luma = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
-        const level = dark ? ramp.length - 3 : Math.min(ramp.length - 1, Math.floor((0.55 + 0.45 * luma) * ramp.length));
-        layerCtx.fillStyle = dark
-          ? "rgb(74,74,80)"
-          : `rgb(${Math.min(255, Math.round(r * 1.3))},${Math.min(255, Math.round(g * 1.3))},${Math.min(255, Math.round(b * 1.3))})`;
-        layerCtx.fillText(ramp[level], x0 + x * tileW, y0 + y * tileH);
+        const strength = data[i + 3] / 255;
+        if (strength < 0.06) continue;
+        const value = Math.min(1, 0.15 + strength * 0.85);
+        const shade = Math.round(12 + value * value * 168);
+        layerCtx.fillStyle = `rgb(${shade},${shade},${Math.min(255, shade + 4)})`;
+        layerCtx.fillText(ramp[Math.min(ramp.length - 1, Math.floor(value * ramp.length))], x0 + x * cellW, y0 + y * cellH);
       }
     }
   };
@@ -4640,9 +4660,9 @@ function runIntro(onEnter) {
       ctx.fillStyle = fade;
       ctx.fillRect(box.x - 6, bottom - 22, box.w + 12, 22);
       const glow = ctx.createLinearGradient(box.x, 0, box.x + box.w, 0);
-      glow.addColorStop(0, "rgba(236,196,98,0)");
-      glow.addColorStop(0.5, "rgba(255,226,150,0.9)");
-      glow.addColorStop(1, "rgba(236,196,98,0)");
+      glow.addColorStop(0, "rgba(255,255,255,0)");
+      glow.addColorStop(0.5, "rgba(255,255,255,0.85)");
+      glow.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = glow;
       ctx.fillRect(box.x, bottom - 1, box.w, 1.5);
     }
@@ -4681,11 +4701,13 @@ function runIntro(onEnter) {
     }, 120);
   });
 
-  loadLogo("assets/porsche.webp", (image) => {
-    logo = image;
-    build();
-    shownAt = performance.now();
-  });
+  if (profile.introLogo) {
+    loadLogo(profile.introLogo, (image) => {
+      logo = image;
+      build();
+      shownAt = performance.now();
+    });
+  }
 
   requestAnimationFrame(frame);
 
