@@ -1087,9 +1087,64 @@ body.entered .rise {
   height: 16px;
 }
 
-.devices [data-status="online"] { color: #4ade80; }
-.devices [data-status="idle"] { color: #facc15; }
-.devices [data-status="dnd"] { color: #f87171; }
+.devices > span {
+  position: relative;
+  display: grid;
+  place-items: center;
+  cursor: default;
+}
+
+.devices [data-status="online"] { color: #4ade80; --dot: #4ade80; }
+.devices [data-status="idle"] { color: #facc15; --dot: #facc15; }
+.devices [data-status="dnd"] { color: #f87171; --dot: #f87171; }
+
+.devices .tip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 9px);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px 5px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(14, 14, 15, 0.96);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: #ededed;
+  opacity: 0;
+  transform: translate(-50%, 4px) scale(0.94);
+  transform-origin: 50% 100%;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.devices .tip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dot, #9a9a9f);
+  box-shadow: 0 0 8px var(--dot, transparent);
+}
+
+.devices .tip small {
+  font-size: inherit;
+  color: #77777c;
+}
+
+.devices > span:hover .tip,
+.devices > span:focus-visible .tip {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
 
 @keyframes pop-in {
   from { transform: scale(0); }
@@ -4436,7 +4491,7 @@ function paintDevices(data, status) {
   ].filter((entry) => entry[1]);
 
   wrap.innerHTML = active
-    .map(([key, , label]) => `<span data-status="${status}" title="${label}" aria-label="${label}">${deviceIcons[key]}</span>`)
+    .map(([key, , label]) => `<span data-status="${status}" tabindex="0" aria-label="${label}, ${status}">${deviceIcons[key]}<i class="tip">${label}<small>${status}</small></i></span>`)
     .join("");
 }
 
