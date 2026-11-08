@@ -39,33 +39,53 @@
 
 html {
   background: var(--bg);
+  scrollbar-width: none;
 }
 
 html::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-html::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-html::-webkit-scrollbar-thumb {
-  background: #2e2e33;
-  border-radius: 8px;
-}
-
-html::-webkit-scrollbar-button {
   display: none;
-  width: 0;
-  height: 0;
 }
 
-@supports (-moz-appearance: none) {
-  html {
-    scrollbar-width: thin;
-    scrollbar-color: #2e2e33 transparent;
-  }
+.rail {
+  position: fixed;
+  top: 6px;
+  right: 2px;
+  bottom: 6px;
+  z-index: 40;
+  width: 14px;
+}
+
+.rail.off {
+  display: none;
+}
+
+.rail i {
+  position: absolute;
+  top: 0;
+  right: 3px;
+  width: 3px;
+  min-height: 36px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.22);
+  opacity: 0;
+  cursor: grab;
+  transition: opacity 0.45s ease, width 0.2s ease, right 0.2s ease, background-color 0.2s ease;
+}
+
+.rail.awake i {
+  opacity: 1;
+}
+
+.rail:hover i,
+.rail.drag i {
+  opacity: 1;
+  width: 5px;
+  right: 2px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.rail.drag i {
+  cursor: grabbing;
 }
 
 body {
@@ -816,14 +836,82 @@ a.social:hover b {
   align-items: center;
   gap: 5px;
   font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--muted);
+  font-size: 0.78rem;
+  color: #8a8a90;
   white-space: nowrap;
-  transition: color 0.2s;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
 .project a.out:hover {
   color: #fff;
+  text-shadow: 0 0 0.6px #fff, 0 0 12px rgba(255, 255, 255, 0.28);
+}
+
+.project a.out svg {
+  transition: transform 0.3s ease;
+}
+
+.project a.out:hover svg {
+  transform: translate(1.5px, -1.5px);
+}
+
+.mark {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  color: #a9a9ae;
+}
+
+.mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.mark .tri-a {
+  clip-path: inset(0 0 100% 0);
+}
+
+.mark .tri-b {
+  clip-path: inset(100% 0 0 0);
+}
+
+.mark.on .tri-a {
+  animation: markTop 0.95s cubic-bezier(0.65, 0, 0.2, 1) forwards;
+}
+
+.mark.on .tri-b {
+  animation: markBottom 0.95s cubic-bezier(0.65, 0, 0.2, 1) 0.4s forwards;
+}
+
+.mark::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(112deg, transparent 43%, rgba(255, 255, 255, 0.95) 50%, transparent 57%) 140% 0 / 200% 100% no-repeat;
+  -webkit-mask: url("assets/larp-mark.svg") center / contain no-repeat;
+  mask: url("assets/larp-mark.svg") center / contain no-repeat;
+}
+
+.mark.on::after {
+  opacity: 1;
+  animation: markGlint 5s ease-in-out 2.2s infinite;
+}
+
+@keyframes markTop {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes markBottom {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes markGlint {
+  0%, 76% { background-position: 140% 0; }
+  100% { background-position: -40% 0; }
 }
 
 .project .out svg {
@@ -1588,6 +1676,17 @@ a.social:hover b {
 
   .intro p {
     animation: none;
+  }
+
+  .mark .tri-a,
+  .mark .tri-b {
+    clip-path: none;
+    animation: none;
+  }
+
+  .mark.on::after {
+    animation: none;
+    opacity: 0;
   }
 }
 .s-title a {
@@ -2565,6 +2664,7 @@ a.rank-card:hover .rank-art img {
 
 <audio id="ambient" loop preload="none"></audio>
 
+<div class="rail" id="rail" aria-hidden="true"><i id="railThumb"></i></div>
 <script src="assets/porsche-logo.js"></script>
 <script>
 const profile = {
@@ -2577,7 +2677,7 @@ const profile = {
   avatarDecoration: "",
   apiBase: "",
   discordId: "893966003690668102",
-  bio: "Developer. Construyendo cosas desde que tengo memoria.",
+  bio: "Break it to understand it. Build it so it can't be broken.",
   bioLinks: [
     { label: "tu-sitio.com", href: "#" },
     { label: "tu-sitio.com/proyectos", href: "#" }
@@ -2594,9 +2694,10 @@ const profile = {
   project: {
     name: "Larp Client",
     description: "Un cliente de Minecraft con visuals, HUD y módulos.",
-    label: "en desarrollo",
-    href: "",
-    icon: ""
+    label: "larpingclient.com",
+    href: "https://larpingclient.vercel.app",
+    icon: "",
+    mark: true
   },
   activity: [
     { name: "Minecraft", detail: "Probando módulos", daysAgo: 2, icon: "", trending: true },
@@ -2639,6 +2740,111 @@ function compact(number) {
   if (number < 1000) return String(Math.round(number));
   const short = (number / 1000).toFixed(1).replace(/\.0$/, "");
   return `${short}K`;
+}
+
+function larpMark() {
+  return `<span class="mark" id="mark"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+<defs>
+<path id="lmA" d="M50,6 L88.11,72 L11.89,72 Z" stroke-linejoin="miter" stroke-miterlimit="10"/>
+<path id="lmB" d="M50,94 L11.89,28 L88.11,28 Z" stroke-linejoin="miter" stroke-miterlimit="10"/>
+<clipPath id="lmCa"><circle cx="75.4" cy="50" r="9"/><circle cx="37.3" cy="72" r="9"/><circle cx="37.3" cy="28" r="9"/></clipPath>
+<clipPath id="lmCb"><circle cx="62.7" cy="72" r="9"/><circle cx="24.6" cy="50" r="9"/><circle cx="62.7" cy="28" r="9"/></clipPath>
+<mask id="lmMa" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+<use href="#lmA" stroke="#fff" stroke-width="8"/>
+<g clip-path="url(#lmCb)"><use href="#lmB" stroke="#000" stroke-width="12.5"/></g>
+</mask>
+<mask id="lmMb" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+<use href="#lmB" stroke="#fff" stroke-width="8"/>
+<g clip-path="url(#lmCa)"><use href="#lmA" stroke="#000" stroke-width="12.5"/></g>
+</mask>
+</defs>
+<rect class="tri-a" width="100" height="100" fill="currentColor" mask="url(#lmMa)"/>
+<rect class="tri-b" width="100" height="100" fill="currentColor" mask="url(#lmMb)"/>
+</svg></span>`;
+}
+
+function setupRail() {
+  const rail = $("rail");
+  const thumb = $("railThumb");
+  const root = document.scrollingElement || document.documentElement;
+  let hide = 0;
+  let drag = null;
+
+  const metrics = () => {
+    const view = root.clientHeight;
+    const total = root.scrollHeight;
+    const track = rail.clientHeight;
+    const size = Math.max(36, (track * view) / total);
+    return { view, total, track, size, travel: track - size, range: total - view };
+  };
+
+  const update = () => {
+    const open = document.body.classList.contains("locked");
+    const m = metrics();
+    rail.classList.toggle("off", open || m.range <= 4);
+    if (open || m.range <= 4) return;
+    thumb.style.height = `${m.size}px`;
+    thumb.style.transform = `translateY(${m.travel * (root.scrollTop / m.range)}px)`;
+  };
+
+  const wake = () => {
+    rail.classList.add("awake");
+    clearTimeout(hide);
+    hide = setTimeout(() => rail.classList.remove("awake"), 1000);
+  };
+
+  window.addEventListener("scroll", () => {
+    update();
+    wake();
+  }, { passive: true });
+  window.addEventListener("resize", update);
+  new ResizeObserver(update).observe(document.body);
+  new MutationObserver(update).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  thumb.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    thumb.setPointerCapture(event.pointerId);
+    drag = { y: event.clientY, top: root.scrollTop };
+    rail.classList.add("drag");
+  });
+
+  thumb.addEventListener("pointermove", (event) => {
+    if (!drag) return;
+    const m = metrics();
+    root.scrollTop = drag.top + ((event.clientY - drag.y) / m.travel) * m.range;
+  });
+
+  const release = () => {
+    drag = null;
+    rail.classList.remove("drag");
+    wake();
+  };
+  thumb.addEventListener("pointerup", release);
+  thumb.addEventListener("pointercancel", release);
+
+  rail.addEventListener("pointerdown", (event) => {
+    if (event.target === thumb) return;
+    const m = metrics();
+    const y = event.clientY - rail.getBoundingClientRect().top - m.size / 2;
+    root.scrollTo({ top: (Math.max(0, Math.min(m.travel, y)) / m.travel) * m.range, behavior: "smooth" });
+  });
+
+  update();
+}
+
+function watchMark() {
+  const mark = $("mark");
+  if (!mark) return;
+  if (!("IntersectionObserver" in window)) {
+    mark.classList.add("on");
+    return;
+  }
+  const seen = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    seen.disconnect();
+    setTimeout(() => mark.classList.add("on"), 250);
+  }, { threshold: 0.6 });
+  seen.observe(mark);
 }
 
 function initialTile(name, icon) {
@@ -2782,50 +2988,6 @@ function setupToast() {
   });
 }
 
-function drawSkull() {
-  const art = document.createElement("canvas");
-  art.width = 256;
-  art.height = 256;
-  const c = art.getContext("2d");
-
-  c.fillStyle = "#fff";
-  c.beginPath();
-  c.ellipse(128, 108, 78, 82, 0, 0, Math.PI * 2);
-  c.fill();
-
-  c.beginPath();
-  c.roundRect(88, 160, 80, 62, 14);
-  c.fill();
-
-  c.globalCompositeOperation = "destination-out";
-
-  c.beginPath();
-  c.ellipse(98, 118, 23, 27, 0.15, 0, Math.PI * 2);
-  c.fill();
-  c.beginPath();
-  c.ellipse(158, 118, 23, 27, -0.15, 0, Math.PI * 2);
-  c.fill();
-
-  c.beginPath();
-  c.moveTo(128, 142);
-  c.lineTo(116, 168);
-  c.lineTo(140, 168);
-  c.closePath();
-  c.fill();
-
-  c.lineWidth = 5;
-  c.lineCap = "round";
-  c.strokeStyle = "#000";
-  [108, 128, 148].forEach((x) => {
-    c.beginPath();
-    c.moveTo(x, 190);
-    c.lineTo(x, 222);
-    c.stroke();
-  });
-
-  return art;
-}
-
 function loadLogo(url, done) {
   const image = new Image();
 
@@ -2878,7 +3040,8 @@ function runIntro(onEnter) {
   let rows = 0;
   let maskData = null;
   let stop = false;
-  let logo = drawSkull();
+  let logo = null;
+  let shownAt = 0;
 
   const build = () => {
     canvas.width = window.innerWidth;
@@ -2888,14 +3051,16 @@ function runIntro(onEnter) {
     mask.width = cols;
     mask.height = rows;
     maskCtx.clearRect(0, 0, cols, rows);
-    const ratio = (logo.width / logo.height) * (cellH / cellW);
-    let height = rows * 0.62;
-    let width = height * ratio;
-    if (width > cols * 0.8) {
-      width = cols * 0.8;
-      height = width / ratio;
+    if (logo) {
+      const ratio = (logo.width / logo.height) * (cellH / cellW);
+      let height = rows * 0.62;
+      let width = height * ratio;
+      if (width > cols * 0.8) {
+        width = cols * 0.8;
+        height = width / ratio;
+      }
+      maskCtx.drawImage(logo, cols / 2 - width / 2, rows / 2 - height / 2, width, height);
     }
-    maskCtx.drawImage(logo, cols / 2 - width / 2, rows / 2 - height / 2, width, height);
     maskData = maskCtx.getImageData(0, 0, cols, rows).data;
     ctx.font = `${cellH - 1}px "Geist Mono", monospace`;
     ctx.textBaseline = "top";
@@ -2907,6 +3072,7 @@ function runIntro(onEnter) {
   if (profile.introLogo) {
     loadLogo(profile.introLogo, (art) => {
       logo = art;
+      shownAt = performance.now();
       build();
     });
   }
@@ -2916,6 +3082,7 @@ function runIntro(onEnter) {
     setTimeout(() => requestAnimationFrame(draw), 40);
 
     const t = now / 1000;
+    const reveal = shownAt ? Math.min(1, (now - shownAt) / 900) : 0;
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -2928,7 +3095,7 @@ function runIntro(onEnter) {
           Math.sin(y * 0.11 - t * 1.2) * 0.5 +
           Math.sin((x + y) * 0.045 + t * 0.6) * 0.5 +
           Math.sin(Math.hypot(x - cols / 2, (y - rows / 2) * 1.8) * 0.12 - t * 1.4) * 0.5;
-        const text = maskData[(y * cols + x) * 4 + 3] / 255;
+        const text = (maskData[(y * cols + x) * 4 + 3] / 255) * reveal;
         const edge = Math.max(0, 1 - Math.hypot(nx - 0.5, (ny - 0.5) * 1.1) * 1.5);
         let value = 0.15 + wave * 0.06 + text * 0.85 + edge * 0.06;
         value = Math.max(0, Math.min(1, value));
@@ -3157,7 +3324,7 @@ function renderProject() {
     side = `<span class="out">${esc(project.label)}</span>`;
   }
 
-  $("project").innerHTML = `${initialTile(project.name, project.icon)}<div class="text"><b>${esc(project.name)}</b><span>${esc(project.description)}</span></div>${side}`;
+  $("project").innerHTML = `${project.mark ? larpMark() : initialTile(project.name, project.icon)}<div class="text"><b>${esc(project.name)}</b><span>${esc(project.description)}</span></div>${side}`;
 }
 
 let liveEntry = null;
@@ -4234,6 +4401,7 @@ function init() {
   renderHead();
   renderSocials();
   renderProject();
+  setupRail();
   renderFeed();
   showLastPlayed(profile.lastPlayed);
   setupPlaysHover();
@@ -4262,6 +4430,7 @@ function init() {
   runIntro(() => {
     document.body.classList.add("entered");
     startAudio();
+    watchMark();
   });
 }
 
