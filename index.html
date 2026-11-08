@@ -571,9 +571,39 @@ body.entered .np-dock.live {
   gap: 3px;
   min-height: 0;
   max-height: 184px;
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+}
+
+.np-results::-webkit-scrollbar {
+  width: 3px;
+}
+
+.np-results::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.np-results::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.np-results::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.np-results::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .np-results {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
 }
 
 .np-find-item {
@@ -2121,26 +2151,42 @@ a.social:hover b {
 .heat > * {
   display: block;
   aspect-ratio: 1;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2.5px;
+  background: #161b22;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.045);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+}
+
+.heat > .pop {
+  animation: cellIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--w, 0) * 12ms);
+}
+
+@keyframes cellIn {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
 }
 
 .heat a:hover {
-  outline: 1px solid rgba(255, 255, 255, 0.7);
-  outline-offset: 0;
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 10px rgba(255, 255, 255, 0.08);
 }
 
 .heat .l1 { background: #0e4429; }
 .heat .l2 { background: #006d32; }
 .heat .l3 { background: #26a641; }
 .heat .l4 { background: #39d353; }
-.heat .void { background: transparent; }
+.heat .void { background: transparent; box-shadow: none; }
 
 .legend {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  margin-top: 8px;
+  margin-top: 10px;
   font-family: var(--mono);
   font-size: 10px;
   color: var(--label);
@@ -2149,8 +2195,9 @@ a.social:hover b {
 .legend i {
   width: 11px;
   height: 11px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2.5px;
+  background: #161b22;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.045);
 }
 
 .legend i.l1 { background: #0e4429; }
@@ -2169,27 +2216,31 @@ a.social:hover b {
 .tip {
   position: fixed;
   z-index: 40;
-  min-width: 150px;
-  padding: 8px 11px;
+  display: grid;
+  gap: 3px;
+  min-width: 152px;
+  padding: 9px 11px;
   border-radius: 8px;
-  border: 1px solid var(--line);
-  background: rgba(16, 16, 18, 0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(14, 14, 15, 0.96);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5), 0 0 22px rgba(57, 211, 83, 0.07);
   pointer-events: none;
   opacity: 0;
-  transform: translate(-50%, -100%);
-  transition: opacity 0.15s ease;
+  transform: translateY(4px) scale(0.96);
+  transition: opacity 0.18s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
   font-size: 11px;
-  line-height: 1.45;
+  line-height: 1.25;
 }
 
 .tip.show {
   opacity: 1;
+  transform: none;
 }
 
 .tip b {
   display: block;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text);
 }
@@ -2202,7 +2253,28 @@ a.social:hover b {
 .tip em {
   display: block;
   font-style: normal;
+  font-size: 10px;
   color: var(--label);
+}
+
+.tip .arrow {
+  position: absolute;
+  left: var(--arrow, 50%);
+  top: 100%;
+  width: 0;
+  height: 0;
+  margin-top: -1px;
+  border: 5px solid transparent;
+  border-top-color: rgba(14, 14, 15, 0.96);
+  transform: translateX(-50%);
+}
+
+.tip[data-place="bottom"] .arrow {
+  top: auto;
+  bottom: 100%;
+  margin: 0 0 -1px;
+  border-top-color: transparent;
+  border-bottom-color: rgba(14, 14, 15, 0.96);
 }
 
 .roblox {
@@ -3737,7 +3809,7 @@ button:focus-visible {
 
 </main>
 
-<div class="tip" id="tip"><b></b><span></span><em>open on github</em></div>
+<div class="tip" id="tip"><b></b><span></span><em>open on github</em><i class="arrow"></i></div>
 
 <div class="overlay" id="overlay" aria-hidden="true">
   <div class="panel" role="dialog" aria-label="Estadísticas de música">
@@ -4701,8 +4773,17 @@ function showTip(cell) {
 
   box.querySelector("b").textContent = `${count} contribution${count === 1 ? "" : "s"}`;
   box.querySelector("span").textContent = label;
-  box.style.left = `${Math.min(window.innerWidth - 90, Math.max(90, rect.left + rect.width / 2))}px`;
-  box.style.top = `${rect.top - 8}px`;
+
+  const width = box.offsetWidth;
+  const height = box.offsetHeight;
+  const center = rect.left + rect.width / 2;
+  const left = Math.min(Math.max(center - width / 2, 12), window.innerWidth - width - 12);
+  const above = rect.top - height - 9 >= 12;
+
+  box.dataset.place = above ? "top" : "bottom";
+  box.style.left = `${left}px`;
+  box.style.top = `${above ? rect.top - height - 9 : rect.bottom + 9}px`;
+  box.style.setProperty("--arrow", `${Math.min(Math.max(center - left, 14), width - 14)}px`);
   box.classList.add("show");
 }
 
@@ -4713,11 +4794,12 @@ function hideTip() {
 function paintHeat(cells, total) {
   $("commits").textContent = `${total.toLocaleString("en-US")} commits this year`;
   $("heat").innerHTML = cells
-    .map((cell) => {
-      if (!cell) return '<i class="void"></i>';
-      if (!cell.date) return '<i class="l0"></i>';
+    .map((cell, index) => {
+      const wave = `--w:${Math.floor(index / 7)}`;
+      if (!cell) return `<i class="void"></i>`;
+      if (!cell.date) return `<i class="l0 pop" style="${wave}"></i>`;
       const link = `https://github.com/${profile.github}?tab=overview&from=${cell.date}&to=${cell.date}`;
-      return `<a class="l${cell.level}" href="${link}" target="_blank" rel="noopener" data-count="${cell.count}" data-date="${cell.date}"></a>`;
+      return `<a class="l${cell.level} pop" style="${wave}" href="${link}" target="_blank" rel="noopener" data-count="${cell.count}" data-date="${cell.date}"></a>`;
     })
     .join("");
 }
@@ -4735,10 +4817,51 @@ function setupHeatTips() {
   });
 }
 
+function isoDay(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function simulatedYear(weeks) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = new Date(today);
+  start.setDate(start.getDate() - ((weeks - 1) * 7 + today.getDay()));
+
+  const noise = (n) => {
+    const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453;
+    return x - Math.floor(x);
+  };
+
+  const days = [];
+  for (const cursor = new Date(start); cursor <= today; cursor.setDate(cursor.getDate() + 1)) {
+    const index = days.length;
+    const weekday = cursor.getDay();
+    const season = 0.55 + 0.45 * Math.sin(index / 23);
+    const burst = noise(Math.floor(index / 6) + 7) > 0.55 ? 1 : 0.15;
+    const weekend = weekday === 0 || weekday === 6 ? 0.55 : 1;
+    const roll = noise(index + 3);
+    const chance = 0.78 * season * burst * weekend + 0.08;
+    const count = roll < chance ? Math.max(1, Math.round(noise(index * 2.3) * 11 * season * burst + 1)) : 0;
+    days.push({ date: isoDay(cursor), count, level: 0 });
+  }
+
+  const peak = Math.max(...days.map((day) => day.count), 1);
+  days.forEach((day) => {
+    const ratio = day.count / peak;
+    day.level = day.count === 0 ? 0 : ratio >= 0.76 ? 4 : ratio >= 0.48 ? 3 : ratio >= 0.22 ? 2 : 1;
+  });
+
+  return days;
+}
+
+function paintSimulated(weeks) {
+  const days = simulatedYear(weeks);
+  paintHeat([...Array(new Date(`${days[0].date}T00:00:00`).getDay()).fill(null), ...days], days.reduce((sum, day) => sum + day.count, 0));
+}
+
 async function loadGithub() {
   const weeks = 48;
-  const blank = Array.from({ length: weeks * 7 }, () => ({ level: 0, count: 0, date: "" }));
-  paintHeat(blank, 0);
+  paintSimulated(weeks);
 
   if (!profile.github) return;
 
@@ -4746,14 +4869,15 @@ async function loadGithub() {
     const response = await fetch(`https://github-contributions-api.jogruber.de/v4/${profile.github}?y=last`);
     const body = await response.json();
     const days = body.contributions;
-    if (!days || !days.length) return;
+    const total = (body.total && body.total.lastYear) || (days || []).reduce((sum, day) => sum + day.count, 0);
+    if (!days || !days.length || !total) return;
 
     const lead = new Date(`${days[0].date}T00:00:00Z`).getUTCDay();
     let cells = [...Array(lead).fill(null), ...days];
     const limit = weeks * 7;
     if (cells.length > limit) cells = cells.slice(Math.ceil((cells.length - limit) / 7) * 7);
 
-    paintHeat(cells, body.total.lastYear || days.reduce((sum, day) => sum + day.count, 0));
+    paintHeat(cells, total);
   } catch (error) {
     return;
   }
