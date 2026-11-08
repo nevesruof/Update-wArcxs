@@ -550,9 +550,26 @@ body.entered .np-dock.live {
   display: none;
 }
 
+.np-results-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.np-results-wrap:not(.open) {
+  transition-duration: 0.55s;
+  transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.np-results-wrap.open {
+  grid-template-rows: 1fr;
+}
+
 .np-results {
   display: grid;
+  align-content: start;
   gap: 3px;
+  min-height: 0;
   max-height: 184px;
   overflow: auto;
   scrollbar-width: thin;
@@ -575,6 +592,21 @@ body.entered .np-dock.live {
   animation: findIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--i, 0) * 40ms);
   transition: background 0.18s ease;
+}
+
+.np-results-wrap:not(.open) .np-find-item,
+.np-results-wrap:not(.open) .np-empty {
+  animation: findOut 0.3s cubic-bezier(0.4, 0, 1, 1) both;
+  animation-delay: calc(var(--i, 0) * 24ms);
+  pointer-events: none;
+}
+
+@keyframes findOut {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+    filter: blur(4px);
+  }
 }
 
 .np-find-item:hover,
@@ -1081,17 +1113,11 @@ body.entered .rise {
   color: #9a9a9f;
   white-space: nowrap;
   cursor: default;
-  transition: color 0.2s ease, border-color 0.2s ease;
   animation: pop-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) both;
 }
 
 .hour b {
   font-weight: 500;
-}
-
-.hour:hover {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .hour {
@@ -1113,13 +1139,7 @@ body.entered .rise {
   stroke: currentColor;
   stroke-opacity: 0.4;
   stroke-width: 1.3;
-  transition: stroke-opacity 0.25s ease, fill 0.25s ease;
-}
-
-.hour:hover .clk .face {
-  stroke-opacity: 0.75;
-  fill: rgba(255, 255, 255, 0.1);
-}
+  }
 
 .clk .ticks {
   stroke-width: 1.4;
@@ -3793,7 +3813,7 @@ button:focus-visible {
       </div>
       <div class="np-find">
         <label class="np-field"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="npSearch" type="search" placeholder="Search listened songs" aria-label="Search listened songs" autocomplete="off" spellcheck="false"></label>
-        <div class="np-results" id="npResults" aria-label="Song search results"></div>
+        <div class="np-results-wrap" id="npWrap"><div class="np-results" id="npResults" aria-label="Song search results"></div></div>
       </div>
     </div>
   </div>
@@ -5207,6 +5227,7 @@ function stopManual() {
 
 function findNote(text) {
   const list = $("npResults");
+  $("npWrap").classList.add("open");
   list.querySelectorAll(".np-empty").forEach((node) => node.remove());
   const note = document.createElement("p");
   note.className = "np-empty";
@@ -5276,12 +5297,20 @@ async function toggleSong(song) {
 
 function renderFinder(query) {
   const list = $("npResults");
+  const wrap = $("npWrap");
   const text = query.trim();
+  clearTimeout(finder.closer);
 
   if (!text) {
-    list.innerHTML = "";
+    wrap.classList.remove("open");
+    list.querySelectorAll(".np-find-item").forEach((item, index) => item.style.setProperty("--i", String(index)));
+    finder.closer = setTimeout(() => {
+      if (!wrap.classList.contains("open")) list.innerHTML = "";
+    }, 700);
     return;
   }
+
+  wrap.classList.add("open");
 
   const rows = (finder.songs || [])
     .map((song) => ({ song, score: matchScore(`${song.name} ${song.artist}`, text) }))
@@ -5391,7 +5420,6 @@ function setupHour() {
     lastMinute = minute;
 
     text.textContent = `${parts.hour}:${parts.minute} ${String(parts.dayPeriod).toLowerCase()}`;
-    chip.title = profile.place;
     hourHand.style.transform = `rotate(${(hour + minute / 60) * 30 + turns * 360}deg)`;
     minuteHand.style.transform = `rotate(${minute * 6 + turns * 360}deg)`;
     chip.hidden = false;
