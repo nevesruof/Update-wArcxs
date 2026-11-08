@@ -140,7 +140,7 @@ img {
   font-size: 11px;
   letter-spacing: 0.24em;
   text-indent: 0.24em;
-  color: #fff;
+  color: #8c8c8c;
   text-shadow: 0 0 10px #000;
   animation: pulse 2.6s ease-in-out infinite;
 }
@@ -151,7 +151,7 @@ img {
   width: 150px;
   height: 1px;
   margin: 10px auto 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9) 22%, rgba(255, 255, 255, 0.9) 78%, transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38) 22%, rgba(255, 255, 255, 0.38) 78%, transparent);
 }
 
 @keyframes pulse {
@@ -604,20 +604,6 @@ body.entered .rise {
   font-size: 0.8rem;
   color: var(--muted);
   line-height: 1.2;
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.tag svg {
-  width: 14px;
-  height: 14px;
-  fill: #ff4d5e;
 }
 
 .bio {
@@ -2367,10 +2353,6 @@ a.rank-card:hover .rank-art img {
       <div class="sub">
         <button class="handle" id="handle" type="button">take</button>
         <span class="copied" id="copiedUser" hidden>Copied!</span>
-        <span class="tag" id="tag">
-          <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.4-9.3C1.4 8.5 3.3 5 6.6 5c2 0 3.6 1.1 5.4 3 1.8-1.9 3.4-3 5.4-3 3.3 0 5.2 3.5 4 6.7C19.5 16.4 12 21 12 21Z"/></svg>
-          <span id="tagText">FM</span>
-        </span>
       </div>
     </div>
   </header>
@@ -2562,7 +2544,6 @@ const profile = {
   name: "Take",
   handle: "singledeve",
   nameStyle: { font_id: 8, effect_id: 4, colors: [16777215] },
-  clanTag: "FM",
   intro: true,
   introLogo: window.INTRO_LOGO || "",
   avatar: "",
@@ -2956,12 +2937,6 @@ function renderHead() {
   setNames(profile.name, profile.handle);
   applyNameStyle(profile.nameStyle);
   $("bio").textContent = profile.bio;
-
-  if (profile.clanTag) {
-    $("tagText").textContent = profile.clanTag;
-  } else {
-    $("tag").hidden = true;
-  }
 
   if (profile.avatar) setAvatar(profile.avatar);
 
