@@ -895,78 +895,34 @@ a.change:hover {
   display: block;
 }
 
-@property --spin {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
-.enter {
+.intro p {
   position: absolute;
-  left: 50%;
-  bottom: max(34px, 7vh);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 11px 24px 11px 19px;
-  border-radius: 99px;
+  left: 0;
+  right: 0;
+  bottom: 34px;
+  text-align: center;
   font-family: var(--mono);
   font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.26em;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.035);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  transform: translateX(-50%);
-  transition: background 0.3s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: enterIn 0.8s 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+  color: #8c8c8c;
+  text-shadow: 0 0 10px #000;
+  animation: pulse 2.6s ease-in-out infinite;
 }
 
-.enter::before {
+.intro p::after {
   content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: conic-gradient(from var(--spin), rgba(255, 255, 255, 0.1), rgba(236, 196, 98, 0.95) 12%, rgba(255, 255, 255, 0.1) 28%, rgba(255, 255, 255, 0.1) 62%, rgba(196, 44, 58, 0.85) 75%, rgba(255, 255, 255, 0.1) 88%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: spin 4.5s linear infinite;
-  pointer-events: none;
+  display: block;
+  width: 150px;
+  height: 1px;
+  margin: 4px auto 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55) 22%, rgba(255, 255, 255, 0.55) 78%, transparent);
+  transform: scaleY(0.5);
 }
 
-.enter i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #ecc462;
-  box-shadow: 0 0 10px rgba(236, 196, 98, 0.8);
-  animation: beat 1.8s ease-in-out infinite;
+@keyframes pulse {
+  50% { opacity: 0.55; }
 }
-
-.intro:hover .enter {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateX(-50%) translateY(-2px);
-}
-
-.intro:active .enter {
-  transform: translateX(-50%) scale(0.97);
-}
-
-@keyframes spin {
-  to { --spin: 360deg; }
-}
-
-@keyframes beat {
-  50% { transform: scale(0.6); opacity: 0.5; }
-}
-
-@keyframes enterIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-}
-
 
 .sound {
   position: fixed;
@@ -3871,7 +3827,7 @@ button:focus-visible {
 
 <div class="intro" id="intro">
   <canvas id="ascii"></canvas>
-  <div class="enter"><i></i><span>click to enter</span></div>
+  <p>click to enter</p>
 </div>
 
 <button class="sound" id="sound" type="button" aria-pressed="false" aria-label="Sonido">
