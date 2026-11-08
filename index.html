@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#030405">
-<meta name="description" content="tapped in">
+<meta name="description" content="Break it to understand it. Build it so it can't be broken.">
 <meta property="og:type" content="profile">
-<meta property="og:title" content="take">
-<meta property="og:description" content="tapped in">
-<title>take</title>
+<meta property="og:title" content="Take">
+<meta property="og:description" content="Break it to understand it. Build it so it can't be broken.">
+<meta name="twitter:card" content="summary">
+<title>Take</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Pixelify+Sans:wght@700&family=Newsreader:wght@400;500;600&display=swap" rel="stylesheet">
@@ -290,6 +291,25 @@ img {
   text-underline-offset: 2px;
   font-weight: 500;
   text-align: left;
+}
+
+.toast button.link em {
+  font-style: normal;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-block;
+  color: #ff5a5f;
+}
+
+.toast.bye {
+  animation: slideOut 0.45s ease forwards;
+}
+
+@keyframes slideOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
 }
 
 .toast .close {
@@ -1311,7 +1331,7 @@ a.social:hover b {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 85px 20px 0;
+  padding: 40px 20px 0;
   background: rgba(0, 0, 0, 0.62);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -1327,22 +1347,43 @@ a.social:hover b {
 
 .panel {
   width: min(1020px, 100%);
-  max-height: calc(100vh - 110px);
+  max-height: calc(100dvh - 64px);
   overflow-y: auto;
   padding: 16px;
-  border-radius: 16px;
+  border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: #0a0a0b;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-  transform: translateY(14px) scale(0.985);
-  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+  background: radial-gradient(120% 50% at 50% -8%, rgba(255, 255, 255, 0.05), transparent 62%), #0a0a0b;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.02);
+  opacity: 0;
+  transform: translateY(26px) scale(0.965);
+  transition: transform 0.26s cubic-bezier(0.4, 0, 1, 1), opacity 0.2s ease;
   scrollbar-width: thin;
   scrollbar-color: #2a2a2d transparent;
 }
 
 .overlay.open .panel {
+  opacity: 1;
   transform: none;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
 }
+
+.panel > * {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.overlay.open .panel > * {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s ease, transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.overlay.open .panel > :nth-child(1) { transition-delay: 0.05s; }
+.overlay.open .panel > :nth-child(2) { transition-delay: 0.11s; }
+.overlay.open .panel > :nth-child(3) { transition-delay: 0.17s; }
+.overlay.open .panel > :nth-child(4) { transition-delay: 0.23s; }
+.overlay.open .panel > :nth-child(5) { transition-delay: 0.29s; }
 
 .s-head {
   display: flex;
@@ -1463,6 +1504,7 @@ a.social:hover b {
   display: flex;
   align-items: center;
   gap: 12px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), transparent 55%), #0e0e0f;
 }
 
 .s-top .cover {
@@ -1503,7 +1545,32 @@ a.social:hover b {
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  background: #0e0e0f;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 70%), #0e0e0f;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+
+.s-stat:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.overlay.open .s-stat {
+  animation: tileIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.overlay.open .s-stat:nth-child(1) { animation-delay: 0.225s; }
+.overlay.open .s-stat:nth-child(2) { animation-delay: 0.270s; }
+.overlay.open .s-stat:nth-child(3) { animation-delay: 0.315s; }
+.overlay.open .s-stat:nth-child(4) { animation-delay: 0.360s; }
+.overlay.open .s-stat:nth-child(5) { animation-delay: 0.405s; }
+.overlay.open .s-stat:nth-child(6) { animation-delay: 0.450s; }
+.overlay.open .s-stat:nth-child(7) { animation-delay: 0.495s; }
+
+@keyframes tileIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
 }
 
 .s-stat svg {
@@ -1519,7 +1586,8 @@ a.social:hover b {
 .s-stat b {
   display: block;
   margin-top: 4px;
-  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  font-size: 19px;
   font-weight: 600;
   line-height: 1.2;
 }
@@ -1586,7 +1654,25 @@ a.social:hover b {
 
 .clock svg path {
   fill: #d4d4d4;
-  transition: d 0.4s ease;
+  transition: d 0.4s ease, fill 0.2s ease;
+}
+
+.clock svg path[data-hour]:hover {
+  fill: #fff;
+}
+
+.overlay.open .clock svg path[data-hour] {
+  transform-origin: 120px 120px;
+  transform-box: view-box;
+  animation: wedgeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(var(--h, 0) * 20ms + 0.3s);
+}
+
+@keyframes wedgeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
 }
 
 .clock .caps {
@@ -1776,7 +1862,17 @@ a.social:hover b {
   width: calc(var(--share, 0) * 100%);
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.72);
+  transform-origin: left;
   transition: width 0.4s ease;
+}
+
+.overlay.open .weekday i {
+  animation: barGrow 0.9s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(var(--d, 0) * 55ms + 0.35s);
+}
+
+@keyframes barGrow {
+  from { transform: scaleX(0); }
 }
 
 .weekday b {
@@ -1861,6 +1957,24 @@ a.social:hover b {
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
   scrollbar-width: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.rank-row.out {
+  opacity: 0;
+  transform: translateX(-16px);
+  transition-duration: 0.16s;
+}
+
+.rank-head > div:first-child.swap {
+  animation: headSwap 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes headSwap {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 
 .rank-row::-webkit-scrollbar {
@@ -1874,6 +1988,32 @@ a.social:hover b {
   min-width: 0;
   scroll-snap-align: start;
   color: inherit;
+  animation: cardIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(var(--n, 0) * 38ms);
+}
+
+.grid-overlay:not(.open) .rank-card {
+  animation: none;
+}
+
+.grid-overlay.open .rank-card {
+  animation-delay: calc(var(--n, 0) * 32ms + 0.18s);
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}
+
+a.rank-card .rank-art {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+
+a.rank-card:hover .rank-art {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.24);
 }
 
 .rank-art {
@@ -1961,7 +2101,7 @@ a.rank-card:hover .rank-art img {
   -webkit-backdrop-filter: blur(12px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 }
 
 .grid-overlay.open {
@@ -1980,6 +2120,15 @@ a.rank-card:hover .rank-art img {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(14, 14, 14, 0.97);
   overflow: hidden;
+  opacity: 0;
+  transform: translateY(30px) scale(0.955);
+  transition: transform 0.26s cubic-bezier(0.4, 0, 1, 1), opacity 0.2s ease;
+}
+
+.grid-overlay.open .grid-panel {
+  opacity: 1;
+  transform: none;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
 }
 
 .grid-panel header {
@@ -2432,6 +2581,27 @@ a.rank-card:hover .rank-art img {
     grid-template-columns: 34px minmax(0, 1fr) 38px;
   }
 }
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .panel > *,
+  .grid-panel,
+  .rank-card,
+  .rank-row,
+  .s-stat,
+  .weekday i,
+  .clock svg path[data-hour] {
+    animation: none !important;
+    transition-duration: 0.01s !important;
+    transition-delay: 0s !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -2458,7 +2628,7 @@ a.rank-card:hover .rank-art img {
   <button class="close" id="toastClose" type="button" aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
   <b>Reduced effects enabled</b>
   Your browser appears to be using software rendering, so some heavier visuals were reduced. Enabling hardware acceleration should restore the full effect.
-  <button class="link" id="toastFull" type="button">Click here to enable full experience (Possible lag!!)</button>
+  <button class="link" id="toastFull" type="button">Click here to enable full experience <em>(!)</em></button>
 </aside>
 
 <main class="page">
@@ -2679,21 +2849,19 @@ const profile = {
   discordId: "893966003690668102",
   bio: "Break it to understand it. Build it so it can't be broken.",
   bioLinks: [
-    { label: "tu-sitio.com", href: "#" },
-    { label: "tu-sitio.com/proyectos", href: "#" }
+    { label: "larpingclient.com", href: "https://larpingclient.vercel.app" },
+    { label: "nohello.net", href: "https://nohello.net/en/" }
   ],
   socials: [
-    { type: "discord", label: "discord", handle: "@take", href: "https://discord.com/users/893966003690668102" },
-    { type: "telegram", label: "telegram", handle: "@take", href: "" },
-    { type: "spotify", label: "spotify", handle: "take", href: "" },
-    { type: "github", label: "github", handle: "@take", href: "" },
-    { type: "valorant", label: "valorant", handle: "take#0000", href: "" },
-    { type: "mail", label: "contact", handle: "arcxsdev@gmail.com", href: "mailto:arcxsdev@gmail.com" },
-    { type: "site", label: "tu-sitio.com", verified: true, href: "#" }
+    { type: "discord", label: "discord", handle: "@singledeve", href: "https://discord.com/users/893966003690668102" },
+    { type: "spotify", label: "spotify", handle: "Take", href: "https://open.spotify.com/user/31esju7gpv3nvyqglogd3mqyczd4" },
+    { type: "github", label: "github", handle: "@nevesruof", href: "https://github.com/nevesruof" },
+    { type: "mail", label: "contact", handle: "takedev@proton.me", href: "mailto:takedev@proton.me" },
+    { type: "site", label: "nohello.net", href: "https://nohello.net/en/" }
   ],
   project: {
     name: "Larp Client",
-    description: "Un cliente de Minecraft con visuals, HUD y módulos.",
+    description: "A Minecraft client with visuals, HUD and modules.",
     label: "larpingclient.com",
     href: "https://larpingclient.vercel.app",
     icon: "",
@@ -2974,18 +3142,31 @@ function setupToast() {
   if (!backdropState.software) return;
 
   const toast = $("toast");
+  let timer = 0;
   toast.hidden = false;
 
-  $("toastClose").addEventListener("click", () => {
-    toast.hidden = true;
-  });
+  const dismiss = () => {
+    clearTimeout(timer);
+    if (toast.hidden || toast.classList.contains("bye")) return;
+    toast.classList.add("bye");
+    setTimeout(() => {
+      toast.hidden = true;
+    }, 450);
+  };
+
+  $("toastClose").addEventListener("click", dismiss);
 
   $("toastFull").addEventListener("click", () => {
     backdropState.scale = 0.8;
     backdropState.full = true;
     if (backdropState.resize) backdropState.resize();
-    toast.hidden = true;
+    dismiss();
   });
+
+  return () => {
+    clearTimeout(timer);
+    timer = setTimeout(dismiss, 5000);
+  };
 }
 
 function loadLogo(url, done) {
@@ -3386,7 +3567,7 @@ function syncFeedMask() {
 function playMarkup(item, index) {
   const label = item.title ? esc(item.title) : "—";
   if (item.image) {
-    return `<div class="play" data-i="${index}"><img src="${esc(item.image)}" alt="" loading="lazy"><span class="name">${label}</span></div>`;
+    return `<div class="play" data-i="${index}"><img src="${esc(item.image)}" alt="" loading="lazy" decoding="async"><span class="name">${label}</span></div>`;
   }
   const hue = (index * 47) % 360;
   const light = 10 + ((index * 7) % 22);
@@ -3760,7 +3941,7 @@ function drawClock(svg, values) {
     const radius = inner + 5 + (outer - inner - 5) * ratio;
     const from = (hour * 15 * Math.PI) / 180 + gap;
     const to = ((hour + 1) * 15 * Math.PI) / 180 - gap;
-    markup += `<path data-hour="${hour}" data-value="${value}" d="${wedge(120, 120, inner, radius, from, to)}"/>`;
+    markup += `<path data-hour="${hour}" data-value="${value}" style="--h:${hour}" d="${wedge(120, 120, inner, radius, from, to)}"/>`;
   });
 
   markup += '<text x="120" y="13" text-anchor="middle">12am</text><text x="236" y="123" text-anchor="end">6am</text><text x="120" y="233" text-anchor="middle">12pm</text><text x="4" y="123" text-anchor="start">6pm</text>';
@@ -3809,7 +3990,7 @@ function renderWeekdays(dates) {
   const max = Math.max(1, ...counts);
 
   $("weekdays").innerHTML = counts
-    .map((count, day) => `<div class="weekday"><span>${weekdayNames[day]}</span><div><i style="--share:${(count / max).toFixed(3)}"></i></div><b>${compact(count)}</b></div>`)
+    .map((count, day) => `<div class="weekday"><span>${weekdayNames[day]}</span><div><i style="--share:${(count / max).toFixed(3)};--d:${day}"></i></div><b>${compact(count)}</b></div>`)
     .join("");
 }
 
@@ -3845,7 +4026,7 @@ function cardMarkup(item, kind) {
   const art = item.image ? `<img src="${esc(item.image)}" alt="" loading="lazy">` : "";
   const sub = item.sub ? `<span>${esc(item.sub)}</span>` : "";
   const streams = item.streams !== null ? `<span class="dim">${compact(item.streams)} streams</span>` : "";
-  return `<${open} class="rank-card ${kind}"><div class="rank-art">${art}<em>#${item.rank}</em></div><strong>${esc(item.name)}</strong>${sub}${streams}</${close}>`;
+  return `<${open} class="rank-card ${kind}" style="--n:${Math.min(item.rank - 1, 14)}"><div class="rank-art">${art}<em>#${item.rank}</em></div><strong>${esc(item.name)}</strong>${sub}${streams}</${close}>`;
 }
 
 function renderRank() {
@@ -3854,6 +4035,11 @@ function renderRank() {
   const row = $("rankRow");
   const empty = $("rankEmpty");
 
+  row.classList.remove("out");
+  const head = $("rankTitle").parentElement;
+  head.classList.remove("swap");
+  void head.offsetWidth;
+  head.classList.add("swap");
   $("rankTitle").textContent = `Top ${kindNames[kind]}`;
   $("rankDesc").textContent = `my top ${kind}s from ${rangeText[statsState.range]}`;
 
@@ -3896,8 +4082,30 @@ function setKind(kind) {
   statsState.kind = kind;
   statsState.error = "";
   $("rankTabs").querySelectorAll("button").forEach((el) => el.classList.toggle("on", el.dataset.kind === kind));
-  renderRank();
-  if (kind === "album" && statsState.lists.album === null) loadAlbums();
+  $("rankRow").classList.add("out");
+  clearTimeout(statsState.swap);
+  statsState.swap = setTimeout(() => {
+    renderRank();
+    if (kind === "album" && statsState.lists.album === null) loadAlbums();
+  }, 170);
+}
+
+function countUp(id, value) {
+  const el = $(id);
+  const end = Math.round(Number(value) || 0);
+  const run = (el.dataset.run = String(Number(el.dataset.run || 0) + 1));
+  if (end < 30 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    el.textContent = end.toLocaleString("en");
+    return;
+  }
+  const start = performance.now();
+  const step = (now) => {
+    if (el.dataset.run !== run) return;
+    const progress = Math.min(1, (now - start) / 900);
+    el.textContent = Math.round(end * (1 - Math.pow(1 - progress, 3))).toLocaleString("en");
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 function resetStats() {
@@ -3980,13 +4188,14 @@ async function loadStats(force) {
     const minutes = Math.round((summary.durationMs || 0) / 60000);
     const cardinality = summary.cardinality || {};
     const days = rangeDays(range);
-    $("vStreams").textContent = Number(summary.count || 0).toLocaleString("en");
-    $("vMinutes").textContent = minutes.toLocaleString("en");
-    $("vHours").textContent = Math.round(minutes / 60).toLocaleString("en");
-    $("vTracks").textContent = Number(cardinality.tracks || 0).toLocaleString("en");
-    $("vAlbums").textContent = Number(cardinality.albums || 0).toLocaleString("en");
-    $("vArtists").textContent = Number(cardinality.artists || 0).toLocaleString("en");
-    $("vDaily").textContent = days ? Math.round((summary.count || 0) / days).toLocaleString("en") : "—";
+    countUp("vStreams", summary.count);
+    countUp("vMinutes", minutes);
+    countUp("vHours", minutes / 60);
+    countUp("vTracks", cardinality.tracks);
+    countUp("vAlbums", cardinality.albums);
+    countUp("vArtists", cardinality.artists);
+    if (days) countUp("vDaily", (summary.count || 0) / days);
+    else $("vDaily").textContent = "—";
     $("cStreams").textContent = compact(summary.count);
     $("cMinutes").textContent = `${compact(minutes)}m`;
     $("clockSub").textContent = `${compact(summary.count)} streams across ${rangeText[range]}`;
@@ -4070,6 +4279,7 @@ function setupStats() {
     if (!button) return;
     statsState.range = button.dataset.range;
     $("ranges").querySelectorAll("button").forEach((el) => el.classList.toggle("on", el === button));
+    $("rankRow").classList.add("out");
     loadStats(false);
   });
 
@@ -4411,7 +4621,7 @@ function init() {
   setupStats();
   setupGame();
   setupEscape();
-  setupToast();
+  const armToast = setupToast();
 
   $("feed").addEventListener("scroll", syncFeedMask, { passive: true });
 
@@ -4424,13 +4634,23 @@ function init() {
   loadActivity();
   loadViews();
 
-  setInterval(loadDiscord, 15000);
-  setInterval(loadActivity, 45000);
+  setInterval(() => {
+    if (!document.hidden) loadDiscord();
+  }, 15000);
+  setInterval(() => {
+    if (!document.hidden) loadActivity();
+  }, 45000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) return;
+    loadDiscord();
+    loadActivity();
+  });
 
   runIntro(() => {
     document.body.classList.add("entered");
     startAudio();
     watchMark();
+    if (armToast) armToast();
   });
 }
 
