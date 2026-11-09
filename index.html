@@ -3742,6 +3742,23 @@ a.social:hover b {
   color: var(--soft);
 }
 
+.rank .rank-timer {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--label);
+}
+
+.rank-timer b {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
 @media (max-width: 520px) {
   .mc {
     flex-direction: column;
@@ -5605,6 +5622,7 @@ button:focus-visible {
         <div class="rank-steps" id="rankSteps"></div>
         <div class="rank-bar"><i id="rankFill"></i></div>
         <p id="rankText"></p>
+        <p class="rank-timer" id="rankTimer" hidden><span id="rankTimerLabel"></span><b id="rankTimerValue"></b></p>
       </div>
     </div>
   </section>
@@ -5839,7 +5857,8 @@ const profile = {
     slim: true,
     org: "ScreenShare Alliance",
     steps: ["basic", "medium", "advanced"],
-    reached: 0
+    reached: 0,
+    test: { label: "test in", at: "2026-11-14T05:21:00Z" }
   },
   audio: "",
   viewsKey: "singledeve-profile-take"
@@ -7586,7 +7605,7 @@ function buildSkin(root, image, slim, cape) {
   };
 }
 
-function loadPicture(url) {
+function loadSkinPicture(url) {
   return new Promise((resolve) => {
     const picture = new Image();
     picture.onload = () => resolve(picture);
@@ -7601,16 +7620,16 @@ async function showSkin(data, name) {
   let cape = null;
   let slim = Boolean(data.slim);
 
-  if (data.skin) skin = await loadPicture(data.skin);
+  if (data.skin) skin = await loadSkinPicture(data.skin);
 
   if (!skin && name) {
     try {
       const info = await api(`/api/minecraft?name=${encodeURIComponent(name)}`);
       if (info && info.skin) {
-        skin = await loadPicture(info.skin);
+        skin = await loadSkinPicture(info.skin);
         if (skin) slim = Boolean(info.slim);
       }
-      if (info && info.cape) cape = await loadPicture(info.cape);
+      if (info && info.cape) cape = await loadSkinPicture(info.cape);
     } catch (error) {
       cape = null;
     }
@@ -7618,17 +7637,43 @@ async function showSkin(data, name) {
 
   if (!skin && name) {
     for (const url of skinUrls(name)) {
-      skin = await loadPicture(url);
+      skin = await loadSkinPicture(url);
       if (skin) break;
     }
   }
 
-  if (!cape && typeof data.cape === "string" && /^assets\/[\w.-]+\.png$/i.test(data.cape)) cape = await loadPicture(data.cape);
+  if (!cape && typeof data.cape === "string" && /^assets\/[\w.-]+\.png$/i.test(data.cape)) cape = await loadSkinPicture(data.cape);
   if (!skin) return;
 
   if (skinState.stop) skinState.stop();
   root.hidden = false;
   skinState.stop = buildSkin(root, skin, slim, cape);
+}
+
+const countdown = { timer: 0 };
+
+function setupCountdown(config) {
+  const end = config && Date.parse(config.at);
+  if (!end) return;
+
+  $("rankTimerLabel").textContent = config.label || "test in";
+  $("rankTimer").hidden = false;
+
+  const pad = (value) => String(value).padStart(2, "0");
+  const tick = () => {
+    clearTimeout(countdown.timer);
+    const left = Math.max(0, end - Date.now());
+    const total = Math.floor(left / 1000);
+    $("rankTimerValue").textContent = left
+      ? `${Math.floor(total / 86400)}d ${pad(Math.floor((total % 86400) / 3600))}h ${pad(Math.floor((total % 3600) / 60))}m ${pad(total % 60)}s`
+      : "test time";
+    if (left && !document.hidden) countdown.timer = setTimeout(tick, 1000 - (Date.now() % 1000));
+  };
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) tick();
+  });
+  tick();
 }
 
 function setupMinecraft() {
@@ -7658,6 +7703,7 @@ function setupMinecraft() {
     requestAnimationFrame(() => {
       $("rankFill").style.width = `${(reached / steps.length) * 100}%`;
     });
+    setupCountdown(data.test);
   } else {
     $("rank").hidden = true;
   }
@@ -9141,9 +9187,7 @@ async function loadChangelog() {
       }));
       try {
         sessionStorage.setItem(key, JSON.stringify({ at: Date.now(), items: commits }));
-      } catch (error) {
-        commits = commits;
-      }
+      } catch {}
     } catch (error) {
       return;
     }
