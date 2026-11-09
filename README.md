@@ -47,6 +47,7 @@ El botón del sobre (junto a sonido, tema y compartir) abre una carta. El texto 
 El bloque `minecraft` sale de `profile.minecraft` en `index.html`:
 
 - `name`: tu usuario de Minecraft Java (3 a 16 letras, números o guion bajo). Con él aparece la skin en 3D, que se puede arrastrar. Si lo dejas vacío solo se ve la barra de rango. Si tu skin tiene brazos finos (Alex) pon `slim: true`.
+- `skin`: ruta a un PNG de skin (64x64, por ejemplo `assets/skin.png`). Úsalo si juegas con cuenta no premium o con skin propia, porque en ese caso no hay skin pública que pedir por nombre. Tiene prioridad sobre `name`.
 - `steps` y `reached`: los rangos y cuántos llevas. Con `reached: 0` la barra dice que trabajas hacia el primero; sube el número cuando consigas cada rango.
 - `org`: el texto de la organización.
 

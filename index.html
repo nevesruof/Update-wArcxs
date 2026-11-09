@@ -5703,6 +5703,7 @@ const profile = {
   lastPlayed: "",
   minecraft: {
     name: "",
+    skin: "",
     slim: false,
     org: "ScreenShare Alliance",
     steps: ["basic", "medium", "advanced"],
@@ -7385,9 +7386,9 @@ function buildSkin(root, url, legacy, slim) {
   };
 }
 
-function showSkin(name, slim) {
+function showSkin(name, slim, local) {
   const root = $("skin3d");
-  const urls = skinUrls(name);
+  const urls = local ? [local] : skinUrls(name);
 
   const attempt = (index) => {
     if (index >= urls.length) return;
@@ -7410,7 +7411,8 @@ function setupMinecraft() {
 
   const steps = Array.isArray(data.steps) ? data.steps : [];
   const name = /^[A-Za-z0-9_]{3,16}$/.test(data.name || "") ? data.name : "";
-  if (!name && !steps.length) return;
+  const local = typeof data.skin === "string" && /^assets\/[\w.-]+\.png$/i.test(data.skin) ? data.skin : "";
+  if (!name && !local && !steps.length) return;
 
   $("mcBlock").hidden = false;
   $("mcNote").textContent = name || "java edition";
@@ -7434,7 +7436,7 @@ function setupMinecraft() {
     $("rank").hidden = true;
   }
 
-  if (name) showSkin(name, Boolean(data.slim));
+  if (name || local) showSkin(name, Boolean(data.slim), local);
 }
 
 const systemsState = { sig: "" };
