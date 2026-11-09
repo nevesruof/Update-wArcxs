@@ -49,7 +49,7 @@ El bloque `minecraft` sale de `profile.minecraft` en `index.html`:
 - `name`: tu usuario de Minecraft Java (3 a 16 letras, números o guion bajo). Con él aparece la skin en 3D, que se puede arrastrar. Si lo dejas vacío solo se ve la barra de rango. Si tu skin tiene brazos finos (Alex) pon `slim: true`.
 - `skin`: ruta a un PNG de skin (64x64, por ejemplo `assets/skin.png`). Úsalo si juegas con cuenta no premium o con skin propia, porque en ese caso no hay skin pública que pedir por nombre. Tiene prioridad sobre `name`.
 - `steps` y `reached`: los rangos y cuántos llevas. Con `reached: 0` la barra dice que trabajas hacia el primero; sube el número cuando consigas cada rango.
-- `returning`: con `true` el texto de la barra dice que estás volviendo a las SS ("Getting back into SS, working toward basic."). Ponlo en `false` para quitarlo.
+- `returning`: con `true` el texto de la barra dice que estás volviendo a las SS ("Getting back into SS."). Ponlo en `false` para quitarlo.
 - `org`: el texto de la organización.
 
 La skin y la capa se piden al servidor (`/api/minecraft`), que las lee de Mojang por tu usuario (y busca una capa de OptiFine si no tienes la de Mojang). Si eso falla, la skin se pide a minotar.net y, si tampoco, a mc-heads.net. Para una capa propia pon `cape: "assets/cape.png"`.

@@ -7700,7 +7700,7 @@ function setupMinecraft() {
         return node;
       })
     );
-    $("rankText").textContent = reached >= steps.length ? "Top rank reached." : reached ? `${steps[reached - 1]} reached, aiming for ${steps[reached]}.` : (data.returning ? `Getting back into SS, working toward ${steps[0]}.` : `Working toward ${steps[0]}.`);
+    $("rankText").textContent = reached >= steps.length ? "Top rank reached." : reached ? `${steps[reached - 1]} reached, aiming for ${steps[reached]}.` : (data.returning ? "Getting back into SS." : `Working toward ${steps[0]}.`);
     requestAnimationFrame(() => {
       $("rankFill").style.width = `${(reached / steps.length) * 100}%`;
     });
