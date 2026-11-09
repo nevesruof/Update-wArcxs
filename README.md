@@ -53,9 +53,9 @@ El bloque `minecraft` sale de `profile.minecraft` en `index.html`:
 
 La skin y la capa se piden al servidor (`/api/minecraft`), que las lee de Mojang por tu usuario (y busca una capa de OptiFine si no tienes la de Mojang). Si eso falla, la skin se pide a minotar.net y, si tampoco, a mc-heads.net. Para una capa propia pon `cape: "assets/cape.png"`.
 
-## Systems
+## Status
 
-`/api/status` revisa en el servidor el bot de Discord, stats.fm, Roblox y las letras (y la key de YouTube si existe) y devuelve solo si responden y cuánto tardan. Se cachea 30 s. Por defecto usa tu usuario de stats.fm; se puede cambiar con la variable opcional `STATSFM_USER`.
+El enlace `status` del pie (junto a `now` y `uses`) abre un panel con el estado de cada servicio y una barra de rapidez; su puntito de color avisa sin abrirlo. `/api/status` revisa en el servidor el bot de Discord, stats.fm, Roblox y las letras (y la key de YouTube si existe) y devuelve solo si responden y cuánto tardan. Se cachea 30 s. Por defecto usa tu usuario de stats.fm; se puede cambiar con la variable opcional `STATSFM_USER`.
 
 ## Trofeos
 

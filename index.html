@@ -3753,52 +3753,190 @@ a.social:hover b {
   }
 }
 
-.systems {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
-  gap: 8px;
+.stat-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  border-radius: 50%;
+  vertical-align: 1px;
+  background: var(--label);
+  transition: background 0.3s;
 }
 
-.sys {
+.stat-dot.ok {
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(63, 185, 80, 0.18);
+}
+
+.stat-dot.bad {
+  background: #e5484d;
+  box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.2);
+}
+
+.status-card {
+  width: min(430px, 100%);
+}
+
+.stat-head {
   display: flex;
   align-items: center;
-  gap: 9px;
-  min-width: 0;
-  padding: 9px 12px;
+  gap: 14px;
+  padding: 14px 14px;
+  margin-bottom: 12px;
   border: 1px solid var(--line);
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.02);
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
 }
 
-.sys i {
-  flex-shrink: 0;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 0 3px rgb(var(--fog) / 0.12);
-}
-
-.sys.down i {
-  background: #e5484d;
-  box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.16);
-}
-
-.sys b {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.stat-head b {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--text);
 }
 
-.sys small {
-  flex-shrink: 0;
+.stat-head small {
+  display: block;
+  margin-top: 1px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
   color: var(--label);
+}
+
+.stat-pulse {
+  position: relative;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--label);
+}
+
+.stat-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0;
+}
+
+.stat-pulse.ok {
+  color: var(--green);
+  background: var(--green);
+}
+
+.stat-pulse.bad {
+  color: #e5484d;
+  background: #e5484d;
+}
+
+.stat-pulse.ok::after,
+.stat-pulse.bad::after {
+  animation: statPing 2.2s ease-out infinite;
+}
+
+@keyframes statPing {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.6);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+.stat-list {
+  display: grid;
+  gap: 6px;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.stat-row i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(63, 185, 80, 0.16);
+}
+
+.stat-row.down i {
+  background: #e5484d;
+  box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.18);
+}
+
+.stat-row b {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.stat-row small {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.7rem;
+  color: var(--label);
+}
+
+.stat-row span {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.stat-row em {
+  display: block;
+  grid-column: 2 / 4;
+  height: 2px;
+  margin-top: 8px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.stat-row em u {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--green);
+  transition: width 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.stat-row.slow em u {
+  background: #e0a63a;
+}
+
+.stat-row.down em u {
+  background: #e5484d;
+}
+
+.stat-foot {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  line-height: 1.5;
+  color: var(--label);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stat-pulse::after {
+    animation: none;
+  }
 }
 
 .figure {
@@ -5292,6 +5430,22 @@ button:focus-visible {
   </div>
 </div>
 
+<div class="keys" id="status" aria-hidden="true">
+  <div class="trophy-card status-card" role="dialog" aria-label="Status">
+    <button class="letter-close" id="statusClose" type="button" aria-label="Close status"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    <h3>status</h3>
+    <div class="stat-head" id="statHead">
+      <span class="stat-pulse" id="statPulse"></span>
+      <div>
+        <b id="statTitle">Checking systems</b>
+        <small id="statSub">one moment</small>
+      </div>
+    </div>
+    <div class="stat-list" id="statList"></div>
+    <p class="stat-foot">Checked live from the server. Updates every minute while this is open.</p>
+  </div>
+</div>
+
 <div class="keys" id="trophy" aria-hidden="true">
   <div class="trophy-card" role="dialog" aria-label="Trophies">
     <button class="letter-close" id="trophyClose" type="button" aria-label="Close trophies"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
@@ -5455,12 +5609,7 @@ button:focus-visible {
     </div>
   </section>
 
-  <section class="block rise" style="--i:10" id="sysBlock" hidden>
-    <div class="label"><span>systems</span><span id="sysNote"></span></div>
-    <div class="systems" id="systems"></div>
-  </section>
-
-  <p class="credit rise" style="--i:11"><span class="hint">press <b>?</b> to see the shortcuts</span><span class="pages"><a href="/now">now</a><a href="/uses">uses</a></span></p>
+  <p class="credit rise" style="--i:10"><span class="hint">press <b>?</b> to see the shortcuts</span><span class="pages"><a href="/now">now</a><a href="/uses">uses</a><a href="#status" id="statusBtn"><i class="stat-dot" id="statDot"></i>status</a></span></p>
 
 </main>
 
@@ -7516,44 +7665,92 @@ function setupMinecraft() {
   if (name || local) showSkin({ skin: local, slim: data.slim, cape: data.cape }, name);
 }
 
-const systemsState = { sig: "" };
+const systemsState = { items: [], checked: 0, timer: 0 };
+
+const systemNotes = {
+  bot: "presence feed",
+  stats: "listening data",
+  roblox: "avatar and games",
+  lyrics: "synced lyrics",
+  youtube: "full song playback"
+};
+
+function paintSystems() {
+  const items = systemsState.items;
+  if (!items.length) return;
+
+  const down = items.filter((item) => !item.ok);
+  const good = !down.length;
+  $("statDot").className = `stat-dot ${good ? "ok" : "bad"}`;
+  $("statPulse").className = `stat-pulse ${good ? "ok" : "bad"}`;
+  $("statTitle").textContent = good ? "All systems operational" : `${down.length} of ${items.length} not responding`;
+
+  const seconds = Math.max(0, Math.round((Date.now() - systemsState.checked) / 1000));
+  $("statSub").textContent = seconds < 5 ? "checked just now" : seconds < 90 ? `checked ${seconds}s ago` : `checked ${Math.round(seconds / 60)} min ago`;
+
+  $("statList").replaceChildren(
+    ...items.map((item) => {
+      const ms = Math.max(1, Math.round(Number(item.ms) || 0));
+      const row = document.createElement("div");
+      row.className = `stat-row${item.ok ? (ms > 1200 ? " slow" : "") : " down"}`;
+
+      const dot = document.createElement("i");
+      const copy = document.createElement("div");
+      const name = document.createElement("b");
+      const note = document.createElement("small");
+      const time = document.createElement("span");
+      const bar = document.createElement("em");
+      const fill = document.createElement("u");
+
+      name.textContent = item.name;
+      note.textContent = systemNotes[item.id] || "service";
+      copy.append(name, note);
+      time.textContent = item.ok ? `${ms} ms` : "down";
+      fill.style.width = item.ok ? `${Math.max(6, Math.min(100, 100 - (ms / 1600) * 100))}%` : "0%";
+      bar.append(fill);
+      row.append(dot, copy, time, bar);
+      return row;
+    })
+  );
+}
 
 async function loadSystems() {
   try {
     const body = await api("/api/status");
     const items = (Array.isArray(body.items) ? body.items : []).filter((item) => item && typeof item.name === "string");
     if (!items.length) return;
-
-    const sig = items.map((item) => `${item.id}:${item.ok}`).join("|");
-    const down = items.filter((item) => !item.ok).length;
-    $("sysNote").textContent = down ? `${down} of ${items.length} down` : "all systems operational";
-
-    if (sig !== systemsState.sig) {
-      systemsState.sig = sig;
-      $("systems").replaceChildren(
-        ...items.map((item) => {
-          const row = document.createElement("div");
-          row.className = `sys${item.ok ? "" : " down"}`;
-          const dot = document.createElement("i");
-          const name = document.createElement("b");
-          name.textContent = item.name;
-          const time = document.createElement("small");
-          time.textContent = item.ok ? `${Math.max(1, Math.round(Number(item.ms) || 0))}ms` : "down";
-          row.append(dot, name, time);
-          return row;
-        })
-      );
-    } else {
-      [...$("systems").children].forEach((row, index) => {
-        const small = row.querySelector("small");
-        if (items[index] && items[index].ok) small.textContent = `${Math.max(1, Math.round(Number(items[index].ms) || 0))}ms`;
-      });
-    }
-
-    $("sysBlock").hidden = false;
+    systemsState.items = items;
+    systemsState.checked = Number(body.checked) || Date.now();
+    paintSystems();
   } catch (error) {
     return;
   }
+}
+
+function setupStatus() {
+  const layer = $("status");
+
+  $("statusBtn").addEventListener("click", (event) => {
+    event.preventDefault();
+    paintSystems();
+    toggleLayer(layer, true);
+    loadSystems();
+    clearInterval(systemsState.timer);
+    systemsState.timer = setInterval(() => {
+      if (layer.classList.contains("open")) loadSystems();
+    }, 60000);
+  });
+
+  const close = () => {
+    toggleLayer(layer, false);
+    clearInterval(systemsState.timer);
+    systemsState.timer = 0;
+  };
+
+  $("statusClose").addEventListener("click", close);
+  layer.addEventListener("click", (event) => {
+    if (event.target === layer) close();
+  });
 }
 
 function avatarUrl(user) {
@@ -9940,6 +10137,7 @@ function setupEscape() {
 
     const layers = [
       ["keys", () => toggleLayer($("keys"), false)],
+      ["status", () => toggleLayer($("status"), false)],
       ["trophy", () => toggleLayer($("trophy"), false)],
       ["letter", () => setLetterOpen(false)],
       ["share", () => toggleLayer($("share"), false)],
@@ -10743,7 +10941,7 @@ async function drawCard() {
 
 async function openShare() {
   if (shareState.busy) return;
-  const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "keys", "letter", "trophy", "lyr"].some((id) => $(id).classList.contains("open"));
+  const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "keys", "letter", "trophy", "status", "lyr"].some((id) => $(id).classList.contains("open"));
   if (busy) return;
 
   unlock("share");
@@ -10956,7 +11154,7 @@ function setupShortcuts() {
     const key = event.key.toLowerCase();
 
     if ($("lyr").classList.contains("open") && !["m", "t"].includes(key)) return;
-    if ($("share").classList.contains("open") || $("letter").classList.contains("open") || $("trophy").classList.contains("open")) return;
+    if ($("share").classList.contains("open") || $("letter").classList.contains("open") || $("trophy").classList.contains("open") || $("status").classList.contains("open")) return;
 
     if (key === "?" || (key === "/" && event.shiftKey)) {
       event.preventDefault();
@@ -10980,7 +11178,7 @@ function setupShortcuts() {
     } else if (key === "t") {
       cycleTheme();
     } else if (key === "s") {
-      const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "share", "letter", "trophy", "lyr"].some((id) => $(id).classList.contains("open"));
+      const busy = ["overlay", "gridOverlay", "gameOverlay", "shotOverlay", "share", "letter", "trophy", "status", "lyr"].some((id) => $(id).classList.contains("open"));
       if (!busy) $("openStats").click();
     } else if (key === "n" && queue.active) {
       queueStep(1);
@@ -11061,6 +11259,7 @@ function init() {
   setupShare();
   setupLetter();
   setupTrophies();
+  setupStatus();
   setupPointerFx();
   setupMinecraft();
   const armToast = setupToast();
