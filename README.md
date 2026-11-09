@@ -51,7 +51,7 @@ El bloque `minecraft` sale de `profile.minecraft` en `index.html`:
 - `steps` y `reached`: los rangos y cuántos llevas. Con `reached: 0` la barra dice que trabajas hacia el primero; sube el número cuando consigas cada rango.
 - `org`: el texto de la organización.
 
-La skin se pide a minotar.net y, si falla, a mc-heads.net.
+La skin y la capa se piden al servidor (`/api/minecraft`), que las lee de Mojang por tu usuario (y busca una capa de OptiFine si no tienes la de Mojang). Si eso falla, la skin se pide a minotar.net y, si tampoco, a mc-heads.net. Para una capa propia pon `cape: "assets/cape.png"`.
 
 ## Systems
 

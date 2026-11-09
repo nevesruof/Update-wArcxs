@@ -3644,6 +3644,10 @@ a.social:hover b {
   color: var(--text);
 }
 
+.label #mcNote {
+  text-transform: none;
+}
+
 .mc {
   display: flex;
   align-items: center;
@@ -5682,6 +5686,7 @@ const profile = {
   minecraft: {
     name: "Raid4k",
     skin: "",
+    cape: "",
     slim: true,
     org: "ScreenShare Alliance",
     steps: ["basic", "medium", "advanced"],
@@ -7233,8 +7238,10 @@ function skinUrls(name) {
   return [`https://minotar.net/skin/${safe}`, `https://mc-heads.net/skin/${safe}`];
 }
 
-function buildSkin(root, image, legacy, slim) {
+function buildSkin(root, image, slim, cape) {
   const aw = slim ? 3 : 4;
+  const sk = image.naturalWidth / 64;
+  const legacy = image.naturalHeight * 2 <= image.naturalWidth;
   const ratio = Math.min(2, window.devicePixelRatio || 1);
   const width = 150;
   const height = 190;
@@ -7252,29 +7259,62 @@ function buildSkin(root, image, legacy, slim) {
   const unit = 5.4 * ratio;
   const cx = (width * ratio) / 2;
   const cy = 95 * ratio;
-  const area = (u, v, w, h) => ({ u, v, w, h });
-
+  const area = (u, v, w, h) => ({ u: u * sk, v: v * sk, w: w * sk, h: h * sk });
   const cube = (top, bottom, right, front, left, back) => ({ top, bottom, right, front, left, back });
-  const headUV = cube(area(8, 0, 8, 8), area(16, 0, 8, 8), area(0, 8, 8, 8), area(8, 8, 8, 8), area(16, 8, 8, 8), area(24, 8, 8, 8));
-  const hatUV = cube(area(40, 0, 8, 8), area(48, 0, 8, 8), area(32, 8, 8, 8), area(40, 8, 8, 8), area(48, 8, 8, 8), area(56, 8, 8, 8));
-  const bodyUV = cube(area(20, 16, 8, 4), area(28, 16, 8, 4), area(16, 20, 4, 12), area(20, 20, 8, 12), area(28, 20, 4, 12), area(32, 20, 8, 12));
-  const armUV = (x, y) => cube(area(x + 4, y, aw, 4), area(x + 4 + aw, y, aw, 4), area(x, y + 4, 4, 12), area(x + 4, y + 4, aw, 12), area(x + 4 + aw, y + 4, 4, 12), area(x + 8 + aw, y + 4, aw, 12));
-  const legUV = (x, y) => cube(area(x + 4, y, 4, 4), area(x + 8, y, 4, 4), area(x, y + 4, 4, 12), area(x + 4, y + 4, 4, 12), area(x + 8, y + 4, 4, 12), area(x + 12, y + 4, 4, 12));
+  const skinCube = (x, y, w, h, d) =>
+    cube(area(x + d, y, w, d), area(x + d + w, y, w, d), area(x, y + d, d, h), area(x + d, y + d, w, h), area(x + d + w, y + d, d, h), area(x + d + w + d, y + d, w, h));
 
   const arm = aw / 2 + 4;
-  const parts = {
-    legR: { c: [-2, 10, 0], size: [4, 12, 4], pivot: [0, -6, 0], uv: legUV(0, 16) },
-    legL: { c: [2, 10, 0], size: [4, 12, 4], pivot: [0, -6, 0], uv: legacy ? legUV(0, 16) : legUV(16, 48) },
-    body: { c: [0, -2, 0], size: [8, 12, 4], pivot: [0, 0, 0], uv: bodyUV },
-    armR: { c: [-arm, -2, 0], size: [aw, 12, 4], pivot: [0, -6, 0], uv: armUV(40, 16) },
-    armL: { c: [arm, -2, 0], size: [aw, 12, 4], pivot: [0, -6, 0], uv: legacy ? armUV(40, 16) : armUV(32, 48) },
-    head: { c: [0, -12, 0], size: [8, 8, 8], pivot: [0, 4, 0], uv: headUV },
-    hat: { c: [0, -12, 0], size: [8.96, 8.96, 8.96], pivot: [0, 4, 0], uv: hatUV }
+  const make = (center, size, pivot, uv, extra = {}) => ({ c: center, size, pivot, uv, img: image, pose: "", turns: false, flat: false, ...extra });
+  const grow = (size, by) => size.map((value) => value + by);
+
+  const list = [];
+  const add = (name, part) => {
+    part.name = name;
+    if (!part.pose) part.pose = name;
+    list.push(part);
   };
+
+  const capeSize = cape ? (cape.naturalHeight / cape.naturalWidth < 0.49 ? cape.naturalWidth / 46 : cape.naturalWidth / 64) : 1;
+  const capeArea = (u, v, w, h) => ({ u: u * capeSize, v: v * capeSize, w: w * capeSize, h: h * capeSize });
+
+  if (cape) {
+    add(
+      "cape",
+      make([0, 0, -2.5], [10, 16, 1], [0, -8, 0], cube(capeArea(1, 0, 10, 1), capeArea(11, 0, 10, 1), capeArea(0, 1, 1, 16), capeArea(12, 1, 10, 16), capeArea(11, 1, 1, 16), capeArea(1, 1, 10, 16)), {
+        img: cape,
+        flat: true
+      })
+    );
+  }
+
+  const legR = [-2, 10, 0];
+  const legL = [2, 10, 0];
+  const armRc = [-arm, -2, 0];
+  const armLc = [arm, -2, 0];
+  const legSize = [4, 12, 4];
+  const armSize = [aw, 12, 4];
+
+  add("legR", make(legR, legSize, [0, -6, 0], skinCube(0, 16, 4, 12, 4)));
+  add("legL", make(legL, legSize, [0, -6, 0], legacy ? skinCube(0, 16, 4, 12, 4) : skinCube(16, 48, 4, 12, 4)));
+  add("body", make([0, -2, 0], [8, 12, 4], [0, 0, 0], skinCube(16, 16, 8, 12, 4)));
+  add("armR", make(armRc, armSize, [0, -6, 0], skinCube(40, 16, aw, 12, 4)));
+  add("armL", make(armLc, armSize, [0, -6, 0], legacy ? skinCube(40, 16, aw, 12, 4) : skinCube(32, 48, aw, 12, 4)));
+  add("head", make([0, -12, 0], [8, 8, 8], [0, 4, 0], skinCube(0, 0, 8, 8, 8), { turns: true }));
+
+  if (!legacy) {
+    add("pantsR", make(legR, grow(legSize, 0.5), [0, -6, 0], skinCube(0, 32, 4, 12, 4), { pose: "legR", flat: true }));
+    add("pantsL", make(legL, grow(legSize, 0.5), [0, -6, 0], skinCube(0, 48, 4, 12, 4), { pose: "legL", flat: true }));
+    add("jacket", make([0, -2, 0], [8.5, 12.5, 4.5], [0, 0, 0], skinCube(16, 32, 8, 12, 4), { pose: "body", flat: true }));
+    add("sleeveR", make(armRc, grow(armSize, 0.5), [0, -6, 0], skinCube(40, 32, aw, 12, 4), { pose: "armR", flat: true }));
+    add("sleeveL", make(armLc, grow(armSize, 0.5), [0, -6, 0], skinCube(48, 48, aw, 12, 4), { pose: "armL", flat: true }));
+  }
+
+  add("hat", make([0, -12, 0], [9, 9, 9], [0, 4, 0], skinCube(32, 0, 8, 8, 8), { pose: "head", turns: true, flat: true }));
+
   const shade = { front: 0, back: 0.3, right: 0.16, left: 0.16, top: 0, bottom: 0.34 };
-  const order = ["legR", "legL", "body", "armR", "armL", "head", "hat"];
   const state = { yaw: 0, tilt: 0 };
-  const pose = { legR: 0, legL: 0, armR: 0, armL: 0, head: 0, hat: 0 };
+  const pose = { legR: 0, legL: 0, armR: 0, armL: 0, head: 0, cape: 0 };
 
   const faceList = (w, h, d) => [
     { key: "front", n: [0, 0, 1], o: [-w / 2, -h / 2, d / 2], ex: [w, 0, 0], ey: [0, h, 0] },
@@ -7295,10 +7335,7 @@ function buildSkin(root, image, legacy, slim) {
     const s = Math.sin(a);
     return [v[0] * c + v[2] * s, v[1], -v[0] * s + v[2] * c];
   };
-  const local = (name, v) => {
-    const angle = pose[name] || 0;
-    return name === "head" || name === "hat" ? spinY(v, angle) : spinX(v, angle);
-  };
+  const local = (part, v) => (part.turns ? spinY(v, pose[part.pose] || 0) : spinX(v, pose[part.pose] || 0));
   const globe = (v) => spinX(spinY(v, state.yaw), state.tilt);
 
   const draw = () => {
@@ -7307,24 +7344,23 @@ function buildSkin(root, image, legacy, slim) {
     ctx.imageSmoothingEnabled = false;
 
     const queue = [];
-    for (const name of order) {
-      const part = parts[name];
+    for (const part of list) {
       const [w, h, d] = part.size;
       for (const face of faceList(w, h, d)) {
-        const normal = globe(local(name, face.n));
+        const normal = globe(local(part, face.n));
         if (normal[2] <= 0.001) continue;
         const rel = face.o.map((value, index) => value - part.pivot[index]);
-        const spun = local(name, rel);
+        const spun = local(part, rel);
         const origin = globe(spun.map((value, index) => value + part.pivot[index] + part.c[index]));
-        const ex = globe(local(name, face.ex));
-        const ey = globe(local(name, face.ey));
-        queue.push({ name, key: face.key, origin, ex, ey, depth: origin[2] + (ex[2] + ey[2]) / 2 });
+        const ex = globe(local(part, face.ex));
+        const ey = globe(local(part, face.ey));
+        queue.push({ part, key: face.key, origin, ex, ey, depth: origin[2] + (ex[2] + ey[2]) / 2 + (part.flat ? 0.01 : 0) });
       }
     }
 
     queue.sort((first, second) => first.depth - second.depth);
     for (const item of queue) {
-      const cell = parts[item.name].uv[item.key];
+      const cell = item.part.uv[item.key];
       ctx.setTransform(
         (item.ex[0] * unit) / cell.w,
         (item.ex[1] * unit) / cell.w,
@@ -7333,8 +7369,8 @@ function buildSkin(root, image, legacy, slim) {
         cx + item.origin[0] * unit,
         cy + item.origin[1] * unit
       );
-      ctx.drawImage(image, cell.u, cell.v, cell.w, cell.h, -0.03, -0.03, cell.w + 0.06, cell.h + 0.06);
-      const dark = item.name === "hat" ? 0 : shade[item.key];
+      ctx.drawImage(item.part.img, cell.u, cell.v, cell.w, cell.h, -0.03, -0.03, cell.w + 0.06, cell.h + 0.06);
+      const dark = item.part.flat ? 0 : shade[item.key];
       if (dark) {
         ctx.fillStyle = `rgba(0,0,0,${dark})`;
         ctx.fillRect(0, 0, cell.w, cell.h);
@@ -7360,7 +7396,7 @@ function buildSkin(root, image, legacy, slim) {
     pose.legR = -swing;
     pose.legL = swing;
     pose.head = calm ? 0 : Math.sin(t * 0.7) * 0.14;
-    pose.hat = pose.head;
+    pose.cape = -0.12 - (calm ? 0 : Math.sin(t * 1.6 + 0.6) * 0.04);
     draw();
   };
 
@@ -7401,23 +7437,49 @@ function buildSkin(root, image, legacy, slim) {
   };
 }
 
-function showSkin(name, slim, local) {
+function loadPicture(url) {
+  return new Promise((resolve) => {
+    const picture = new Image();
+    picture.onload = () => resolve(picture);
+    picture.onerror = () => resolve(null);
+    picture.src = url;
+  });
+}
+
+async function showSkin(data, name) {
   const root = $("skin3d");
-  const urls = local ? [local] : skinUrls(name);
+  let skin = null;
+  let cape = null;
+  let slim = Boolean(data.slim);
 
-  const attempt = (index) => {
-    if (index >= urls.length) return;
-    const probe = new Image();
-    probe.onload = () => {
-      if (skinState.stop) skinState.stop();
-      root.hidden = false;
-      skinState.stop = buildSkin(root, probe, probe.naturalHeight <= 32, slim);
-    };
-    probe.onerror = () => attempt(index + 1);
-    probe.src = urls[index];
-  };
+  if (data.skin) skin = await loadPicture(data.skin);
 
-  attempt(0);
+  if (!skin && name) {
+    try {
+      const info = await api(`/api/minecraft?name=${encodeURIComponent(name)}`);
+      if (info && info.skin) {
+        skin = await loadPicture(info.skin);
+        if (skin) slim = Boolean(info.slim);
+      }
+      if (info && info.cape) cape = await loadPicture(info.cape);
+    } catch (error) {
+      cape = null;
+    }
+  }
+
+  if (!skin && name) {
+    for (const url of skinUrls(name)) {
+      skin = await loadPicture(url);
+      if (skin) break;
+    }
+  }
+
+  if (!cape && typeof data.cape === "string" && /^assets\/[\w.-]+\.png$/i.test(data.cape)) cape = await loadPicture(data.cape);
+  if (!skin) return;
+
+  if (skinState.stop) skinState.stop();
+  root.hidden = false;
+  skinState.stop = buildSkin(root, skin, slim, cape);
 }
 
 function setupMinecraft() {
@@ -7451,7 +7513,7 @@ function setupMinecraft() {
     $("rank").hidden = true;
   }
 
-  if (name || local) showSkin(name, Boolean(data.slim), local);
+  if (name || local) showSkin({ skin: local, slim: data.slim, cape: data.cape }, name);
 }
 
 const systemsState = { sig: "" };
