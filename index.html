@@ -7330,7 +7330,7 @@ function buildSkin(root, url, legacy, slim) {
   root.appendChild(ground);
 
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let yaw = -28;
+  let yaw = -18;
   let drag = null;
   let visible = true;
   let frameId = 0;
@@ -7339,7 +7339,8 @@ function buildSkin(root, url, legacy, slim) {
   const paint = (now) => {
     const t = now / 1000;
     const swing = calm ? 0 : Math.sin(t * 1.6) * 9;
-    stage.style.transform = `rotateX(-9deg) rotateY(${yaw.toFixed(1)}deg)`;
+    const sway = calm || drag ? 0 : Math.sin(t * 0.7) * 24;
+    stage.style.transform = `rotateX(-9deg) rotateY(${(yaw + sway).toFixed(1)}deg)`;
     armR.style.transform = `rotateX(${swing}deg)`;
     armL.style.transform = `rotateX(${-swing}deg)`;
     legR.style.transform = `rotateX(${-swing}deg)`;
@@ -7355,7 +7356,7 @@ function buildSkin(root, url, legacy, slim) {
     if (now - last < 33) return;
     const gap = Math.min(100, now - last);
     last = now;
-    if (!drag && !calm) yaw += gap * 0.025;
+    if (!drag) yaw += (Math.round(yaw / 360) * 360 - yaw) * Math.min(1, gap * 0.004);
     paint(now);
   };
 
