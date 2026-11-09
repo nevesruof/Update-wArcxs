@@ -36,8 +36,34 @@ El dominio no cambia: en Vercel sigue apuntando al mismo proyecto. Si redesplieg
 
 ## Atajos
 
-`?` ayuda, `M` sonido, `P` reproductor, `/` buscar canción, `N` / `B` siguiente y anterior de la playlist, `T` tema (incluye `auto`, que toma el color de la portada), `Y` letras (también con el icono de micrófono de la tarjeta de actividad), `C` compartir como imagen, `S` stats.fm, `G` arriba. Para ver la intro completa otra vez abre la página con `?intro` al final.
+`?` ayuda, `M` sonido, `P` reproductor, `/` buscar canción, `N` / `B` siguiente y anterior de la playlist, `T` tema (incluye `season`, que cambia según la época del año, y `auto`, que toma el color de la portada), `Y` letras (también con el icono de micrófono de la tarjeta de actividad), `C` compartir como imagen, `S` stats.fm, `G` arriba. Para ver la intro completa otra vez abre la página con `?intro` al final.
 
 ## Carta para Matheo
 
 El botón del sobre (junto a sonido, tema y compartir) abre una carta. El texto y el GIF se editan en `profile.letter` de `index.html` (`to`, `lines`, `sign`, `gif`). Para el GIF, copia el archivo a `assets/` y pon `gif: "assets/nombre.gif"` (también acepta una URL https).
+
+## Minecraft
+
+El bloque `minecraft` sale de `profile.minecraft` en `index.html`:
+
+- `name`: tu usuario de Minecraft Java (3 a 16 letras, números o guion bajo). Con él aparece la skin en 3D, que se puede arrastrar. Si lo dejas vacío solo se ve la barra de rango. Si tu skin tiene brazos finos (Alex) pon `slim: true`.
+- `steps` y `reached`: los rangos y cuántos llevas. Con `reached: 0` la barra dice que trabajas hacia el primero; sube el número cuando consigas cada rango.
+- `org`: el texto de la organización.
+
+La skin se pide a minotar.net y, si falla, a mc-heads.net.
+
+## Systems
+
+`/api/status` revisa en el servidor el bot de Discord, stats.fm, Roblox y las letras (y la key de YouTube si existe) y devuelve solo si responden y cuánto tardan. Se cachea 30 s. Por defecto usa tu usuario de stats.fm; se puede cambiar con la variable opcional `STATSFM_USER`.
+
+## Trofeos
+
+El botón de la copa abre 12 trofeos que se guardan en el navegador de cada visitante (localStorage), tres de ellos secretos. La lista está en `trophies` de `index.html`.
+
+## /now y /uses
+
+Son `now.html` y `uses.html`, con el estilo compartido en `assets/sub.css`. Se editan directamente en el HTML y `vercel.json` tiene `cleanUrls` para que se abran como `/now` y `/uses`. Para probarlas en local usa `now.html` y `uses.html` con el servidor sencillo.
+
+## Efectos
+
+El intro se deshace con el cursor o el dedo y se rearma. En escritorio hay un brillo que sigue al cursor y los botones del menú y las redes se acercan un poco al puntero. Todo se desactiva con "reducir movimiento" y en pantallas táctiles.
