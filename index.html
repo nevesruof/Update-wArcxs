@@ -3585,27 +3585,6 @@ a.social:hover b {
   color: var(--text);
 }
 
-.stat-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-right: 7px;
-  border-radius: 50%;
-  vertical-align: 1px;
-  background: var(--label);
-  transition: background 0.3s;
-}
-
-.stat-dot.ok {
-  background: var(--green);
-  box-shadow: 0 0 0 3px rgba(63, 185, 80, 0.18);
-}
-
-.stat-dot.bad {
-  background: #e5484d;
-  box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.2);
-}
-
 .status-card {
   width: min(430px, 100%);
 }
@@ -5428,7 +5407,7 @@ button:focus-visible {
     </div>
   </section>
 
-  <p class="credit rise" style="--i:10"><span class="hint">press <b>?</b> to see the shortcuts</span><span class="pages"><a href="#status" id="statusBtn"><i class="stat-dot" id="statDot"></i>status</a><a href="/now">now</a><a href="/uses">uses</a></span></p>
+  <p class="credit rise" style="--i:10"><span class="hint">press <b>?</b> to see the shortcuts</span><span class="pages"><a href="#status" id="statusBtn">status</a><a href="/now">now</a><a href="/uses">uses</a></span></p>
 
 </main>
 
@@ -7167,7 +7146,6 @@ function paintSystems() {
 
   const down = items.filter((item) => !item.ok);
   const good = !down.length;
-  $("statDot").className = `stat-dot ${good ? "ok" : "bad"}`;
   $("statPulse").className = `stat-pulse ${good ? "ok" : "bad"}`;
   $("statTitle").textContent = good ? "All systems operational" : `${down.length} of ${items.length} not responding`;
 
