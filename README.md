@@ -42,6 +42,12 @@ El dominio no cambia: en Vercel sigue apuntando al mismo proyecto. Si redesplieg
 
 El botón del sobre (junto a sonido, tema y compartir) abre una carta. El texto y el GIF se editan en `profile.letter` de `index.html` (`to`, `lines`, `sign`, `gif`). Para el GIF, copia el archivo a `assets/` y pon `gif: "assets/nombre.gif"` (también acepta una URL https).
 
+## Música local
+
+El bloque de actividad de arriba tiene dos estados. Si estás escuchando Spotify dice `current activity` / `listening on spotify`. Si no, se queda siempre como `page activity` / `local music` con la playlist de las más escuchadas, el buscador y el estado de lo que suena en la página. Si alguien reproduce algo ahí, esa canción tiene prioridad y usa los mismos efectos que Spotify en vivo (aura, barra, letras).
+
+En el celular el audio solo se permite después de un toque, así que la página desbloquea un reproductor compartido en el primer toque. Si YouTube no arranca, cae solo al clip de 30 segundos.
+
 ## Status
 
 El enlace `status` del pie (junto a `now` y `uses`) abre un panel con el estado de cada servicio y una barra de rapidez; su puntito de color avisa sin abrirlo. `/api/status` revisa en el servidor el bot de Discord, stats.fm, Roblox y las letras (y la key de YouTube si existe) y devuelve solo si responden y cuánto tardan. Se cachea 30 s. Por defecto usa tu usuario de stats.fm; se puede cambiar con la variable opcional `STATSFM_USER`.

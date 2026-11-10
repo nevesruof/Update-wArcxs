@@ -2501,6 +2501,18 @@ body.entered .rise {
   box-shadow: 0 0 8px rgba(234, 179, 8, 0.7);
 }
 
+.np-win .np-find {
+  padding: 0 11px 11px;
+}
+
+.np-top.idle .np-lyr-btn {
+  display: none;
+}
+
+.np-top.idle .eq {
+  display: none;
+}
+
 .np-top {
   opacity: 0;
   transform: translateY(8px);
@@ -3432,6 +3444,7 @@ a.social:hover b {
 .legend {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   margin-top: 12px;
   font-size: 13px;
@@ -5321,7 +5334,7 @@ button:focus-visible {
   <div class="bio-links rise" style="--i:1" id="bioLinks"></div>
 
   <section class="block np-block" id="npBlock" hidden>
-    <div class="label"><span>current activity</span><span class="np-live" id="npLive"><i></i><span id="npLiveText">listening on spotify</span></span></div>
+    <div class="label"><span id="npLabel">current activity</span><span class="np-live" id="npLive"><i></i><span id="npLiveText">listening on spotify</span></span></div>
     <div class="np-top" id="npTop" aria-label="Now playing">
       <div class="np-win">
         <button class="np-lyr-btn" id="topLyr" type="button" aria-label="Open lyrics" title="Lyrics"><svg viewBox="0 0 24 24"><path d="m11 7.6-5.99 8.19a1 1 0 0 0 .1 1.3l.82.82a1 1 0 0 0 1.31.09L15.1 12"/><path d="M16.5 21.17c-1-.67-2.13-1.17-3.5-1.17-2.06 0-3.93 2.36-6 2-2.07-.36-2.78-3.37-1.5-4.5"/><circle cx="16" cy="7" r="5"/></svg></button>
@@ -5336,6 +5349,16 @@ button:focus-visible {
           </div>
         </div>
         <div class="np-panel"><div><p class="np-lyric" id="npLyric"></p></div></div>
+        <div class="np-find" id="npFind" hidden>
+          <div class="np-queue" id="npQueue">
+            <button class="np-q-main" id="npQMain" type="button"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg><span id="npQLabel">Play top songs</span></button>
+            <button class="np-q-ico np-q-nav" id="npQPrev" type="button" aria-label="Previous song"><svg viewBox="0 0 24 24"><path d="M6 5.5h2.4v13H6zM20 5.5v13L9.5 12z"/></svg></button>
+            <button class="np-q-ico np-q-nav" id="npQNext" type="button" aria-label="Next song"><svg viewBox="0 0 24 24"><path d="M15.6 5.5H18v13h-2.4zM4 5.5v13L14.5 12z"/></svg></button>
+            <button class="np-q-ico" id="npQShuffle" type="button" aria-pressed="false" aria-label="Shuffle"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><path d="M3 7h3.2c1.5 0 2.9.8 3.7 2.1l2.2 3.8c.8 1.3 2.2 2.1 3.7 2.1H21M3 17h3.2c1.5 0 2.9-.8 3.7-2.1M14.3 8.1c.8-1.3 2.2-2.1 3.7-2.1H21m-3 -2 3 2-3 2m0 8 3 2-3 2"/></svg></button>
+          </div>
+          <label class="np-field"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="npSearch" type="search" placeholder="Search listened songs" aria-label="Search listened songs" autocomplete="off" spellcheck="false"></label>
+          <div class="np-results-wrap" id="npWrap"><div class="np-results" id="npResults" aria-label="Song search results"></div></div>
+        </div>
       </div>
     </div>
   </section>
@@ -5548,16 +5571,6 @@ button:focus-visible {
       <div class="np-vol" id="npVol">
         <button type="button" aria-label="Mute"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path class="w1" d="M15.5 9.5a3.5 3.5 0 0 1 0 5"/><path class="w2" d="M18.5 7a7 7 0 0 1 0 10"/><path class="x" d="m16 9 5 6m0-6-5 6"/></svg></button>
         <input id="npVolRange" type="range" min="0" max="100" step="1" value="30" aria-label="Volume">
-      </div>
-      <div class="np-find">
-        <div class="np-queue" id="npQueue">
-          <button class="np-q-main" id="npQMain" type="button"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg><span id="npQLabel">Play top songs</span></button>
-          <button class="np-q-ico np-q-nav" id="npQPrev" type="button" aria-label="Previous song"><svg viewBox="0 0 24 24"><path d="M6 5.5h2.4v13H6zM20 5.5v13L9.5 12z"/></svg></button>
-          <button class="np-q-ico np-q-nav" id="npQNext" type="button" aria-label="Next song"><svg viewBox="0 0 24 24"><path d="M15.6 5.5H18v13h-2.4zM4 5.5v13L14.5 12z"/></svg></button>
-          <button class="np-q-ico" id="npQShuffle" type="button" aria-pressed="false" aria-label="Shuffle"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><path d="M3 7h3.2c1.5 0 2.9.8 3.7 2.1l2.2 3.8c.8 1.3 2.2 2.1 3.7 2.1H21M3 17h3.2c1.5 0 2.9-.8 3.7-2.1M14.3 8.1c.8-1.3 2.2-2.1 3.7-2.1H21m-3 -2 3 2-3 2m0 8 3 2-3 2"/></svg></button>
-        </div>
-        <label class="np-field"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="npSearch" type="search" placeholder="Search listened songs" aria-label="Search listened songs" autocomplete="off" spellcheck="false"></label>
-        <div class="np-results-wrap" id="npWrap"><div class="np-results" id="npResults" aria-label="Song search results"></div></div>
       </div>
     </div>
   </div>
@@ -7229,7 +7242,7 @@ function avatarUrl(user) {
 
 const aura = { track: "", front: "auraA", color: "" };
 const dock = { start: 0, end: 0, timer: 0, song: null, id: "" };
-const manual = { audio: null, stop: null, id: "", token: 0, seeking: false, song: null, full: false };
+const manual = { audio: null, stop: null, id: "", token: 0, seeking: false, song: null, full: false, starting: false, previewed: 0 };
 
 const music = {
   player: null,
@@ -7264,6 +7277,73 @@ try {
   if (Number.isFinite(saved) && localStorage.getItem("site-global-volume") !== null) music.volume = Math.min(100, Math.max(0, saved));
 } catch {
   music.volume = 30;
+}
+
+const clip = new Audio();
+clip.preload = "auto";
+clip.setAttribute("playsinline", "");
+clip.addEventListener("ended", () => {
+  if (manual.audio === clip) manualEnded();
+});
+
+const silence = "data:audio/wav;base64,UklGRrQBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YZABAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA";
+
+const stopClip = () => clip.pause();
+
+function unlockClip() {
+  if (clip.unlocked || !clip.paused) return;
+  clip.unlocked = true;
+  clip.src = silence;
+  clip.play()
+    .then(() => {
+      if (clip.getAttribute("src") === silence) clip.pause();
+    })
+    .catch(() => {
+      clip.unlocked = false;
+    });
+}
+
+function primeKey() {
+  const lead = finder.top && finder.top[0];
+  return lead ? `${lead.name}\u0000${lead.artist.split(",")[0].trim()}`.toLowerCase() : "";
+}
+
+function endPrime(done) {
+  clearTimeout(music.primeTimer);
+  if (!music.priming) return;
+  music.priming = false;
+  if (done) music.primed = true;
+  try {
+    music.player.pauseVideo();
+    music.player.seekTo(0, true);
+  } catch {
+    music.primed = false;
+  }
+  applyLevel();
+}
+
+function primePlayer() {
+  if (music.primed || music.priming || music.source !== "none" || !music.player || !music.entered) return;
+  const match = music.matches.get(primeKey());
+  if (!match || !match.videoId) return;
+  music.priming = true;
+  try {
+    music.player.mute();
+    music.player.loadVideoById({ videoId: match.videoId, startSeconds: 0 });
+  } catch {
+    music.priming = false;
+    return;
+  }
+  music.primeTimer = setTimeout(() => endPrime(false), 4000);
+}
+
+function warmEngine() {
+  loadFinder()
+    .then(() => {
+      const lead = finder.top && finder.top[0];
+      return lead ? Promise.all([resolveTrack(lead.name, lead.artist.split(",")[0].trim()), ensurePlayer()]) : null;
+    })
+    .catch(() => {});
 }
 
 function livePosition() {
@@ -7374,6 +7454,10 @@ function ensurePlayer() {
               },
               onStateChange: (event) => {
                 const playing = event.data === YT.PlayerState.PLAYING;
+                if (music.priming) {
+                  if (playing) endPrime(true);
+                  return;
+                }
                 music.playing = playing;
                 if (playing) {
                   clearTimeout(music.watch);
@@ -7451,9 +7535,10 @@ function watchStart(request) {
         watchStart(request);
         return;
       }
+      if (state === -1 || state === 5) music.candidates = [];
       music.loaded = "";
       nextCandidate();
-    }, 4500);
+    }, 3500);
   }, 2500);
 }
 
@@ -7473,6 +7558,7 @@ async function playVideo(id, offset, source, keep) {
   try {
     const player = await ensurePlayer();
     if (request !== music.generation) return false;
+    endPrime(false);
 
     const live = source === "spotify" ? livePosition() : null;
     const start = Math.max(0, live === null ? offset : live);
@@ -7519,12 +7605,7 @@ function nextCandidate() {
   music.retryAt = Date.now() + [3000, 10000, 30000][Math.min(music.failures++, 2)];
   music.key = "";
 
-  if (wasManual) {
-    findNote(music.errorCode ? `Couldn't play that song (code ${music.errorCode}).` : "Couldn't play that song.");
-    music.errorCode = 0;
-    if (queue.active && manual.id) playQueueAt(queue.index + 1);
-    else stopManual(queue.active);
-  }
+  if (wasManual && !manual.starting && manual.audio && manual.full) previewFallback();
 }
 
 function musicStop() {
@@ -7631,7 +7712,13 @@ function startMusic() {
   music.entered = true;
   paintVolume();
   music.timer = setInterval(syncSpotify, 1000);
-  ["pointerup", "touchend", "click", "keydown"].forEach((type) => document.addEventListener(type, retryBlocked, { passive: true }));
+  const onGesture = () => {
+    unlockClip();
+    retryBlocked();
+    primePlayer();
+  };
+  ["pointerup", "touchend", "click", "keydown"].forEach((type) => document.addEventListener(type, onGesture, { passive: true }));
+  setTimeout(warmEngine, 1200);
   document.addEventListener("visibilitychange", () => {
     retryBlocked();
     syncSpotify();
@@ -8023,6 +8110,9 @@ function paintDockRow(song) {
   }
 }
 
+const idleArt = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 52'%3E%3Crect width='52' height='52' fill='%231b1b1e'/%3E%3Cg fill='none' stroke='%23777' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' transform='translate(14 14)'%3E%3Cpath d='M9 18V5l12-2v13'/%3E%3Ccircle cx='6' cy='18' r='3'/%3E%3Ccircle cx='18' cy='16' r='3'/%3E%3C/g%3E%3C/svg%3E";
+const nowState = { ready: false };
+
 function nowSong() {
   if (manual.audio && manual.song) {
     return {
@@ -8042,31 +8132,24 @@ function nowSong() {
 }
 
 function paintNow() {
+  if (!nowState.ready) return;
   const song = nowSong();
+  const local = !song || song.local;
   const top = $("npTop");
   paintAura(song);
 
-  if (!song) {
-    top.classList.remove("live");
-    setTimeout(() => {
-      if (!top.classList.contains("live")) $("npBlock").hidden = true;
-    }, 800);
-    clearInterval(lyrics.timer);
-    lyrics.id = "";
-    lyrics.lines = [];
-    return;
-  }
-
-  $("npLive").classList.toggle("local", song.local);
-  $("npLiveText").textContent = song.local ? "local music" : "listening on spotify";
-  $("topTitle").textContent = song.title;
-  $("topArtist").textContent = song.artist;
-  if (song.art) $("topArt").src = song.art;
-  else $("topArt").removeAttribute("src");
   $("npBlock").hidden = false;
+  $("npLabel").textContent = local ? "page activity" : "current activity";
+  $("npLive").classList.toggle("local", local);
+  $("npLiveText").textContent = local ? "local music" : "listening on spotify";
+  $("npFind").hidden = !local;
+  top.classList.toggle("idle", !song);
+  $("topTitle").textContent = song ? song.title : "Nothing playing";
+  $("topArtist").textContent = song ? song.artist : "Pick a song below";
+  $("topArt").src = song && song.art ? song.art : idleArt;
   requestAnimationFrame(() => top.classList.add("live"));
 
-  if (song.synced) {
+  if (song && song.synced) {
     loadLyricsFor(song, song.seconds);
     return;
   }
@@ -8078,6 +8161,7 @@ function paintNow() {
 
 function paintSpotify(data) {
   const track = data.listening_to_spotify && data.spotify;
+  nowState.ready = true;
   const box = $("npDock");
   if (track && music.entered) ensurePlayer().catch(() => {});
 
@@ -8215,6 +8299,7 @@ function stopManual(keepQueue) {
   }
   manual.token += 1;
   if (manual.stop) manual.stop();
+  if (music.source === "manual") music.source = "none";
   manual.stop = null;
   manual.audio = null;
   manual.song = null;
@@ -8246,9 +8331,10 @@ function findNote(text) {
 }
 
 function beginManual(song, audio, stop) {
+  nowState.ready = true;
   unlock("tune");
   collect("songs", song.id, 5, "selector");
-  if (manual.stop) manual.stop();
+  if (manual.stop && manual.stop !== stop) manual.stop();
   manual.song = song;
   manual.full = stop === musicStop;
   manual.audio = audio;
@@ -8293,9 +8379,10 @@ async function toggleSong(song) {
     if (token !== manual.token) return;
 
     if (match && match.available) {
+      manual.starting = true;
       const started = await playMatch(match, 0, "manual");
+      manual.starting = false;
       if (token !== manual.token) return;
-      settleItem(item);
 
       if (started && music.source === "manual") {
         const adapter = {
@@ -8321,17 +8408,21 @@ async function toggleSong(song) {
             }
           }
         };
+        settleItem(item);
         beginManual(song, adapter, musicStop);
-        return;
-      }
-
-      if (started) {
-        findNote("Couldn't play that song.");
         return;
       }
     }
   }
 
+  if (!(await playPreview(song, token, item))) {
+    if (token === manual.token) findNote("No preview available for that song.");
+  }
+}
+
+async function playPreview(song, token, item) {
+  if (manual.previewed === token) return true;
+  manual.previewed = token;
   let url = "";
   try {
     url = await previewFor(song);
@@ -8339,41 +8430,44 @@ async function toggleSong(song) {
     url = "";
   }
 
-  if (token !== manual.token) return;
+  if (token !== manual.token) return true;
   settleItem(item);
+  if (!url) return false;
 
-  if (!url) {
-    findNote("No preview available for that song.");
-    return;
-  }
-
-  const audio = new Audio(url);
-  audio.volume = Math.min(1, music.volume / 100);
-  audio.muted = music.muted;
-  audio.addEventListener("ended", () => {
-    if (manual.audio === audio) manualEnded();
-  });
+  clip.src = url;
+  clip.volume = Math.min(1, music.volume / 100);
+  clip.muted = music.muted;
 
   try {
-    await audio.play();
+    await clip.play();
   } catch {
-    findNote("Your browser blocked the playback.");
-    return;
+    findNote("Your browser blocked the playback. Tap the song again.");
+    return true;
   }
 
   if (token !== manual.token) {
-    audio.pause();
-    return;
+    clip.pause();
+    return true;
   }
 
   musicStop();
+  beginManual(song, clip, stopClip);
   music.source = "manual";
-  beginManual(song, audio, () => {
-    audio.pause();
-    audio.removeAttribute("src");
-    audio.load();
-    music.source = "none";
-  });
+  return true;
+}
+
+async function previewFallback() {
+  const song = manual.song;
+  const token = manual.token;
+  if (!song) return;
+
+  if (await playPreview(song, token, null)) return;
+  if (token !== manual.token) return;
+
+  findNote(music.errorCode ? `Couldn't play that song (code ${music.errorCode}).` : "Couldn't play that song.");
+  music.errorCode = 0;
+  if (queue.active && manual.id) playQueueAt(queue.index + 1);
+  else stopManual(queue.active);
 }
 
 function renderFinder(query) {
@@ -10686,8 +10780,12 @@ function setupShortcuts() {
       dock.setOpen(!dock.isOpen());
     } else if (key === "/") {
       event.preventDefault();
-      dock.setOpen(true);
+      if ($("npFind").hidden) {
+        dock.setOpen(true);
+        return;
+      }
       $("npSearch").focus();
+      $("npFind").scrollIntoView({ block: "center", behavior: "smooth" });
     } else if (key === "t") {
       cycleTheme();
     } else if (key === "s") {
@@ -10747,6 +10845,10 @@ function init() {
   renderProject();
   setupRail();
   setupDock();
+  setTimeout(() => {
+    nowState.ready = true;
+    paintNow();
+  }, 3000);
   setupHour();
   loadChangelog();
   renderFeed();
