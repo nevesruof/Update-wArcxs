@@ -3221,65 +3221,6 @@ a.social:hover b {
   transform: translate(1.5px, -1.5px);
 }
 
-.mark {
-  position: relative;
-  width: 42px;
-  height: 42px;
-  flex-shrink: 0;
-  color: #a9a9ae;
-}
-
-.mark svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.mark .tri-a {
-  clip-path: inset(0 0 100% 0);
-}
-
-.mark .tri-b {
-  clip-path: inset(100% 0 0 0);
-}
-
-.mark.on .tri-a {
-  animation: markTop 0.95s cubic-bezier(0.65, 0, 0.2, 1) forwards;
-}
-
-.mark.on .tri-b {
-  animation: markBottom 0.95s cubic-bezier(0.65, 0, 0.2, 1) 0.4s forwards;
-}
-
-.mark::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  background: linear-gradient(112deg, transparent 43%, rgba(255, 255, 255, 0.95) 50%, transparent 57%) 140% 0 / 200% 100% no-repeat;
-  -webkit-mask: url("assets/larp-mark.svg") center / contain no-repeat;
-  mask: url("assets/larp-mark.svg") center / contain no-repeat;
-}
-
-.mark.on::after {
-  opacity: 1;
-  animation: markGlint 5s ease-in-out 2.2s infinite;
-}
-
-@keyframes markTop {
-  to { clip-path: inset(0 0 0 0); }
-}
-
-@keyframes markBottom {
-  to { clip-path: inset(0 0 0 0); }
-}
-
-@keyframes markGlint {
-  0%, 76% { background-position: 140% 0; }
-  100% { background-position: -40% 0; }
-}
-
 .project .out svg {
   width: 10px;
   height: 10px;
@@ -5806,10 +5747,8 @@ const profile = {
   discordId: "893966003690668102",
   timezone: "America/Mexico_City",
   place: "Mexico City",
-  changelog: { repo: "nevesruof/LarpingClient", count: 4 },
   bio: "Break it to understand it. Build it so it can't be broken.",
   bioLinks: [
-    { label: "larpingclient.com", href: "https://larpingclient.vercel.app" },
     { label: "fmsociety.me", href: "https://fmsociety.me" }
   ],
   socials: [
@@ -5821,12 +5760,11 @@ const profile = {
     { type: "site", label: "nohello.net", verified: true, href: "https://nohello.net/en/" }
   ],
   project: {
-    name: "Larp Client",
+    name: "Sable Client",
     description: "A Minecraft client with visuals, HUD and modules.",
-    label: "larpingclient.com",
-    href: "https://larpingclient.vercel.app",
-    icon: "",
-    mark: true
+    label: "In development",
+    href: "",
+    icon: "assets/sable.png"
   },
   activity: [
     { name: "Minecraft", detail: "Testing modules", daysAgo: 2, icon: "", trending: true },
@@ -5892,27 +5830,6 @@ function compact(number) {
   if (number < 1000) return String(Math.round(number));
   const short = (number / 1000).toFixed(1).replace(/\.0$/, "");
   return `${short}K`;
-}
-
-function larpMark() {
-  return `<span class="mark" id="mark"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
-<defs>
-<path id="lmA" d="M50,6 L88.11,72 L11.89,72 Z" stroke-linejoin="miter" stroke-miterlimit="10"/>
-<path id="lmB" d="M50,94 L11.89,28 L88.11,28 Z" stroke-linejoin="miter" stroke-miterlimit="10"/>
-<clipPath id="lmCa"><circle cx="75.4" cy="50" r="9"/><circle cx="37.3" cy="72" r="9"/><circle cx="37.3" cy="28" r="9"/></clipPath>
-<clipPath id="lmCb"><circle cx="62.7" cy="72" r="9"/><circle cx="24.6" cy="50" r="9"/><circle cx="62.7" cy="28" r="9"/></clipPath>
-<mask id="lmMa" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-<use href="#lmA" stroke="#fff" stroke-width="8"/>
-<g clip-path="url(#lmCb)"><use href="#lmB" stroke="#000" stroke-width="12.5"/></g>
-</mask>
-<mask id="lmMb" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-<use href="#lmB" stroke="#fff" stroke-width="8"/>
-<g clip-path="url(#lmCa)"><use href="#lmA" stroke="#000" stroke-width="12.5"/></g>
-</mask>
-</defs>
-<rect class="tri-a" width="100" height="100" fill="currentColor" mask="url(#lmMa)"/>
-<rect class="tri-b" width="100" height="100" fill="currentColor" mask="url(#lmMb)"/>
-</svg></span>`;
 }
 
 function setupRail() {
@@ -5991,21 +5908,6 @@ function setupRail() {
   });
 
   update();
-}
-
-function watchMark() {
-  const mark = $("mark");
-  if (!mark) return;
-  if (!("IntersectionObserver" in window)) {
-    mark.classList.add("on");
-    return;
-  }
-  const seen = new IntersectionObserver((entries) => {
-    if (!entries.some((entry) => entry.isIntersecting)) return;
-    seen.disconnect();
-    setTimeout(() => mark.classList.add("on"), 250);
-  }, { threshold: 0.6 });
-  seen.observe(mark);
 }
 
 function initialTile(name, icon) {
@@ -6726,7 +6628,7 @@ function renderProject() {
     side = `<span class="out">${esc(project.label)}</span>`;
   }
 
-  $("project").innerHTML = `${project.mark ? larpMark() : initialTile(project.name, project.icon)}<div class="text"><b>${esc(project.name)}</b><span>${esc(project.description)}</span></div>${side}`;
+  $("project").innerHTML = `${initialTile(project.name, project.icon)}<div class="text"><b>${esc(project.name)}</b><span>${esc(project.description)}</span></div>${side}`;
 }
 
 let liveEntry = null;
@@ -11336,7 +11238,6 @@ function init() {
     unlock("hello");
     document.body.classList.add("entered");
     startAudio();
-    watchMark();
     if (armToast) armToast();
   });
 }
