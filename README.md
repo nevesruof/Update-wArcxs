@@ -42,18 +42,6 @@ El dominio no cambia: en Vercel sigue apuntando al mismo proyecto. Si redesplieg
 
 El botón del sobre (junto a sonido, tema y compartir) abre una carta. El texto y el GIF se editan en `profile.letter` de `index.html` (`to`, `lines`, `sign`, `gif`). Para el GIF, copia el archivo a `assets/` y pon `gif: "assets/nombre.gif"` (también acepta una URL https).
 
-## Minecraft
-
-El bloque `minecraft` sale de `profile.minecraft` en `index.html`:
-
-- `name`: tu usuario de Minecraft Java (3 a 16 letras, números o guion bajo). Con él aparece la skin en 3D, que se puede arrastrar. Si lo dejas vacío solo se ve la barra de rango. Si tu skin tiene brazos finos (Alex) pon `slim: true`.
-- `skin`: ruta a un PNG de skin (64x64, por ejemplo `assets/skin.png`). Úsalo si juegas con cuenta no premium o con skin propia, porque en ese caso no hay skin pública que pedir por nombre. Tiene prioridad sobre `name`.
-- `steps` y `reached`: los rangos y cuántos llevas. Con `reached: 0` la barra dice que trabajas hacia el primero; sube el número cuando consigas cada rango.
-- `returning`: con `true` el texto de la barra dice que estás volviendo a las SS ("Getting back into SS."). Ponlo en `false` para quitarlo.
-- `org`: el texto de la organización.
-
-La skin y la capa se piden al servidor (`/api/minecraft`), que las lee de Mojang por tu usuario (y busca una capa de OptiFine si no tienes la de Mojang). Si eso falla, la skin se pide a minotar.net y, si tampoco, a mc-heads.net. Para una capa propia pon `cape: "assets/cape.png"`.
-
 ## Status
 
 El enlace `status` del pie (junto a `now` y `uses`) abre un panel con el estado de cada servicio y una barra de rapidez; su puntito de color avisa sin abrirlo. `/api/status` revisa en el servidor el bot de Discord, stats.fm, Roblox y las letras (y la key de YouTube si existe) y devuelve solo si responden y cuánto tardan. Se cachea 30 s. Por defecto usa tu usuario de stats.fm; se puede cambiar con la variable opcional `STATSFM_USER`.
