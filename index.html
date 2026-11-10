@@ -2496,6 +2496,11 @@ body.entered .rise {
   animation: breathe 1.8s ease-in-out infinite;
 }
 
+.np-live.local i {
+  background: #eab308;
+  box-shadow: 0 0 8px rgba(234, 179, 8, 0.7);
+}
+
 .np-top {
   opacity: 0;
   transform: translateY(8px);
@@ -3427,11 +3432,9 @@ a.social:hover b {
 .legend {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  margin-top: 10px;
-  font-family: var(--mono);
-  font-size: 10px;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 13px;
   color: var(--label);
 }
 
@@ -3449,11 +3452,11 @@ a.social:hover b {
 .legend i.l4 { background: var(--h4); }
 
 .legend span:first-child {
-  margin-right: 2px;
+  margin-right: 1px;
 }
 
 .legend span:last-child {
-  margin-left: 2px;
+  margin-left: 1px;
 }
 
 .tip {
@@ -5318,7 +5321,7 @@ button:focus-visible {
   <div class="bio-links rise" style="--i:1" id="bioLinks"></div>
 
   <section class="block np-block" id="npBlock" hidden>
-    <div class="label"><span>current activity</span><span class="np-live"><i></i>listening on spotify</span></div>
+    <div class="label"><span>current activity</span><span class="np-live" id="npLive"><i></i><span id="npLiveText">listening on spotify</span></span></div>
     <div class="np-top" id="npTop" aria-label="Now playing">
       <div class="np-win">
         <button class="np-lyr-btn" id="topLyr" type="button" aria-label="Open lyrics" title="Lyrics"><svg viewBox="0 0 24 24"><path d="m11 7.6-5.99 8.19a1 1 0 0 0 .1 1.3l.82.82a1 1 0 0 0 1.31.09L15.1 12"/><path d="M16.5 21.17c-1-.67-2.13-1.17-3.5-1.17-2.06 0-3.93 2.36-6 2-2.07-.36-2.78-3.37-1.5-4.5"/><circle cx="16" cy="7" r="5"/></svg></button>
@@ -6626,7 +6629,7 @@ function hideTip() {
 }
 
 function paintHeat(cells, total) {
-  $("commits").textContent = `${total.toLocaleString("en-US")} commits this year`;
+  $("commits").textContent = `${total} commits this year`;
   $("heat").innerHTML = cells
     .map((cell, index) => {
       const wave = `--w:${Math.floor(index / 7)}`;
@@ -6688,13 +6691,20 @@ function simulatedYear(weeks) {
   return days;
 }
 
+function lastWeeks(days, lead, weeks) {
+  const cells = [...Array(lead).fill(null), ...days];
+  const limit = weeks * 7;
+  return cells.length > limit ? cells.slice(Math.ceil((cells.length - limit) / 7) * 7) : cells;
+}
+
 function paintSimulated(weeks) {
-  const days = simulatedYear(weeks);
-  paintHeat([...Array(new Date(`${days[0].date}T00:00:00`).getDay()).fill(null), ...days], days.reduce((sum, day) => sum + day.count, 0));
+  const days = simulatedYear(48);
+  const lead = new Date(`${days[0].date}T00:00:00`).getDay();
+  paintHeat(lastWeeks(days, lead, weeks), days.reduce((sum, day) => sum + day.count, 0));
 }
 
 async function loadGithub() {
-  const weeks = 48;
+  const weeks = 26;
   paintSimulated(weeks);
 
   if (!profile.github) return;
@@ -6706,12 +6716,7 @@ async function loadGithub() {
     const total = (body.total && body.total.lastYear) || (days || []).reduce((sum, day) => sum + day.count, 0);
     if (!days || !days.length || !total) return;
 
-    const lead = new Date(`${days[0].date}T00:00:00Z`).getUTCDay();
-    let cells = [...Array(lead).fill(null), ...days];
-    const limit = weeks * 7;
-    if (cells.length > limit) cells = cells.slice(Math.ceil((cells.length - limit) / 7) * 7);
-
-    paintHeat(cells, total);
+    paintHeat(lastWeeks(days, new Date(`${days[0].date}T00:00:00Z`).getUTCDay(), weeks), total);
   } catch {
     return;
   }
@@ -7728,20 +7733,21 @@ function fmtClock(seconds) {
 }
 
 function tickDock() {
-  const span = dock.end - dock.start;
-  const ratio = span > 0 ? Math.max(0, Math.min(1, (Date.now() - dock.start) / span)) : 0;
-  $("topFill").style.transform = `scaleX(${ratio})`;
-
   if (manual.audio) {
     const audio = manual.audio;
     const length = audio.duration || 30;
-    $("npFill").style.transform = `scaleX(${Math.min(1, audio.currentTime / length)})`;
+    const played = Math.min(1, audio.currentTime / length);
+    $("topFill").style.transform = `scaleX(${played})`;
+    $("npFill").style.transform = `scaleX(${played})`;
     $("npNow").textContent = fmtClock(audio.currentTime);
     $("npLen").textContent = fmtClock(length);
     if (!manual.seeking) $("npSeek").value = String(Math.round((audio.currentTime / length) * 1000));
     return;
   }
 
+  const span = dock.end - dock.start;
+  const ratio = span > 0 ? Math.max(0, Math.min(1, (Date.now() - dock.start) / span)) : 0;
+  $("topFill").style.transform = `scaleX(${ratio})`;
   $("npFill").style.transform = `scaleX(${dock.song ? ratio : 0})`;
 }
 
@@ -7889,11 +7895,16 @@ function showLine(row) {
   lyrics.lit = -1;
 }
 
+function lyricClock() {
+  if (manual.audio && manual.song) return manual.full ? manual.audio.currentTime * 1000 : null;
+  return dock.start ? Date.now() - dock.start + 180 : null;
+}
+
 function tickLyrics() {
   const rows = lyrics.lines;
-  if (!rows.length || !dock.start) return;
+  const elapsed = lyricClock();
+  if (!rows.length || elapsed === null) return;
 
-  const elapsed = Date.now() - dock.start + 180;
   let index = -1;
   for (let i = 0; i < rows.length; i += 1) {
     if (rows[i].at <= elapsed) index = i;
@@ -8012,6 +8023,59 @@ function paintDockRow(song) {
   }
 }
 
+function nowSong() {
+  if (manual.audio && manual.song) {
+    return {
+      id: `manual:${manual.id}`,
+      title: manual.song.name,
+      artist: manual.song.artist,
+      album: "",
+      art: manual.song.image || "",
+      local: true,
+      synced: manual.full,
+      seconds: manual.full ? manual.audio.duration || 0 : 0
+    };
+  }
+
+  if (!dock.song) return null;
+  return { ...dock.song, local: false, synced: true, seconds: dock.end && dock.start ? (dock.end - dock.start) / 1000 : 0 };
+}
+
+function paintNow() {
+  const song = nowSong();
+  const top = $("npTop");
+  paintAura(song);
+
+  if (!song) {
+    top.classList.remove("live");
+    setTimeout(() => {
+      if (!top.classList.contains("live")) $("npBlock").hidden = true;
+    }, 800);
+    clearInterval(lyrics.timer);
+    lyrics.id = "";
+    lyrics.lines = [];
+    return;
+  }
+
+  $("npLive").classList.toggle("local", song.local);
+  $("npLiveText").textContent = song.local ? "local music" : "listening on spotify";
+  $("topTitle").textContent = song.title;
+  $("topArtist").textContent = song.artist;
+  if (song.art) $("topArt").src = song.art;
+  else $("topArt").removeAttribute("src");
+  $("npBlock").hidden = false;
+  requestAnimationFrame(() => top.classList.add("live"));
+
+  if (song.synced) {
+    loadLyricsFor(song, song.seconds);
+    return;
+  }
+  clearInterval(lyrics.timer);
+  lyrics.id = "";
+  lyrics.lines = [];
+  showLine(null);
+}
+
 function paintSpotify(data) {
   const track = data.listening_to_spotify && data.spotify;
   const box = $("npDock");
@@ -8021,13 +8085,6 @@ function paintSpotify(data) {
   requestAnimationFrame(() => box.classList.add("live"));
 
   if (!track) {
-    $("npTop").classList.remove("live");
-    setTimeout(() => {
-      if (!$("npTop").classList.contains("live")) $("npBlock").hidden = true;
-    }, 800);
-    clearInterval(lyrics.timer);
-    lyrics.id = "";
-    lyrics.lines = [];
     dock.song = null;
     dock.start = 0;
     dock.end = 0;
@@ -8038,7 +8095,7 @@ function paintSpotify(data) {
       dock.timer = 0;
       tickDock();
     }
-    paintAura(null);
+    paintNow();
     syncSpotify();
     return;
   }
@@ -8061,15 +8118,7 @@ function paintSpotify(data) {
   }
   tickDock();
   if (!dock.timer) dock.timer = setInterval(() => !document.hidden && tickDock(), manual.audio ? 250 : 1000);
-  paintAura(song);
-
-  $("topTitle").textContent = song.title;
-  $("topArtist").textContent = song.artist;
-  if (song.art) $("topArt").src = song.art;
-  $("npBlock").hidden = false;
-  requestAnimationFrame(() => $("npTop").classList.add("live"));
-  const seconds = dock.end && dock.start ? (dock.end - dock.start) / 1000 : 0;
-  loadLyricsFor(song, seconds);
+  paintNow();
 }
 
 function fold(text) {
@@ -8181,6 +8230,7 @@ function stopManual(keepQueue) {
   dock.timer = dock.song ? setInterval(() => !document.hidden && tickDock(), 1000) : 0;
   tickDock();
   markPlaying();
+  paintNow();
   syncSpotify();
 }
 
@@ -8213,6 +8263,7 @@ function beginManual(song, audio, stop) {
   dock.timer = setInterval(() => !document.hidden && tickDock(), 250);
   tickDock();
   markPlaying();
+  paintNow();
 }
 
 function settleItem(item) {
