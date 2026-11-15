@@ -1,5 +1,5 @@
-const VERSION = "take-v4";
-const SHELL = ["/", "/assets/porsche-logo.js", "/assets/favicon-64.png", "/assets/icon-192.png", "/manifest.webmanifest"];
+const VERSION = "take-v5";
+const SHELL = ["/", "/assets/porsche-logo.js", "/assets/skell-64.png", "/assets/skell-192.png", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(VERSION).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));

@@ -19,9 +19,10 @@
 <meta name="twitter:image" content="https://www.whoistake.com/assets/cover-take.jpg">
 <title>Take</title>
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
-<link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-64.png">
-<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/skell-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/assets/skell-64.png">
+<link rel="apple-touch-icon" href="/assets/skell-touch.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -473,14 +474,15 @@ body.entered .np-dock.live {
 .np-bar i::after {
   content: "";
   position: absolute;
-  inset: 0 auto 0 -40%;
+  inset: 0 auto 0 0;
   width: 40%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+  transform: translateX(-100%);
   animation: barGlint 3.2s ease-in-out infinite;
 }
 
 @keyframes barGlint {
-  to { left: 120%; }
+  to { transform: translateX(400%); }
 }
 
 .np-seek {
@@ -1087,9 +1089,7 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: rgba(10, 10, 11, 0.9);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  background: rgba(10, 10, 11, 0.94);
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.08em;
@@ -1579,7 +1579,7 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   border-radius: 16px;
   border: 1px solid var(--line);
   background:
-    radial-gradient(110% 60% at 50% 0%, rgb(var(--fog) / 0.1), transparent 70%),
+    radial-gradient(110% 60% at 50% 0%, rgba(255, 255, 255, 0.05), transparent 70%),
     rgba(12, 12, 14, 0.97);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
   transform: translateY(8px) scale(0.985);
@@ -1647,8 +1647,7 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   height: 100%;
   width: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--tc-common), var(--tc-rare), var(--tc-epic), var(--tc-gold));
-  background-size: 440px 100%;
+  background: #f2f2f2;
   transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1672,9 +1671,9 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
 }
 
 .trophy-tabs button.on {
-  color: var(--text);
-  border-color: rgb(var(--fog) / 0.45);
-  background: rgb(var(--fog) / 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .trophy-list {
@@ -1840,10 +1839,8 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   max-width: calc(100vw - 32px);
   padding: 10px 18px 10px 12px;
   border-radius: 999px;
-  border: 1px solid rgb(var(--fog) / 0.35);
-  background: rgba(10, 10, 11, 0.92);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(10, 10, 11, 0.95);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   opacity: 0;
   transform: translate(-50%, -18px) scale(0.96);
@@ -2155,9 +2152,7 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   place-items: center;
   border-radius: 9px;
   border: 1px solid var(--line);
-  background: rgba(10, 10, 11, 0.55);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: rgba(12, 12, 14, 0.94);
   color: var(--soft);
   transition: background 0.2s, border-color 0.2s;
 }
@@ -2255,7 +2250,7 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
 }
 
 .sound:hover {
-  background: rgba(30, 30, 32, 0.7);
+  background: rgb(28, 28, 30);
   border-color: rgba(255, 255, 255, 0.22);
 }
 
@@ -5436,8 +5431,6 @@ a.rank-card:hover .rank-art img {
 
   .np-card {
     background: radial-gradient(120% 120% at 0% 0%, rgba(255, 255, 255, 0.05), transparent 60%), rgba(10, 10, 11, 0.985);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
   }
 
   .game-id {
@@ -6161,24 +6154,31 @@ void main(){
   backdropState.tint = setTint;
   setTint(backdropState.mid || [0.42, 0.43, 0.47]);
 
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
   const resize = () => {
-    canvas.width = Math.max(2, Math.floor(window.innerWidth * backdropState.scale));
-    canvas.height = Math.max(2, Math.floor(window.innerHeight * backdropState.scale));
+    const cap = coarse ? 360 : 640;
+    const scale = Math.min(backdropState.scale, cap / Math.max(1, window.innerWidth));
+    canvas.width = Math.max(2, Math.floor(window.innerWidth * scale));
+    canvas.height = Math.max(2, Math.floor(window.innerHeight * scale));
     gl.viewport(0, 0, canvas.width, canvas.height);
   };
 
   resize();
-  window.addEventListener("resize", resize);
+  let resizing = 0;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizing);
+    resizing = setTimeout(resize, 120);
+  });
   backdropState.resize = resize;
 
   const started = performance.now();
-  const gap = window.matchMedia("(pointer: coarse)").matches ? 50 : 33;
+  const gap = coarse ? 56 : 40;
   let last = 0;
 
   const frame = (now) => {
     requestAnimationFrame(frame);
-    if (backdropState.paused || document.body.classList.contains("locked") || document.hidden) return;
     if (now - last < gap) return;
+    if (backdropState.paused || document.body.classList.contains("locked") || document.hidden || document.querySelector(".keys.open, .shot-overlay.open")) return;
     last = now;
     gl.uniform2f(resolution, canvas.width, canvas.height);
     gl.uniform1f(clock, (now - started) / 1000 + 12);
@@ -11094,29 +11094,51 @@ function setupPointerFx() {
     const node = held;
     const from = node.style.translate || "0px 0px";
     held = null;
+    heldBox = null;
     node.style.translate = "";
     if (node.animate) node.animate([{ translate: from }, { translate: "0px 0px" }], { duration: 220, easing: "cubic-bezier(0.2, 0.7, 0.2, 1)" });
   };
 
-  document.addEventListener("pointermove", (event) => {
-    if (event.pointerType !== "mouse") return;
+  let heldBox = null;
+  let moveQueued = 0;
+  let lastMove = null;
+
+  const follow = () => {
+    moveQueued = 0;
+    const event = lastMove;
+    if (!event) return;
     const target = event.target.closest && event.target.closest(".tools .sound, .tools-toggle, .social, .bio-links a");
     if (!target || target.disabled) {
       release();
       return;
     }
 
-    if (held && held !== target) release();
-    const box = target.getBoundingClientRect();
-    const dx = event.clientX - (box.left + box.width / 2);
-    const dy = event.clientY - (box.top + box.height / 2);
-    const limit = Math.min(reach, Math.max(box.width, box.height));
+    if (held && held !== target) {
+      release();
+      heldBox = null;
+    }
     held = target;
+    if (!heldBox) {
+      const had = target.style.translate;
+      target.style.translate = "";
+      heldBox = target.getBoundingClientRect();
+      target.style.translate = had;
+    }
+    const dx = event.clientX - (heldBox.left + heldBox.width / 2);
+    const dy = event.clientY - (heldBox.top + heldBox.height / 2);
+    const limit = Math.min(reach, Math.max(heldBox.width, heldBox.height));
     target.style.translate = `${Math.max(-limit, Math.min(limit, dx * pull)).toFixed(1)}px ${Math.max(-limit, Math.min(limit, dy * pull)).toFixed(1)}px`;
+  };
+
+  document.addEventListener("pointermove", (event) => {
+    if (event.pointerType !== "mouse") return;
+    lastMove = event;
+    if (!moveQueued) moveQueued = requestAnimationFrame(follow);
   }, { passive: true });
 
   document.addEventListener("pointerleave", release);
   window.addEventListener("blur", release);
+  window.addEventListener("scroll", () => { heldBox = null; }, { passive: true });
 }
 
 function setupTools() {
