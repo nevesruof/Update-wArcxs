@@ -1,4 +1,4 @@
-const VERSION = "take-v5";
+const VERSION = "take-v6";
 const SHELL = ["/", "/assets/porsche-logo.js", "/assets/skell-64.png", "/assets/skell-192.png", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {

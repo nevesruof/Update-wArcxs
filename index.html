@@ -19,9 +19,9 @@
 <meta name="twitter:image" content="https://www.whoistake.com/assets/cover-take.jpg">
 <title>Take</title>
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/skell-32.png">
-<link rel="icon" type="image/png" sizes="64x64" href="/assets/skell-64.png">
+<link rel="icon" href="/favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/skell-32.png?v=2">
+<link rel="icon" type="image/png" sizes="64x64" href="/assets/skell-64.png?v=2">
 <link rel="apple-touch-icon" href="/assets/skell-touch.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2152,7 +2152,9 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   place-items: center;
   border-radius: 9px;
   border: 1px solid var(--line);
-  background: rgba(12, 12, 14, 0.94);
+  background: rgba(10, 10, 11, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   color: var(--soft);
   transition: background 0.2s, border-color 0.2s;
 }
@@ -2250,7 +2252,7 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
 }
 
 .sound:hover {
-  background: rgb(28, 28, 30);
+  background: rgba(30, 30, 32, 0.7);
   border-color: rgba(255, 255, 255, 0.22);
 }
 
