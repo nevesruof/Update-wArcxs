@@ -1,4 +1,4 @@
-const VERSION = "take-v3";
+const VERSION = "take-v4";
 const SHELL = ["/", "/assets/porsche-logo.js", "/assets/favicon-64.png", "/assets/icon-192.png", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {

@@ -36,6 +36,10 @@
   --label: #848484;
   --line: rgba(255, 255, 255, 0.1);
   --green: #3fb950;
+  --tc-common: #9aa4b2;
+  --tc-rare: #58a6ff;
+  --tc-epic: #c084fc;
+  --tc-gold: #f5c451;
   --fog: 150 154 163;
   --h1: #0e4429;
   --h2: #006d32;
@@ -207,25 +211,6 @@ img {
     radial-gradient(50vw 60vh at 85% 40%, rgb(var(--fog) / 0.25), transparent 70%),
     radial-gradient(60vw 40vh at 40% 100%, rgb(var(--fog) / 0.28), transparent 70%),
     var(--bg);
-}
-
-.glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 520px;
-  height: 520px;
-  margin: -260px 0 0 -260px;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(var(--fog) / 0.16), rgb(var(--fog) / 0.05) 55%, transparent);
-  opacity: 0;
-  pointer-events: none;
-  will-change: transform;
-  transition: opacity 0.6s ease;
-}
-
-.glow.on {
-  opacity: 1;
 }
 
 .aura {
@@ -1587,13 +1572,15 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
 
 .trophy-card {
   position: relative;
-  width: min(400px, 100%);
+  width: min(440px, 100%);
   max-height: calc(100vh - 40px);
   overflow-y: auto;
-  padding: 20px 22px 18px;
-  border-radius: 14px;
+  padding: 22px 20px 18px;
+  border-radius: 16px;
   border: 1px solid var(--line);
-  background: rgba(12, 12, 14, 0.96);
+  background:
+    radial-gradient(110% 60% at 50% 0%, rgb(var(--fog) / 0.1), transparent 70%),
+    rgba(12, 12, 14, 0.97);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
   transform: translateY(8px) scale(0.985);
   transition: transform 0.25s ease;
@@ -1604,8 +1591,12 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   transform: none;
 }
 
+.trophy-card::-webkit-scrollbar {
+  display: none;
+}
+
 .trophy-card h3 {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   font-family: var(--mono);
   font-size: 0.68rem;
   font-weight: 500;
@@ -1614,79 +1605,301 @@ html[data-theme="ambar"] { --fog: 210 150 70; --green: #f5a524; --h1: #4a2e08; -
   color: var(--label);
 }
 
-.trophy-card::-webkit-scrollbar {
-  display: none;
+.trophy-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .trophy-count {
-  margin: -4px 0 12px;
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 1.7rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text);
+}
+
+.trophy-count small {
+  margin-left: 4px;
+  font-size: 0.8rem;
   color: var(--label);
+}
+
+.trophy-rank {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--label);
+}
+
+.trophy-bar {
+  height: 4px;
+  margin: 12px 0 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.trophy-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--tc-common), var(--tc-rare), var(--tc-epic), var(--tc-gold));
+  background-size: 440px 100%;
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.trophy-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.trophy-tabs button {
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  color: var(--label);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.trophy-tabs button.on {
+  color: var(--text);
+  border-color: rgb(var(--fog) / 0.45);
+  background: rgb(var(--fog) / 0.1);
 }
 
 .trophy-list {
   display: grid;
-  gap: 6px;
+  gap: 7px;
+}
+
+.trophy-empty {
+  padding: 18px 0 8px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--label);
 }
 
 .trophy {
+  --tier: var(--tc-common);
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 9px 10px;
+  padding: 10px 12px;
+  overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.02);
-  opacity: 0.5;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.018);
 }
 
+.trophy.rare { --tier: var(--tc-rare); }
+.trophy.epic { --tier: var(--tc-epic); }
+.trophy.gold { --tier: var(--tc-gold); }
+
 .trophy.on {
-  opacity: 1;
-  background: rgb(var(--fog) / 0.08);
-  border-color: rgb(var(--fog) / 0.3);
+  border-color: color-mix(in srgb, var(--tier) 38%, transparent);
+  background:
+    linear-gradient(100deg, color-mix(in srgb, var(--tier) 14%, transparent), transparent 60%),
+    rgba(255, 255, 255, 0.02);
+}
+
+.trophy.off .copy {
+  opacity: 0.55;
 }
 
 .trophy .medal {
+  position: relative;
   display: grid;
   flex-shrink: 0;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   border-radius: 50%;
   border: 1px solid var(--line);
   color: var(--label);
+  opacity: 0.7;
 }
 
 .trophy.on .medal {
-  color: #0b0b0c;
-  background: var(--green);
-  border-color: transparent;
+  opacity: 1;
+  color: var(--tier);
+  border-color: color-mix(in srgb, var(--tier) 60%, transparent);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--tier) 30%, transparent), color-mix(in srgb, var(--tier) 6%, transparent));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--tier) 28%, transparent);
 }
 
 .trophy .medal svg {
-  width: 14px;
-  height: 14px;
+  width: 17px;
+  height: 17px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
+.trophy .copy {
+  flex: 1;
+  min-width: 0;
+}
+
 .trophy b {
   display: block;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 600;
   color: var(--text);
 }
 
 .trophy small {
   display: block;
-  margin-top: 1px;
+  margin-top: 2px;
   font-family: var(--mono);
   font-size: 0.66rem;
+  line-height: 1.5;
   color: var(--label);
+}
+
+.trophy .side {
+  display: grid;
+  flex-shrink: 0;
+  gap: 5px;
+  justify-items: end;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--label);
+}
+
+.trophy .tier {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--tier);
+}
+
+.trophy.off .tier {
+  color: var(--label);
+}
+
+.trophy .meter {
+  width: 54px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.trophy .meter i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tier);
+}
+
+.trophy.fresh::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--tier) 35%, transparent) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: trophySweep 1.4s ease-out 0.25s forwards;
+  pointer-events: none;
+}
+
+.trophy.fresh .medal {
+  animation: medalPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+}
+
+@keyframes trophySweep {
+  to { transform: translateX(100%); }
+}
+
+@keyframes medalPop {
+  0% { transform: scale(0.5); }
+  100% { transform: scale(1); }
+}
+
+.trophy-toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 18px 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--fog) / 0.35);
+  background: rgba(10, 10, 11, 0.92);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translate(-50%, -18px) scale(0.96);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.trophy-toast.on {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.trophy-toast .medal {
+  display: grid;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--tier, #9aa4b2);
+  border: 1px solid color-mix(in srgb, var(--tier, #9aa4b2) 60%, transparent);
+  background: color-mix(in srgb, var(--tier, #9aa4b2) 16%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--tier, #9aa4b2) 35%, transparent);
+}
+
+.trophy-toast .medal svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trophy-toast em {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-style: normal;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--label);
+}
+
+.trophy-toast b {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trophy.fresh::after, .trophy.fresh .medal { animation: none; }
+  .trophy-toast, .trophy-bar i { transition: opacity 0.2s ease; }
 }
 
 .letter-card {
@@ -3196,35 +3409,50 @@ a.social:hover b {
 
 .blade {
   display: block;
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
   object-fit: contain;
   cursor: pointer;
-  -webkit-mask: linear-gradient(45deg, #000 40%, transparent 60%) 100% 0 / 300% 300% no-repeat;
-  mask: linear-gradient(45deg, #000 40%, transparent 60%) 100% 0 / 300% 300% no-repeat;
-  filter: drop-shadow(0 0 0 rgba(74, 222, 128, 0));
+  transform-origin: 50% 92%;
+  -webkit-mask: linear-gradient(to top, #000 42%, transparent 58%) 0 0 / 100% 300% no-repeat;
+  mask: linear-gradient(to top, #000 42%, transparent 58%) 0 0 / 100% 300% no-repeat;
+  filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
 }
 
 .blade.on {
   -webkit-mask-position: 0 100%;
   mask-position: 0 100%;
-  animation: bladeGlow 3.4s ease-in-out 1.2s infinite;
-  transition: -webkit-mask-position 1.1s cubic-bezier(0.5, 0, 0.2, 1), mask-position 1.1s cubic-bezier(0.5, 0, 0.2, 1);
+  transition: -webkit-mask-position 1.15s cubic-bezier(0.45, 0, 0.25, 1), mask-position 1.15s cubic-bezier(0.45, 0, 0.25, 1);
+  animation: flameFlicker 2.8s ease-in-out 1.2s infinite, flameGlow 3.2s ease-in-out 1.2s infinite;
 }
 
 .blade.pop {
-  animation: bladeFlash 0.7s ease-out, bladeGlow 3.4s ease-in-out 0.7s infinite;
+  animation: flameBurst 0.8s ease-out, flameFlicker 2.8s ease-in-out 0.8s infinite, flameGlow 3.2s ease-in-out 0.8s infinite;
 }
 
-@keyframes bladeGlow {
-  0%, 100% { filter: drop-shadow(0 0 3px rgba(74, 222, 128, 0.35)); }
-  50% { filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.7)); }
+@keyframes flameFlicker {
+  0%, 100% { transform: scale(1, 1) skewX(0deg); }
+  22% { transform: scale(0.985, 1.04) skewX(-1.4deg); }
+  48% { transform: scale(1.01, 0.985) skewX(0.8deg); }
+  74% { transform: scale(0.99, 1.03) skewX(1.2deg); }
 }
 
-@keyframes bladeFlash {
-  0% { filter: drop-shadow(0 0 14px rgba(190, 255, 210, 0.95)) brightness(1.6); }
-  100% { filter: drop-shadow(0 0 3px rgba(74, 222, 128, 0.35)) brightness(1); }
+@keyframes flameGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.25)); }
+  50% { filter: drop-shadow(0 0 11px rgba(255, 255, 255, 0.55)); }
+}
+
+@keyframes flameBurst {
+  0% { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.95)) brightness(1.5); transform: scale(1.12); }
+  100% { filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.25)) brightness(1); transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blade, .blade.on, .blade.pop {
+    animation: none;
+    transition: none;
+  }
 }
 
 .project .text {
@@ -3482,6 +3710,16 @@ a.social:hover b {
   margin-top: 12px;
   font-size: 13px;
   color: var(--label);
+}
+
+@media (min-width: 760px) {
+  .legend {
+    justify-content: flex-start;
+    gap: 4px;
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+  }
 }
 
 .legend i {
@@ -5231,7 +5469,6 @@ button:focus-visible {
     <div class="aura-layer" id="auraB"></div>
   </div>
   <div class="grain"></div>
-  <div class="glow" id="glow"></div>
 </div>
 
 <div class="intro" id="intro">
@@ -5310,10 +5547,21 @@ button:focus-visible {
   <div class="trophy-card" role="dialog" aria-label="Trophies">
     <button class="letter-close" id="trophyClose" type="button" aria-label="Close trophies"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
     <h3>trophies</h3>
-    <p class="trophy-count" id="trophyCount"></p>
+    <div class="trophy-head">
+      <div class="trophy-count" id="trophyCount"></div>
+      <div class="trophy-rank" id="trophyRank"></div>
+    </div>
+    <div class="trophy-bar"><i id="trophyBar"></i></div>
+    <div class="trophy-tabs" id="trophyTabs">
+      <button type="button" data-filter="all" class="on">All</button>
+      <button type="button" data-filter="done">Unlocked</button>
+      <button type="button" data-filter="todo">Locked</button>
+    </div>
     <div class="trophy-list" id="trophyList"></div>
   </div>
 </div>
+
+<div class="trophy-toast" id="trophyToast" role="status" aria-live="polite"></div>
 
 <div class="keys" id="keys" aria-hidden="true">
   <div class="keys-card" role="dialog" aria-label="Keyboard shortcuts">
@@ -5648,11 +5896,11 @@ const profile = {
     { type: "site", label: "nohello.net", verified: true, href: "https://nohello.net/en/" }
   ],
   project: {
-    name: "Sable Client",
+    name: "Skell Client",
     description: "A Minecraft client with visuals, HUD and modules.",
     label: "In development",
     href: "",
-    icon: "assets/sable.png",
+    icon: "assets/skell.png",
     blade: true
   },
   activity: [
@@ -6744,7 +6992,7 @@ function simulatedYear(weeks) {
   for (const cursor = new Date(start); cursor <= today; cursor.setDate(cursor.getDate() + 1)) {
     const index = days.length;
     const weekday = cursor.getDay();
-    const season = 0.8 + 0.2 * Math.sin(index / 23);
+    const season = (0.8 + 0.2 * Math.sin(index / 23)) * (0.55 + 0.45 * (index / 336));
     const burst = noise(Math.floor(index / 5) + 7) > 0.3 ? 1 : 0.6;
     const weekend = weekday === 0 || weekday === 6 ? 0.85 : 1;
     const roll = noise(index + 3);
@@ -6762,21 +7010,32 @@ function simulatedYear(weeks) {
   return days;
 }
 
+const heatData = { days: null, lead: 0, total: 0 };
+const wideHeat = window.matchMedia("(min-width: 760px)");
+
+function heatWeeks() {
+  return wideHeat.matches ? 48 : 26;
+}
+
+function showHeat() {
+  if (heatData.days) paintHeat(lastWeeks(heatData.days, heatData.lead, heatWeeks()), heatData.total);
+}
+
 function lastWeeks(days, lead, weeks) {
   const cells = [...Array(lead).fill(null), ...days];
   const limit = weeks * 7;
   return cells.length > limit ? cells.slice(Math.ceil((cells.length - limit) / 7) * 7) : cells;
 }
 
-function paintSimulated(weeks) {
+function paintSimulated() {
   const days = simulatedYear(48);
-  const lead = new Date(`${days[0].date}T00:00:00`).getDay();
-  paintHeat(lastWeeks(days, lead, weeks), days.reduce((sum, day) => sum + day.count, 0));
+  Object.assign(heatData, { days, lead: new Date(`${days[0].date}T00:00:00`).getDay(), total: days.reduce((sum, day) => sum + day.count, 0) });
+  showHeat();
 }
 
 async function loadGithub() {
-  const weeks = 26;
-  paintSimulated(weeks);
+  paintSimulated();
+  wideHeat.addEventListener("change", showHeat);
 
   if (!profile.github) return;
 
@@ -6787,7 +7046,8 @@ async function loadGithub() {
     const total = (body.total && body.total.lastYear) || (days || []).reduce((sum, day) => sum + day.count, 0);
     if (!days || !days.length || !total) return;
 
-    paintHeat(lastWeeks(days, new Date(`${days[0].date}T00:00:00Z`).getUTCDay(), weeks), total);
+    Object.assign(heatData, { days, lead: new Date(`${days[0].date}T00:00:00Z`).getUTCDay(), total });
+    showHeat();
   } catch {
     return;
   }
@@ -9823,22 +10083,48 @@ function setupEscape() {
   });
 }
 
+const trophyIcons = {
+  hello: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  apart: '<path d="m12 3 2.2 5.3L20 9l-4.4 3.8L17 18.5 12 15.5 7 18.5l1.4-5.7L4 9l5.8-.7L12 3Z"/>',
+  tune: '<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
+  selector: '<path d="M4 7h10M4 12h10M4 17h6"/><path d="m17 10 4 2.5-4 2.5v-5Z"/>',
+  lyrics: '<path d="M5 6h14M5 11h14M5 16h8"/>',
+  themes: '<path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-.9 2-1.8 0-1.3-1-1.5-1-2.7 0-1 .8-1.5 1.8-1.5H17a4 4 0 0 0 4-4c0-4-4-8-9-8Z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="10" r="1"/>',
+  share: '<path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/>',
+  letter: '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4 7 8 6 8-6"/>',
+  keys: '<rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M7 10h.01M11 10h.01M15 10h.01M8 14h8"/>',
+  regular: '<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/><path d="m9.5 15 2 2 3.5-3.5"/>',
+  night: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
+  konami: '<path d="M6 11h4M8 9v4"/><circle cx="15.5" cy="10.5" r=".8"/><circle cx="18" cy="12.5" r=".8"/><path d="M7 6h10a4 4 0 0 1 4 4v3a4 4 0 0 1-7 2.6L13 14h-2l-1 1.6A4 4 0 0 1 3 13v-3a4 4 0 0 1 4-4Z"/>',
+  all: '<path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5v1.5A3 3 0 0 0 8 10.5M16 6h3v1.5a3 3 0 0 1-3 3"/><path d="M12 13v3.5M8.5 20h7M10 16.5h4l.5 3.5h-5l.5-3.5Z"/>',
+  lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'
+};
+
 const trophies = [
-  { id: "hello", title: "Welcome in", text: "Get past the intro." },
-  { id: "apart", title: "Take it apart", text: "Break the intro logo into pieces.", secret: true },
-  { id: "tune", title: "First play", text: "Play a song from the player." },
-  { id: "selector", title: "Selector", text: "Play 5 different songs from the player." },
-  { id: "lyrics", title: "Sing along", text: "Open the lyrics." },
-  { id: "themes", title: "Shapeshifter", text: "Try 4 different themes." },
-  { id: "share", title: "Show off", text: "Open the share card." },
-  { id: "letter", title: "Real ones", text: "Read the letter." },
-  { id: "keys", title: "Power user", text: "Open the shortcuts list." },
-  { id: "regular", title: "Regular", text: "Come back on 3 different days." },
-  { id: "night", title: "Night owl", text: "Visit between midnight and 5 AM.", secret: true },
-  { id: "konami", title: "Old school", text: "You know the code.", secret: true }
+  { id: "hello", title: "Welcome in", text: "Get past the intro.", tier: "common" },
+  { id: "tune", title: "First play", text: "Play a song from the player.", tier: "common" },
+  { id: "lyrics", title: "Sing along", text: "Open the lyrics.", tier: "common" },
+  { id: "share", title: "Show off", text: "Open the share card.", tier: "common" },
+  { id: "letter", title: "Real ones", text: "Read the letter.", tier: "common" },
+  { id: "keys", title: "Power user", text: "Open the shortcuts list.", tier: "common" },
+  { id: "selector", title: "Selector", text: "Play 5 different songs from the player.", tier: "rare", key: "songs", goal: 5 },
+  { id: "themes", title: "Shapeshifter", text: "Try 4 different themes.", tier: "rare", key: "themes", goal: 4 },
+  { id: "regular", title: "Regular", text: "Come back on 3 different days.", tier: "rare", key: "days", goal: 3 },
+  { id: "apart", title: "Take it apart", text: "Break the intro logo into pieces.", tier: "epic", secret: true },
+  { id: "night", title: "Night owl", text: "Visit between midnight and 5 AM.", tier: "epic", secret: true },
+  { id: "konami", title: "Old school", text: "You know the code.", tier: "epic", secret: true },
+  { id: "all", title: "Completionist", text: "Unlock every other trophy.", tier: "gold" }
 ];
 
-const trophyState = { got: null, progress: {} };
+const trophyRanks = [
+  [0, "Visitor"],
+  [3, "Regular"],
+  [7, "Insider"],
+  [11, "Veteran"],
+  [13, "Legend"]
+];
+
+const trophyState = { got: null, progress: {}, fresh: {}, filter: "all", queue: [], busy: false };
 
 function readTrophies() {
   if (trophyState.got) return;
@@ -9862,14 +10148,41 @@ function keepTrophies() {
   }
 }
 
+function trophyMedal(id) {
+  return `<svg viewBox="0 0 24 24">${trophyIcons[id] || trophyIcons.lock}</svg>`;
+}
+
+function showTrophyToast() {
+  if (trophyState.busy) return;
+  const trophy = trophyState.queue.shift();
+  if (!trophy) return;
+  trophyState.busy = true;
+  const toast = $("trophyToast");
+  toast.style.setProperty("--tier", `var(--tc-${trophy.tier})`);
+  toast.innerHTML = `<span class="medal">${trophyMedal(trophy.id)}</span><div><em>trophy unlocked</em><b></b></div>`;
+  toast.querySelector("b").textContent = trophy.title;
+  requestAnimationFrame(() => toast.classList.add("on"));
+  setTimeout(() => {
+    toast.classList.remove("on");
+    setTimeout(() => {
+      trophyState.busy = false;
+      showTrophyToast();
+    }, 450);
+  }, 3200);
+}
+
 function unlock(id) {
   readTrophies();
   const trophy = trophies.find((item) => item.id === id);
   if (!trophy || trophyState.got[id]) return;
   trophyState.got[id] = Date.now();
+  trophyState.fresh[id] = true;
   keepTrophies();
-  flash(`trophy unlocked · ${trophy.title}`, 2600);
+  trophyState.queue.push(trophy);
+  showTrophyToast();
   paintTrophies();
+  const rest = trophies.filter((item) => item.id !== "all");
+  if (id !== "all" && rest.every((item) => trophyState.got[item.id])) setTimeout(() => unlock("all"), 600);
 }
 
 function collect(key, value, goal, id) {
@@ -9879,33 +10192,84 @@ function collect(key, value, goal, id) {
     list.push(value);
     trophyState.progress[key] = list.slice(-40);
     keepTrophies();
+    paintTrophies();
   }
   if (list.length >= goal) unlock(id);
+}
+
+function trophyAmount(item) {
+  if (item.id === "all") return trophies.filter((other) => other.id !== "all" && trophyState.got[other.id]).length;
+  const list = trophyState.progress[item.key];
+  return Array.isArray(list) ? list.length : 0;
 }
 
 function paintTrophies() {
   const list = $("trophyList");
   if (!list) return;
   readTrophies();
+  const total = trophies.length;
   const done = trophies.filter((item) => trophyState.got[item.id]).length;
-  $("trophyCount").textContent = `${done} of ${trophies.length} unlocked`;
+  $("trophyCount").innerHTML = `${done}<small>/ ${total}</small>`;
+  $("trophyRank").textContent = trophyRanks.filter(([min]) => done >= min).pop()[1];
+  $("trophyBar").style.width = `${Math.round((done / total) * 100)}%`;
+  document.querySelectorAll("#trophyTabs button").forEach((button) => button.classList.toggle("on", button.dataset.filter === trophyState.filter));
+
+  const shown = trophies.filter((item) => {
+    const got = Boolean(trophyState.got[item.id]);
+    return trophyState.filter === "done" ? got : trophyState.filter === "todo" ? !got : true;
+  });
+  if (!shown.length) {
+    const empty = document.createElement("p");
+    empty.className = "trophy-empty";
+    empty.textContent = trophyState.filter === "done" ? "Nothing unlocked yet." : "You got them all.";
+    list.replaceChildren(empty);
+    return;
+  }
+
   list.replaceChildren(
-    ...trophies.map((item) => {
-      const got = Boolean(trophyState.got[item.id]);
+    ...shown.map((item) => {
+      const stamp = trophyState.got[item.id];
+      const got = Boolean(stamp);
+      const hidden = !got && item.secret;
       const row = document.createElement("div");
-      row.className = `trophy${got ? " on" : ""}`;
+      row.className = `trophy ${item.tier} ${got ? "on" : "off"}${trophyState.fresh[item.id] ? " fresh" : ""}`;
+
       const medal = document.createElement("span");
       medal.className = "medal";
-      medal.innerHTML = got
-        ? '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>'
-        : '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+      medal.innerHTML = trophyMedal(got ? item.id : hidden ? "lock" : item.id);
+
       const copy = document.createElement("div");
+      copy.className = "copy";
       const title = document.createElement("b");
       const text = document.createElement("small");
-      title.textContent = got || !item.secret ? item.title : "Secret";
-      text.textContent = got || !item.secret ? item.text : "Keep exploring to find it.";
+      title.textContent = hidden ? "Secret trophy" : item.title;
+      text.textContent = hidden ? "Keep exploring to find it." : item.text;
       copy.append(title, text);
-      row.append(medal, copy);
+
+      const side = document.createElement("div");
+      side.className = "side";
+      const tier = document.createElement("span");
+      tier.className = "tier";
+      tier.textContent = hidden ? "???" : item.tier;
+      side.append(tier);
+      const goal = item.goal || (item.id === "all" ? trophies.length - 1 : 0);
+      if (got) {
+        const date = document.createElement("span");
+        date.textContent = new Date(stamp).toLocaleDateString("en", { month: "short", day: "numeric" });
+        side.append(date);
+      } else if (goal) {
+        const amount = Math.min(goal, trophyAmount(item));
+        const label = document.createElement("span");
+        label.textContent = `${amount}/${goal}`;
+        const meter = document.createElement("span");
+        meter.className = "meter";
+        const fill = document.createElement("i");
+        fill.style.width = `${Math.round((amount / goal) * 100)}%`;
+        meter.append(fill);
+        side.append(label, meter);
+      }
+
+      row.append(medal, copy, side);
       return row;
     })
   );
@@ -9917,6 +10281,13 @@ function setupTrophies() {
   $("trophyBtn").addEventListener("click", () => {
     paintTrophies();
     toggleLayer(layer, true);
+    setTimeout(() => { trophyState.fresh = {}; }, 2000);
+  });
+  $("trophyTabs").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-filter]");
+    if (!button) return;
+    trophyState.filter = button.dataset.filter;
+    paintTrophies();
   });
   $("trophyClose").addEventListener("click", () => toggleLayer(layer, false));
   layer.addEventListener("click", (event) => {
@@ -10100,7 +10471,7 @@ function applyTheme(id, notify) {
     theme.label = `season · ${season.name}`;
   }
   try {
-    localStorage.setItem("theme", theme.id);
+    localStorage.setItem("themePick", theme.id);
   } catch {
     return;
   } finally {
@@ -10118,9 +10489,9 @@ function cycleTheme() {
 
 function savedTheme() {
   try {
-    return localStorage.getItem("theme") || "mono";
+    return localStorage.getItem("themePick") || "auto";
   } catch {
-    return "mono";
+    return "auto";
   }
 }
 
@@ -10713,37 +11084,6 @@ function setupPointerFx() {
   const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!fine || calm) return;
-
-  const glow = $("glow");
-  let x = innerWidth / 2;
-  let y = innerHeight / 2;
-  let shownX = x;
-  let shownY = y;
-  let running = false;
-
-  const draw = () => {
-    shownX += (x - shownX) * 0.14;
-    shownY += (y - shownY) * 0.14;
-    glow.style.transform = `translate3d(${shownX.toFixed(1)}px, ${shownY.toFixed(1)}px, 0)`;
-    if (Math.abs(x - shownX) + Math.abs(y - shownY) > 0.5 && !document.hidden) {
-      requestAnimationFrame(draw);
-    } else {
-      running = false;
-    }
-  };
-
-  window.addEventListener("pointermove", (event) => {
-    if (event.pointerType !== "mouse") return;
-    x = event.clientX;
-    y = event.clientY;
-    glow.classList.add("on");
-    if (!running) {
-      running = true;
-      requestAnimationFrame(draw);
-    }
-  }, { passive: true });
-
-  document.documentElement.addEventListener("pointerleave", () => glow.classList.remove("on"));
 
   const pull = 0.28;
   const reach = 46;
