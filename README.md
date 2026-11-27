@@ -20,7 +20,7 @@ Página de perfil con presencia de Discord (tu bot), juegos con ficha de IGDB (T
 | --- | --- |
 | `ACTIVITY_BOT_URL` | `http://fi10.bot-hosting.cloud:25169/api/activity` |
 | `ACTIVITY_BOT_TOKEN` | el mismo valor que `API_TOKEN` del `.env` del bot |
-| `DISCORD_USER_ID` | `893966003690668102` |
+| `DISCORD_USER_ID` | `1213355725087313991` |
 | `IGDB_CLIENT_ID` | Client ID de tu app en dev.twitch.tv |
 | `IGDB_CLIENT_SECRET` | Client Secret de esa app |
 
